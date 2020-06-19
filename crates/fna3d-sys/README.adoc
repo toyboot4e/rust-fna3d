@@ -1,0 +1,10 @@
+= fna3d-sys
+
+Rust FFI bindings to FNA3D generated with https://github.com/rust-lang/rust-bindgen[bindgen]
+
+== Notes
+
+=== The name (`fna3d-sys`)
+
+* The library name (`*-sys`) came from the https://doc.rust-lang.org/cargo/reference/build-scripts.html#-sys-packages[cargo book].
+* The library name is `fna3d-sys` while the target name (library name) is `fna3d_sys`.
