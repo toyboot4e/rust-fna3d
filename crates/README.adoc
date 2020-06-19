@@ -1,0 +1,17 @@
+= Crates
+
+== Cargo workspace
+
+`../Cargo.toml` is:
+
+[source,toml]
+----
+[workspace]
+members = [
+    "crates/*",
+]
+----
+
+== Notes
+
+I used to name this directory as `src` but it was confusing.

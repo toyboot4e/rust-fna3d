@@ -13,7 +13,7 @@ use std::{
 type Result<T> = ::std::result::Result<T, Box<dyn ::std::error::Error>>;
 
 fn main() -> Result<()> {
-    // link `libFNA3D.dylib` from absolute path (TODO: bundle FNA with release build)
+    // link `libFNA3D.dylib` from absolute path (TODO: bundle FNA on release build)
     self::setup_lib_paths();
     println!("cargo:rustc-link-lib=dylib=FNA3D");
 
@@ -43,6 +43,9 @@ fn setup_lib_paths() {
     println!("cargo:rustc-env=LIBRARY_PATH={}", fna);
     // we don't need this
     // println!("cargo:rustc-env=DYLD_LIBRARY_PATH={}/FNA3D/build", man);
+
+    // we don't need this on macOS. other platform..??
+    // println!("cargo:rustc-link-search=native={}", fna);
 }
 
 /// Generates bindings using a wrapper header file

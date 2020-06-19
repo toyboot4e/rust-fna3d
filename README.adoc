@@ -8,4 +8,6 @@ Rust-FNA3D is a safe & handy wrapper around FNA3D in Rust.
 
 === What is FNA3D?
 
-https://github.com/FNA-XNA/FNA[FNA] is a reimplementation of the http://en.wikipedia.org/wiki/Microsoft_XNA[Microsoft XNA Game Studio 4.0 Refresh] libraries. FNA3D is the 3D graphics library for FNA in C99, which corresponds to https://docs.microsoft.com/en-us/previous-versions/windows/silverlight/dotnet-windows-silverlight/bb197344(v=xnagamestudio.35)[Microsoft.Xna.Framework.Graphics Namespace].
+https://github.com/FNA-XNA/FNA[FNA] is a reimplementation of the http://en.wikipedia.org/wiki/Microsoft_XNA[Microsoft XNA Game Studio 4.0 Refresh] libraries. FNA3D is the 3D graphics library for FNA written in C99, which corresponds to https://docs.microsoft.com/en-us/previous-versions/windows/silverlight/dotnet-windows-silverlight/bb197344(v=xnagamestudio.35)[Microsoft.Xna.Framework.Graphics Namespace].
+
+=== What can it do?
