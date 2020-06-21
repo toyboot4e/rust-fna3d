@@ -8,10 +8,13 @@
 ----
 [workspace]
 members = [
-    "crates/*",
+    "crates/fna3d",
+    "crates/fna3d-sys",
 ]
 ----
 
 == Notes
 
-I used to name this directory as `src` but it was confusing.
+I used to name this directory as `src` but it was confusing to me.
+
+Maybe I should put `fna3d` in `:/root`, not here?

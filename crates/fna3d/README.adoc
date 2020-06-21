@@ -1,0 +1,15 @@
+= State
+
+Not ready.
+
+* [x] enums
+* [x] structs and methods with rustic cases
+* [ ] I need to learn how to use FNA3D and improve this wrapper
+
+= fna3d
+
+Wrapper of Rust FFI to FNA3D generated with `bindgen` (i.e. `fna3d-sys`)
+
+== Overview
+
+`fna3d-sys` generates Rust FFI to FNA3D using https://github.com/rust-lang/rust-bindgen[bindgen]. `fna3d` wraps them in Rust code and make it more safe & handy.
