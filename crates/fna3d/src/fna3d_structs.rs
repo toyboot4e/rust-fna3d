@@ -141,7 +141,7 @@ impl<'a, T> AsMutPtr<T> for Option<&'a mut T> {
 // --------------------------------------------------------------------------------
 // Device
 
-// TODO: Should I put `&mut` in `Device`? Or, should it be taken be a wrapper of `Device`
+// TODO: Should I put `&mut` in `Device`? Or, should it be taken by a wrapper of `Device`
 // i.e. (GraphicsDevice)?
 
 pub struct Device {

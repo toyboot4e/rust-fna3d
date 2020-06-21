@@ -4,7 +4,7 @@ Not ready.
 
 * [x] enums
 * [x] structs and methods with rustic cases
-* [ ] I need to learn how to solve dependencies to dynamic libraries and bundle it to your release build
+* [ ] I need to learn how to solve dependencies to dynamic libraries and how to bundle it to release builds
 ** [ ] I need to learn how to do with both Rust-FNA3D and Rust-SDL2 (or should it not be used?)
 * [ ] I need to learn how to use FNA3D and improve this wrapper
 

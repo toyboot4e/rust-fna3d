@@ -1,5 +1,3 @@
-//! Wraps unsafe ffi functions into safe Rust types
-
 use fna3d_sys as sys;
 
 // this should be replaced with `std::ffi::c_void`
@@ -26,12 +24,4 @@ pub fn get_drawable_size(window: *mut c_void) -> (i32, i32) {
         sys::FNA3D_GetDrawableSize(window, &mut x, &mut y);
     }
     (x, y)
-}
-
-#[cfg(test)]
-mod test {
-    #[test]
-    fn test_version() {
-        println!("{}", super::linked_version());
-    }
 }

@@ -17,4 +17,4 @@ members = [
 
 I used to name this directory as `src` but it was confusing to me.
 
-Maybe I should put `fna3d` in `:/root`, not here?
+Maybe I should put `fna3d` in `:/src`, not here?

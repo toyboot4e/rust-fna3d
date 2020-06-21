@@ -5,7 +5,7 @@
 //!
 //! Internally, `build.rs` uses `bindgen` to generate forengin function interface in `ffi`.
 //! Those bindings gemerated are autimatically included. If you want to see the generated file,
-//! ou can find it in `target`, or you can install the `bindgen` command line tool via `carg` and
+//! you can find it in `target`, or you can install the `bindgen` command line tool via `cargo` and
 //! run it over a wrapping header file.
 
 mod fna3d_enums;

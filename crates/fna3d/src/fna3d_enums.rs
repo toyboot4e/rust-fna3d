@@ -15,8 +15,9 @@
 // }
 
 // TODO: should we use u8 or stick with u32?
+// TODO: do we not need to use enum_primitive?
 // TODO: was it possible to make such enums automatically?
-// TODO: MONOSHADER_effect?
+// TODO: MOJOSHADER_effect?
 
 use enum_primitive::*;
 use fna3d_sys as sys;
@@ -166,7 +167,7 @@ enum_from_primitive! {
         SourceAlpha = sys::FNA3D_Blend_FNA3D_BLEND_SOURCEALPHA,
         InverseSourceAlpha = sys::FNA3D_Blend_FNA3D_BLEND_INVERSESOURCEALPHA,
         DestinationColor = sys::FNA3D_Blend_FNA3D_BLEND_DESTINATIONCOLOR,
-        InveseDestinationColo = sys::FNA3D_Blend_FNA3D_BLEND_INVERSEDESTINATIONCOLOR,
+        InveseDestinationColor = sys::FNA3D_Blend_FNA3D_BLEND_INVERSEDESTINATIONCOLOR,
         DestinaitonAlpha = sys::FNA3D_Blend_FNA3D_BLEND_DESTINATIONALPHA,
         InverseDetinationAlpha = sys::FNA3D_Blend_FNA3D_BLEND_INVERSEDESTINATIONALPHA,
         BlendFactor = sys::FNA3D_Blend_FNA3D_BLEND_BLENDFACTOR,
