@@ -1,0 +1,9 @@
+{
+    // C specific settings
+    "[C]": {
+        "editor.formatOnSave": false,
+        "editor.tabSize": 4,
+        "editor.insertSpaces": false,
+    }
+    // Also, see `.vscode/c_cpp_properties.json` and setup includePath
+}
