@@ -9,13 +9,13 @@
 //! run it over a wrapping header file.
 
 mod fna3d_enums;
+mod fna3d_functions;
 mod fna3d_structs;
-mod wrappers;
 
 // FNA3D.h
 pub use fna3d_enums::*;
+pub use fna3d_functions::*;
 pub use fna3d_structs::*;
-pub use wrappers::*;
 
 // FNA3D_Image.h
 pub use fna3d_structs::img;
