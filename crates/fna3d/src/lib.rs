@@ -12,6 +12,8 @@ mod fna3d_enums;
 mod fna3d_functions;
 mod fna3d_structs;
 
+pub use fna3d_sys as sys;
+
 // FNA3D.h
 pub use fna3d_enums::*;
 pub use fna3d_functions::*;
@@ -19,3 +21,41 @@ pub use fna3d_structs::*;
 
 // FNA3D_Image.h
 pub use fna3d_structs::img;
+
+pub mod utils {
+    use std::os::raw::c_void;
+
+    use crate::fna3d_enums as enums;
+    use fna3d_sys as sys;
+
+    pub fn color_as_vec4(color: sys::FNA3D_Color) -> sys::FNA3D_Vec4 {
+        sys::FNA3D_Vec4 {
+            x: color.r as f32 / 255 as f32,
+            y: color.g as f32 / 255 as f32,
+            z: color.b as f32 / 255 as f32,
+            w: color.a as f32 / 255 as f32,
+        }
+    }
+
+    /// `handle` is actually `SDL_Window*` in Rust-SDL2-sys
+    pub fn params_from_window_handle(handle: *mut c_void) -> sys::FNA3D_PresentationParameters {
+        let surface = enums::SurfaceFormat::Color;
+        let stencil = enums::DepthFormat::D24S8;
+        let target = enums::RenderTargetUsage::PlatformContents;
+        let is_fullscreen = false;
+        sys::FNA3D_PresentationParameters {
+            backBufferWidth: 1280,
+            backBufferHeight: 720,
+            backBufferFormat: surface as u32,
+            multiSampleCount: 1,
+            // this is actually `SDL_Window*`
+            deviceWindowHandle: handle,
+            isFullScreen: is_fullscreen as u8,
+            depthStencilFormat: stencil as u32,
+            presentationInterval: enums::PresentInterval::Defalt as u32,
+            displayOrientation: enums::DisplayOrientation::Defaut as u32,
+            // FIXME:
+            renderTargetUsage: target as u32,
+        }
+    }
+}

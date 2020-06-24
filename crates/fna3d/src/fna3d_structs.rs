@@ -1,4 +1,4 @@
-//! Thin wrappers to Rust FFI bindings to FNA3D generated with `bindgen`
+//! Thin wrappers of Rust FFI bindings to FNA3D generated with `bindgen`
 //!
 //! TODO: complete the following guide (I'm learning for now)
 //!
@@ -22,21 +22,15 @@
 //! `c_void` is used to represent a pointer to any type.
 //! The Rust nomicon has a [corresponding page](https://doc.rust-lang.org/nomicon/ffi.html#representing-opaque-structs).
 
-// TODO: is it OK to wrap FFI and show it as if it is _safe_?
-// TODO: should I make `&mut self` functions or should mutabilities be handle by a wrapper
-// of `Device`? (maybe `GraphicsDevice`)
-//
-// TODO: should `Option<T>` be `Option<&mut T> to represent a pointer?
 // TODO: remove `as u32` and maybe use `to_repr()`
 
 use std::ptr;
-
-use crate::fna3d_enums as enums;
-use enum_primitive::*;
-use fna3d_sys as sys;
-
 // this should be `std::ffi::c_void` but `bindgen` uses:
 use std::os::raw::c_void;
+
+use crate::{fna3d_enums as enums, utils};
+use enum_primitive::*;
+use fna3d_sys as sys;
 
 // --------------------------------------------------------------------------------
 // Type aliases
@@ -57,58 +51,9 @@ mod mojo {
     pub type EffectStateChanges = sys::MOJOSHADER_effectStateChanges;
 }
 
-#[derive(Debug, Copy, Clone)]
-pub struct Color {
-    raw: sys::FNA3D_Color,
-}
-
-impl Color {
-    fn as_vec4(&self) -> sys::FNA3D_Vec4 {
-        sys::FNA3D_Vec4 {
-            x: self.raw.r as f32 / 255 as f32,
-            y: self.raw.g as f32 / 255 as f32,
-            z: self.raw.b as f32 / 255 as f32,
-            w: self.raw.a as f32 / 255 as f32,
-        }
-    }
-}
-
-#[derive(Debug, Copy, Clone)]
-pub struct Rect {
-    raw: sys::FNA3D_Rect,
-}
-
-#[derive(Debug, Clone)]
-pub struct PresentationParameters {
-    pub raw: sys::FNA3D_PresentationParameters,
-}
-
-// TODO: Drop?? Is it handle by something else?
-
-impl PresentationParameters {
-    // TODO: encapsulate it
-    pub fn from_window_handle(handle: *mut c_void) -> Self {
-        let surface = enums::SurfaceFormat::Color;
-        let stencil = enums::DepthFormat::D24S8;
-        let target = enums::RenderTargetUsage::PlatformContents;
-        let is_fullscreen = false;
-        Self {
-            raw: sys::FNA3D_PresentationParameters {
-                backBufferWidth: 1280,
-                backBufferHeight: 720,
-                backBufferFormat: surface as u32,
-                multiSampleCount: 1,
-                deviceWindowHandle: handle,
-                isFullScreen: is_fullscreen as u8,
-                depthStencilFormat: stencil as u32,
-                presentationInterval: enums::PresentInterval::Defalt as u32,
-                displayOrientation: enums::DisplayOrientation::Defaut as u32,
-                // FIXME:
-                renderTargetUsage: target as u32,
-            },
-        }
-    }
-}
+pub type Color = sys::FNA3D_Color;
+pub type Rect = sys::FNA3D_Rect;
+pub type PresentationParameters = sys::FNA3D_PresentationParameters;
 
 pub type BlendState = sys::FNA3D_BlendState;
 pub type DepthStencilState = sys::FNA3D_DepthStencilState;
@@ -140,9 +85,8 @@ impl<'a, T> AsMutPtr<T> for Option<&'a mut T> {
 
 // --------------------------------------------------------------------------------
 // Device
-
-// TODO: Should I put `&mut` in `Device`? Or, should it be taken by a wrapper of `Device`
-// i.e. (GraphicsDevice)?
+//
+// Most of the internal implementation of `GraphicsDevice`
 
 pub struct Device {
     raw: *mut sys::FNA3D_Device,
@@ -157,12 +101,16 @@ impl Drop for Device {
 }
 
 impl Device {
-    // TODO: solve debug_mode
-    pub fn create(params: *mut sys::FNA3D_PresentationParameters) -> Self {
+    pub fn from_params(params: &mut PresentationParameters, is_debug: bool) -> Self {
+        let dbg = if is_debug { 1 } else { 0 };
         Self {
             // debug mode
-            raw: unsafe { sys::FNA3D_CreateDevice(params, 1) },
+            raw: unsafe { sys::FNA3D_CreateDevice(params, dbg) },
         }
+    }
+
+    pub fn raw(&self) -> *mut sys::FNA3D_Device {
+        self.raw
     }
 
     pub fn begin_frame(&mut self) {
@@ -173,12 +121,13 @@ impl Device {
 
     pub fn swap_buffers(
         &mut self,
-        src: Option<Rect>,
-        dest: Option<Rect>,
+        // TODO: different function name for (None, None)?
+        mut src: Option<Rect>,
+        mut dest: Option<Rect>,
         window_handle: *mut c_void,
     ) {
-        let src = src.map(|rect| rect.raw).as_mut().as_mut_ptr();
-        let dest = dest.map(|rect| rect.raw).as_mut().as_mut_ptr();
+        let src = src.as_mut().as_mut_ptr();
+        let dest = dest.as_mut().as_mut_ptr();
         unsafe {
             sys::FNA3D_SwapBuffers(self.raw, src, dest, window_handle);
         }
@@ -189,7 +138,7 @@ impl Device {
             sys::FNA3D_Clear(
                 self.raw,
                 options as u32,
-                &mut color.as_vec4() as *mut _,
+                &mut utils::color_as_vec4(color.clone()) as *mut _,
                 depth,
                 stencil,
             );
@@ -258,21 +207,21 @@ impl Device {
         }
     }
 
-    pub fn set_scissor_rect(&mut self, scissor: Option<Rect>) {
+    pub fn set_scissor_rect(&mut self, mut scissor: Option<Rect>) {
         unsafe {
-            sys::FNA3D_SetScissorRect(self.raw, scissor.map(|r| r.raw).as_mut().as_mut_ptr());
+            sys::FNA3D_SetScissorRect(self.raw, scissor.as_mut().as_mut_ptr());
         }
     }
 
     pub fn get_blend_factor(&mut self, mut blend_factor: Color) {
         unsafe {
-            sys::FNA3D_GetBlendFactor(self.raw, &mut blend_factor.raw as *mut _);
+            sys::FNA3D_GetBlendFactor(self.raw, &mut blend_factor as *mut _);
         }
     }
 
     pub fn set_blend_factor(&mut self, mut blend_factor: Color) {
         unsafe {
-            sys::FNA3D_SetBlendFactor(self.raw, &mut blend_factor.raw as *mut _);
+            sys::FNA3D_SetBlendFactor(self.raw, &mut blend_factor as *mut _);
         }
     }
 
@@ -380,7 +329,7 @@ impl Device {
 
     pub fn reset_backbuffer(&mut self, params: &mut PresentationParameters) {
         unsafe {
-            sys::FNA3D_ResetBackbuffer(self.raw, &mut params.raw as *mut _);
+            sys::FNA3D_ResetBackbuffer(self.raw, params as *mut _);
         }
     }
 
@@ -927,7 +876,7 @@ impl Device {
         }
     }
 
-    pub fn FNA3D_QueryEnd(&mut self, query: *mut Query) {
+    pub fn query_end(&mut self, query: *mut Query) {
         unsafe {
             sys::FNA3D_QueryEnd(self.raw, query);
         }
@@ -988,6 +937,7 @@ impl Device {
 // FNA3D_Image.h
 
 pub mod img {
+    // TODO: wrap them
     use fna3d_sys as sys;
 
     // type ImageSkipFunc = sys::FNA3D_Image_SkipFunc;
