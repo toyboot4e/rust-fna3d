@@ -28,12 +28,19 @@ pub mod utils {
     use crate::fna3d_enums as enums;
     use fna3d_sys as sys;
 
-    pub fn color_as_vec4(color: sys::FNA3D_Color) -> sys::FNA3D_Vec4 {
-        sys::FNA3D_Vec4 {
-            x: color.r as f32 / 255 as f32,
-            y: color.g as f32 / 255 as f32,
-            z: color.b as f32 / 255 as f32,
-            w: color.a as f32 / 255 as f32,
+    // TODO: use trait
+    pub trait AsVec4 {
+        fn as_vec4(&self) -> sys::FNA3D_Vec4;
+    }
+
+    impl AsVec4 for sys::FNA3D_Color {
+        fn as_vec4(&self) -> sys::FNA3D_Vec4 {
+            sys::FNA3D_Vec4 {
+                x: self.r as f32 / 255 as f32,
+                y: self.g as f32 / 255 as f32,
+                z: self.b as f32 / 255 as f32,
+                w: self.a as f32 / 255 as f32,
+            }
         }
     }
 

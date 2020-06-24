@@ -28,19 +28,30 @@ use std::ptr;
 // this should be `std::ffi::c_void` but `bindgen` uses:
 use std::os::raw::c_void;
 
-use crate::{fna3d_enums as enums, utils};
+use crate::{fna3d_enums as enums, utils::AsVec4};
 use enum_primitive::*;
 use fna3d_sys as sys;
 
 // --------------------------------------------------------------------------------
+// Disposed types
+//
+// Those types have corresponding disposing function in `Device`
+
+/// Disposed with a corresponding function in `Device`
+pub type Buffer = sys::FNA3D_Buffer;
+/// Disposed with a corresponding function in `Device`
+pub type Renderbuffer = sys::FNA3D_Renderbuffer;
+/// Disposed with a corresponding function in `Device`
+pub type Effect = sys::FNA3D_Effect;
+/// Disposed with a corresponding function in `Device`
+pub type Query = sys::FNA3D_Query;
+/// Disposed with a corresponding function in `Device`
+pub type Texture = sys::FNA3D_Texture;
+
+// --------------------------------------------------------------------------------
 // Type aliases
 
-pub type Buffer = sys::FNA3D_Buffer;
 pub type Viewport = sys::FNA3D_Viewport;
-pub type Texture = sys::FNA3D_Texture;
-pub type Renderbuffer = sys::FNA3D_Renderbuffer;
-pub type Effect = sys::FNA3D_Effect;
-pub type Query = sys::FNA3D_Query;
 
 mod mojo {
     //! Aliases
@@ -88,6 +99,16 @@ impl<'a, T> AsMutPtr<T> for Option<&'a mut T> {
 //
 // Most of the internal implementation of `GraphicsDevice`
 
+/// Used to implement `GraphicsDevice`
+///
+/// # Things to take care
+///
+/// - using disposing functions for:
+///     - `Buffer`
+///     - `Renderbuffer`
+///     - `Effect`
+///     - `Query`
+///     - `Texture`
 pub struct Device {
     raw: *mut sys::FNA3D_Device,
 }
@@ -138,7 +159,7 @@ impl Device {
             sys::FNA3D_Clear(
                 self.raw,
                 options as u32,
-                &mut utils::color_as_vec4(color.clone()) as *mut _,
+                &mut color.as_vec4() as *mut _,
                 depth,
                 stencil,
             );
