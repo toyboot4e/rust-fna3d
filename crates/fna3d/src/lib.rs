@@ -8,6 +8,7 @@
 //! you can find it in `target`, or you can install the `bindgen` command line tool via `cargo` and
 //! run it over a wrapping header file.
 
+mod fna3d_device;
 mod fna3d_enums;
 mod fna3d_functions;
 mod fna3d_structs;
@@ -15,6 +16,7 @@ mod fna3d_structs;
 pub use fna3d_sys as sys;
 
 // FNA3D.h
+pub use fna3d_device::*;
 pub use fna3d_enums::*;
 pub use fna3d_functions::*;
 pub use fna3d_structs::*;

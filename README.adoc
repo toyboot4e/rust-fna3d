@@ -1,5 +1,7 @@
 = WIP!!!!
 
+Currently I'm trying to make an FNA-like framework and to improve this crate.
+
 I'm really not sure about dynamic libraries, Rust FFI and even FNA3D. I need much more time or help!
 
 == Getting started?

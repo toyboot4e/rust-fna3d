@@ -8,6 +8,8 @@
 //!
 //! * https://github.com/rust-lang/rust-bindgen/issues/1096
 
+// TODO: make a macro to wrap u32 as enum
+
 // TODO: cast to underlying type
 // pub trait ToRepr {
 //     type Output;

@@ -14,8 +14,12 @@ pub fn linked_version() -> u32 {
 //     pub fn FNA3D_HookLogFunctions(info: FNA3D_LogFunc, warn: FNA3D_LogFunc, error: FNA3D_LogFunc);
 // }
 
-pub fn prepare_window_attributes() -> u32 {
-    unsafe { sys::FNA3D_PrepareWindowAttributes() }
+/// [SDL_WindowFlags](https://wiki.libsdl.org/SDL_WindowFlags), which is required by
+/// [SDL_CreateWindow](https://wiki.libsdl.org/SDL_CreateWindow)
+pub struct SdlWindowFlags(u32);
+
+pub fn prepare_window_attributes() -> SdlWindowFlags {
+    SdlWindowFlags(unsafe { sys::FNA3D_PrepareWindowAttributes() })
 }
 
 pub fn get_drawable_size(window: *mut c_void) -> (i32, i32) {
