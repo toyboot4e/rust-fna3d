@@ -29,7 +29,7 @@
 //! ### enums and booleans
 //!
 //! Because C is not so strict about them, `bindgen` translates `enum` s as `u32` and `bool` s as
-//! `u8`. We need to wrap them so to
+//! `u8`. We need to wrap them for handy interface
 //!
 //! ## Trait implementations
 //!
@@ -83,7 +83,6 @@ pub type Rect = sys::FNA3D_Rect;
 pub type PresentationParameters = sys::FNA3D_PresentationParameters;
 
 pub type RasterizerState = sys::FNA3D_RasterizerState;
-pub type SamplerState = sys::FNA3D_SamplerState;
 pub type VertexElement = sys::FNA3D_VertexElement;
 pub type VertexDeclaration = sys::FNA3D_VertexDeclaration;
 pub type VertexBufferBinding = sys::FNA3D_VertexBufferBinding;
@@ -98,6 +97,163 @@ pub type Vec4 = sys::FNA3D_Vec4;
 // We _could_ use macors to define field accessors. Probablly the
 // [paste](https://github.com/dtolnay/paste) is usefule for that. However, I prefered explicit
 // definitions this time.
+
+// ----------------------------------------
+// SamplerState
+
+#[derive(Debug, Clone)]
+pub struct SamplerState {
+    raw: sys::FNA3D_SamplerState,
+}
+
+impl SamplerState {
+    pub fn raw(&mut self) -> &mut sys::FNA3D_SamplerState {
+        &mut self.raw
+    }
+
+    pub fn filter(&self) -> enums::TextureFilter {
+        enums::TextureFilter::from_u32(self.raw.filter).unwrap()
+    }
+
+    pub fn set_filter(&mut self, filter: enums::TextureFilter) {
+        self.raw.filter = filter as u32;
+    }
+
+    pub fn address_u(&self) -> enums::TextureAddressMode {
+        enums::TextureAddressMode::from_u32(self.raw.addressU).unwrap()
+    }
+
+    pub fn set_address_u(&mut self, address: enums::TextureAddressMode) {
+        self.raw.addressU = address as u32;
+    }
+
+    pub fn address_v(&self) -> enums::TextureAddressMode {
+        enums::TextureAddressMode::from_u32(self.raw.addressV).unwrap()
+    }
+
+    pub fn set_address_v(&mut self, address: enums::TextureAddressMode) {
+        self.raw.addressV = address as u32;
+    }
+
+    pub fn address_w(&self) -> enums::TextureAddressMode {
+        enums::TextureAddressMode::from_u32(self.raw.addressW).unwrap()
+    }
+
+    pub fn set_address_w(&mut self, address: enums::TextureAddressMode) {
+        self.raw.addressW = address as u32;
+    }
+
+    pub fn mip_map_level_of_detail_bias(&self) -> f32 {
+        self.raw.mipMapLevelOfDetailBias
+    }
+
+    pub fn set_mip_map_level_of_detail_bias(&mut self, value: f32) {
+        self.raw.mipMapLevelOfDetailBias = value;
+    }
+
+    pub fn max_anisotropy(&self) -> i32 {
+        self.raw.maxAnisotropy
+    }
+
+    pub fn set_max_anisotropy(&mut self, value: i32) {
+        self.raw.maxAnisotropy = value;
+    }
+
+    pub fn max_mip_level(&self) -> i32 {
+        self.raw.maxMipLevel
+    }
+
+    pub fn set_max_mip_level(&mut self, value: i32) {
+        self.raw.maxMipLevel = value;
+    }
+}
+
+impl Default for SamplerState {
+    fn default() -> Self {
+        Self {
+            raw: sys::FNA3D_SamplerState {
+                filter: enums::TextureFilter::Linear as u32,
+                addressU: enums::TextureAddressMode::Wrap as u32,
+                addressV: enums::TextureAddressMode::Wrap as u32,
+                addressW: enums::TextureAddressMode::Wrap as u32,
+                mipMapLevelOfDetailBias: 0 as f32,
+                maxAnisotropy: 4,
+                maxMipLevel: 0,
+            },
+        }
+    }
+}
+
+/// Preset values
+impl SamplerState {
+    fn new_(
+        filter: enums::TextureFilter,
+        addressU: enums::TextureAddressMode,
+        addressV: enums::TextureAddressMode,
+        addressW: enums::TextureAddressMode,
+    ) -> Self {
+        let mut me = Self::default();
+        me.set_filter(filter);
+        me.set_address_u(addressU);
+        me.set_address_v(addressV);
+        me.set_address_w(addressW);
+        me
+    }
+
+    pub fn anisotropic_clamp() -> Self {
+        Self::new_(
+            enums::TextureFilter::Anisotropic,
+            enums::TextureAddressMode::Clamp,
+            enums::TextureAddressMode::Clamp,
+            enums::TextureAddressMode::Clamp,
+        )
+    }
+
+    pub fn anisotropic_wrap() -> Self {
+        Self::new_(
+            enums::TextureFilter::Anisotropic,
+            enums::TextureAddressMode::Wrap,
+            enums::TextureAddressMode::Wrap,
+            enums::TextureAddressMode::Wrap,
+        )
+    }
+
+    pub fn linear_clamp() -> Self {
+        Self::new_(
+            enums::TextureFilter::Linear,
+            enums::TextureAddressMode::Clamp,
+            enums::TextureAddressMode::Clamp,
+            enums::TextureAddressMode::Clamp,
+        )
+    }
+
+    pub fn linear_wrap() -> Self {
+        Self::new_(
+            enums::TextureFilter::Linear,
+            enums::TextureAddressMode::Wrap,
+            enums::TextureAddressMode::Wrap,
+            enums::TextureAddressMode::Wrap,
+        )
+    }
+
+    pub fn point_clamp() -> Self {
+        Self::new_(
+            enums::TextureFilter::Point,
+            enums::TextureAddressMode::Clamp,
+            enums::TextureAddressMode::Clamp,
+            enums::TextureAddressMode::Clamp,
+        )
+    }
+
+    pub fn point_wrap() -> Self {
+        Self::new_(
+            enums::TextureFilter::Point,
+            enums::TextureAddressMode::Wrap,
+            enums::TextureAddressMode::Wrap,
+            enums::TextureAddressMode::Wrap,
+        )
+    }
+}
 
 // ----------------------------------------
 // BlendState

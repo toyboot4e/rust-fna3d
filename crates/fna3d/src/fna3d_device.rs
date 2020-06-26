@@ -220,7 +220,7 @@ impl Device {
         sampler: &mut SamplerState,
     ) {
         unsafe {
-            sys::FNA3D_VerifySampler(self.raw, index, texture, sampler);
+            sys::FNA3D_VerifySampler(self.raw, index, texture, sampler.raw() as *mut _);
         }
     }
 
@@ -231,7 +231,7 @@ impl Device {
         sampler: &mut SamplerState,
     ) {
         unsafe {
-            sys::FNA3D_VerifyVertexSampler(self.raw, index, texture, sampler);
+            sys::FNA3D_VerifyVertexSampler(self.raw, index, texture, sampler.raw() as *mut _);
         }
     }
 

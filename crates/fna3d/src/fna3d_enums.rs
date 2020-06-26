@@ -255,7 +255,7 @@ enum_from_primitive! {
 enum_from_primitive! {
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
-    pub enum TextureAddresMode {
+    pub enum TextureAddressMode {
         Wrap = sys::FNA3D_TextureAddressMode_FNA3D_TEXTUREADDRESSMODE_WRAP,
         Clamp = sys::FNA3D_TextureAddressMode_FNA3D_TEXTUREADDRESSMODE_CLAMP,
         Mirror = sys::FNA3D_TextureAddressMode_FNA3D_TEXTUREADDRESSMODE_MIRROR,
