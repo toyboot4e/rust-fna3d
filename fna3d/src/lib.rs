@@ -24,7 +24,7 @@
 //!
 //! Consider such constants as an example:
 //!
-//! ```rust
+//! ```
 //! pub const FNA3D_ClearOptions_FNA3D_CLEAROPTIONS_TARGET: FNA3D_ClearOptions = 1;
 //! pub const FNA3D_ClearOptions_FNA3D_CLEAROPTIONS_DEPTHBUFFER: FNA3D_ClearOptions = 2;
 //! pub const FNA3D_ClearOptions_FNA3D_CLEAROPTIONS_STENCIL: FNA3D_ClearOptions = 4;
@@ -33,7 +33,9 @@
 //!
 //! We want to wrap them into an `enum`:
 //!
-//! ```rust
+//! ```
+//! use enum_primitive::*;
+//! use fna3d_sys as sys;
 //! enum_from_primitive! {
 //!     #[derive(Debug, Copy, Clone, PartialEq)]
 //!     #[repr(u32)]
@@ -51,7 +53,8 @@
 //!
 //! Consider wrapping such a `struct` as an example:
 //!
-//! ```rust
+//! ```
+//! use fna3d_sys::*;
 //! #[repr(C)]
 //! #[derive(Debug, Copy, Clone)]
 //! pub struct FNA3D_DepthStencilState {
@@ -66,8 +69,8 @@
 //!
 //! First we'll make a struct:
 //!
-//! ```rust
-//! use fna3_sys as sys;
+//! ```
+//! use fna3d_sys as sys;
 //!
 //! #[derive(Debug, Clone)]
 //! pub struct DepthStencilState {
@@ -80,7 +83,7 @@
 //! * [x] use snake case
 //! * [x] wrap enums and booleans
 //!
-//! ```rust
+//! ```ignore
 //! impl DepthStencilState {
 //!     // Use `bool` to wrap `u8`
 //!     pub fn is_depth_buffer_enabled(&self) -> bool {
@@ -124,7 +127,9 @@
 //!
 //! They are used to represent a pointer type. Example:
 //!
-//! ```csharp
+//! ```
+//! #[repr(C)]
+//! #[derive(Debug, Copy, Clone)]
 //! pub struct FNA3D_Device {
 //!     _unused: [u8; 0],
 //! }
@@ -140,10 +145,10 @@ pub use fna3d_sys as sys;
 
 // FNA3D.h (re-exported to the root)
 mod fna3d;
-pub use fna3d::fna3d_device::*;
-pub use fna3d::fna3d_enums::*;
-pub use fna3d::fna3d_functions::*;
-pub use fna3d::fna3d_structs::*;
+pub use crate::fna3d::fna3d_device::*;
+pub use crate::fna3d::fna3d_enums::*;
+pub use crate::fna3d::fna3d_functions::*;
+pub use crate::fna3d::fna3d_structs::*;
 
 // FNA3D_Image.h
 pub mod img;
