@@ -1,48 +1,12 @@
-//! Thin wrappers of Rust FFI bindings to FNA3D generated with `bindgen`
+//! Struct types in FNA3D except `Device`
 //!
-//! TODO: complete the following guide (I'm learning for now)
-//!
-//! # How to make wrappers
-//!
-//! The follows are notes about wrapping Rust FFI generated with `bindgen`
-//!
-//! ## C
-//!
-//! ### Pointer types
-//!
-//! This is an example type from `bindgen`:
-//!
-//! ```csharp
-//! pub struct FNA3D_Device {
-//!     _unused: [u8; 0],
-//! }
-//! ```
-//!
-//! It's used to represent a pointer for the type. It's wrapped into a struct holding
-//! `*mut FNA3D_Device` and andle destructing via `Drop` trait.
-//!
-//! ### *void
-//!
-//! `c_void` is used to represent a function pointer.
-//! The Rust nomicon has a [corresponding page](https://doc.rust-lang.org/nomicon/ffi.html#representing-opaque-structs).
-//!
-//! ### enums and booleans
-//!
-//! Because C is not so strict about them, `bindgen` translates `enum` s as `u32` and `bool` s as
-//! `u8`. We need to wrap them for handy interface
-//!
-//! ## Trait implementations
-//!
-//! `Default`
+//! Those types don't have methods
 
 // TODO: remove `as u32` and maybe use `to_repr()`
 
-use std::ptr;
-// this should be `std::ffi::c_void` but `bindgen` uses:
-use std::os::raw::c_void;
-
-use crate::{fna3d_enums as enums, utils::AsVec4};
 use enum_primitive::*;
+
+use crate::fna3d::fna3d_enums as enums;
 use fna3d_sys as sys;
 
 // --------------------------------------------------------------------------------
@@ -82,7 +46,6 @@ pub type Color = sys::FNA3D_Color;
 pub type Rect = sys::FNA3D_Rect;
 pub type PresentationParameters = sys::FNA3D_PresentationParameters;
 
-pub type RasterizerState = sys::FNA3D_RasterizerState;
 pub type VertexElement = sys::FNA3D_VertexElement;
 pub type VertexDeclaration = sys::FNA3D_VertexDeclaration;
 pub type VertexBufferBinding = sys::FNA3D_VertexBufferBinding;
@@ -102,8 +65,107 @@ pub type Vec4 = sys::FNA3D_Vec4;
 // SamplerState
 
 #[derive(Debug, Clone)]
+pub struct RasterizerState {
+    raw: sys::FNA3D_RasterizerState,
+}
+
+impl Default for RasterizerState {
+    fn default() -> Self {
+        Self {
+            raw: sys::FNA3D_RasterizerState {
+                fillMode: enums::FillMode::Solid as u32,
+                cullMode: enums::CullMode::CullCounterClockwiseFace as u32,
+                depthBias: 0 as f32,
+                slopeScaleDepthBias: 0 as f32,
+                scissorTestEnable: false as u8,
+                multiSampleAntiAlias: true as u8,
+            },
+        }
+    }
+}
+
+impl RasterizerState {
+    pub fn raw(&mut self) -> &mut sys::FNA3D_RasterizerState {
+        &mut self.raw
+    }
+
+    pub fn from_cull_mode(mode: enums::CullMode) -> Self {
+        let mut me = Self::default();
+        me.set_cull_mode(mode);
+        me
+    }
+}
+
+/// Accessors
+impl RasterizerState {
+    pub fn fill_mode(&self) -> enums::FillMode {
+        enums::FillMode::from_u32(self.raw.fillMode).unwrap()
+    }
+
+    pub fn set_fill_mode(&mut self, fill_mode: enums::FillMode) {
+        self.raw.fillMode = fill_mode as u32;
+    }
+
+    pub fn cull_mode(&self) -> enums::CullMode {
+        enums::CullMode::from_u32(self.raw.cullMode).unwrap()
+    }
+
+    pub fn set_cull_mode(&mut self, value: enums::CullMode) {
+        self.raw.cullMode = value as u32;
+    }
+
+    pub fn depth_bias(&self) -> f32 {
+        self.raw.depthBias
+    }
+
+    pub fn set_depth_bias(&mut self, value: f32) {
+        self.raw.depthBias = value;
+    }
+
+    pub fn slope_scale_depth_bias(&self) -> f32 {
+        self.raw.slopeScaleDepthBias
+    }
+
+    pub fn set_slope_scale_depth_bias(&mut self, value: f32) {
+        self.raw.slopeScaleDepthBias = value;
+    }
+
+    pub fn scissor_test_enable(&self) -> u8 {
+        self.raw.scissorTestEnable
+    }
+
+    pub fn set_scissor_test_enable(&mut self, value: u8) {
+        self.raw.scissorTestEnable = value;
+    }
+
+    pub fn multi_sample_anti_alias(&self) -> u8 {
+        self.raw.multiSampleAntiAlias
+    }
+
+    pub fn set_multi_sample_anti_alias(&mut self, value: u8) {
+        self.raw.multiSampleAntiAlias = value;
+    }
+}
+
+#[derive(Debug, Clone)]
 pub struct SamplerState {
     raw: sys::FNA3D_SamplerState,
+}
+
+impl Default for SamplerState {
+    fn default() -> Self {
+        Self {
+            raw: sys::FNA3D_SamplerState {
+                filter: enums::TextureFilter::Linear as u32,
+                addressU: enums::TextureAddressMode::Wrap as u32,
+                addressV: enums::TextureAddressMode::Wrap as u32,
+                addressW: enums::TextureAddressMode::Wrap as u32,
+                mipMapLevelOfDetailBias: 0 as f32,
+                maxAnisotropy: 4,
+                maxMipLevel: 0,
+            },
+        }
+    }
 }
 
 impl SamplerState {
@@ -168,35 +230,19 @@ impl SamplerState {
     }
 }
 
-impl Default for SamplerState {
-    fn default() -> Self {
-        Self {
-            raw: sys::FNA3D_SamplerState {
-                filter: enums::TextureFilter::Linear as u32,
-                addressU: enums::TextureAddressMode::Wrap as u32,
-                addressV: enums::TextureAddressMode::Wrap as u32,
-                addressW: enums::TextureAddressMode::Wrap as u32,
-                mipMapLevelOfDetailBias: 0 as f32,
-                maxAnisotropy: 4,
-                maxMipLevel: 0,
-            },
-        }
-    }
-}
-
 /// Preset values
 impl SamplerState {
     fn new_(
         filter: enums::TextureFilter,
-        addressU: enums::TextureAddressMode,
-        addressV: enums::TextureAddressMode,
-        addressW: enums::TextureAddressMode,
+        address_u: enums::TextureAddressMode,
+        address_v: enums::TextureAddressMode,
+        address_w: enums::TextureAddressMode,
     ) -> Self {
         let mut me = Self::default();
         me.set_filter(filter);
-        me.set_address_u(addressU);
-        me.set_address_v(addressV);
-        me.set_address_w(addressW);
+        me.set_address_u(address_u);
+        me.set_address_v(address_v);
+        me.set_address_w(address_w);
         me
     }
 
@@ -261,6 +307,36 @@ impl SamplerState {
 #[derive(Debug, Clone)]
 pub struct BlendState {
     raw: sys::FNA3D_BlendState,
+}
+
+impl Default for BlendState {
+    fn default() -> Self {
+        Self {
+            raw: sys::FNA3D_BlendState {
+                colorSourceBlend: enums::Blend::SourceAlpha as u32,
+                colorDestinationBlend: enums::Blend::InverseSourceAlpha as u32,
+                colorBlendFunction: enums::BlendFunction::Add as u32,
+                //
+                alphaSourceBlend: enums::Blend::SourceAlpha as u32,
+                alphaDestinationBlend: enums::Blend::InverseSourceAlpha as u32,
+                alphaBlendFunction: enums::BlendFunction::Add as u32,
+                //
+                colorWriteEnable: enums::ColorWriteChannels::All as u32,
+                colorWriteEnable1: enums::ColorWriteChannels::All as u32,
+                colorWriteEnable2: enums::ColorWriteChannels::All as u32,
+                colorWriteEnable3: enums::ColorWriteChannels::All as u32,
+                //
+                blendFactor: Color {
+                    r: 255,
+                    g: 255,
+                    b: 255,
+                    a: 255,
+                },
+                // TODO: what does it mean??
+                multiSampleMask: -1,
+            },
+        }
+    }
 }
 
 impl BlendState {
@@ -358,36 +434,6 @@ impl BlendState {
     }
 }
 
-impl Default for BlendState {
-    fn default() -> Self {
-        Self {
-            raw: sys::FNA3D_BlendState {
-                colorSourceBlend: enums::Blend::SourceAlpha as u32,
-                colorDestinationBlend: enums::Blend::InverseSourceAlpha as u32,
-                colorBlendFunction: enums::BlendFunction::Add as u32,
-                //
-                alphaSourceBlend: enums::Blend::SourceAlpha as u32,
-                alphaDestinationBlend: enums::Blend::InverseSourceAlpha as u32,
-                alphaBlendFunction: enums::BlendFunction::Add as u32,
-                //
-                colorWriteEnable: enums::ColorWriteChannels::All as u32,
-                colorWriteEnable1: enums::ColorWriteChannels::All as u32,
-                colorWriteEnable2: enums::ColorWriteChannels::All as u32,
-                colorWriteEnable3: enums::ColorWriteChannels::All as u32,
-                //
-                blendFactor: Color {
-                    r: 255,
-                    g: 255,
-                    b: 255,
-                    a: 255,
-                },
-                // TODO: what does it mean??
-                multiSampleMask: -1,
-            },
-        }
-    }
-}
-
 // ----------------------------------------
 // DepthStencilState
 
@@ -395,6 +441,31 @@ impl Default for BlendState {
 #[derive(Debug, Clone)]
 pub struct DepthStencilState {
     raw: sys::FNA3D_DepthStencilState,
+}
+
+impl Default for DepthStencilState {
+    fn default() -> Self {
+        Self {
+            raw: sys::FNA3D_DepthStencilState {
+                depthBufferEnable: true as u8,
+                depthBufferWriteEnable: true as u8,
+                depthBufferFunction: enums::CompareFunction::Less as u32,
+                stencilEnable: false as u8,
+                stencilMask: 0,
+                stencilWriteMask: 0,
+                twoSidedStencilMode: false as u8,
+                stencilFail: enums::StencilOperation::Keep as u32,
+                stencilDepthBufferFail: enums::StencilOperation::Keep as u32,
+                stencilPass: enums::StencilOperation::Keep as u32,
+                stencilFunction: enums::CompareFunction::Always as u32,
+                ccwStencilFail: enums::StencilOperation::Keep as u32,
+                ccwStencilDepthBufferFail: enums::StencilOperation::Keep as u32,
+                ccwStencilPass: enums::StencilOperation::Keep as u32,
+                ccwStencilFunction: enums::CompareFunction::Always as u32,
+                referenceStencil: 0,
+            },
+        }
+    }
 }
 
 /// Wrap enums and booleans
@@ -407,7 +478,7 @@ impl DepthStencilState {
     // depth buffer
 
     pub fn is_depth_buffer_enabled(&self) -> bool {
-        self.raw.depthBufferEnable == 0
+        self.raw.depthBufferEnable != 0
     }
 
     pub fn set_is_depth_buffer_enabled(&mut self, b: bool) {
@@ -415,7 +486,7 @@ impl DepthStencilState {
     }
 
     pub fn is_depth_buffer_write_enabled(&self) -> bool {
-        self.raw.depthBufferWriteEnable == 0
+        self.raw.depthBufferWriteEnable != 0
     }
 
     pub fn set_is_depth_buffer_write_enabled(&mut self, b: bool) {
@@ -434,7 +505,7 @@ impl DepthStencilState {
     // stencil
 
     pub fn is_stencil_enabled(&self) -> bool {
-        self.raw.stencilEnable == 0
+        self.raw.stencilEnable != 0
     }
 
     pub fn set_is_stencil_enabled(&mut self, b: bool) {
@@ -458,7 +529,7 @@ impl DepthStencilState {
     }
 
     pub fn is_two_sided_stencil_mode(&self) -> bool {
-        self.raw.twoSidedStencilMode == 0
+        self.raw.twoSidedStencilMode != 0
     }
 
     pub fn set_two_sided_stencil_mode(&mut self, b: bool) {
@@ -538,31 +609,6 @@ impl DepthStencilState {
     }
 }
 
-impl Default for DepthStencilState {
-    fn default() -> Self {
-        Self {
-            raw: sys::FNA3D_DepthStencilState {
-                depthBufferEnable: true as u8,
-                depthBufferWriteEnable: true as u8,
-                depthBufferFunction: enums::CompareFunction::Less as u32,
-                stencilEnable: false as u8,
-                stencilMask: 0,
-                stencilWriteMask: 0,
-                twoSidedStencilMode: false as u8,
-                stencilFail: enums::StencilOperation::Keep as u32,
-                stencilDepthBufferFail: enums::StencilOperation::Keep as u32,
-                stencilPass: enums::StencilOperation::Keep as u32,
-                stencilFunction: enums::CompareFunction::Always as u32,
-                ccwStencilFail: enums::StencilOperation::Keep as u32,
-                ccwStencilDepthBufferFail: enums::StencilOperation::Keep as u32,
-                ccwStencilPass: enums::StencilOperation::Keep as u32,
-                ccwStencilFunction: enums::CompareFunction::Always as u32,
-                referenceStencil: 0,
-            },
-        }
-    }
-}
-
 impl DepthStencilState {
     // TODO: what is this??
     pub fn none() -> Self {
@@ -573,68 +619,4 @@ impl DepthStencilState {
         me.set_depth_buffer_function(enums::CompareFunction::Always);
         me
     }
-}
-
-// --------------------------------------------------------------------------------
-// FNA3D_Image.h
-
-pub mod img {
-    // TODO: wrap them
-    use fna3d_sys as sys;
-
-    // type ImageSkipFunc = sys::FNA3D_Image_SkipFunc;
-    // type ImageReadFunc = sys::FNA3D_Image_ReadFunc;
-    // type ImageEofFunc = sys::FNA3D_Image_EOFFunc;
-
-    // extern "C" {
-    //     pub fn FNA3D_Image_Load(
-    //         readFunc: FNA3D_Image_ReadFunc,
-    //         skipFunc: FNA3D_Image_SkipFunc,
-    //         eofFunc: FNA3D_Image_EOFFunc,
-    //         context: *mut ::std::os::raw::c_void,
-    //         w: *mut i32,
-    //         h: *mut i32,
-    //         len: *mut i32,
-    //         forceW: i32,
-    //         forceH: i32,
-    //         zoom: u8,
-    //     ) -> *mut u8;
-    // }
-
-    // extern "C" {
-    //     pub fn FNA3D_Image_Free(mem: *mut u8);
-    // }
-
-    // pub type FNA3D_Image_WriteFunc = ::std::option::Option<
-    //     unsafe extern "C" fn(
-    //         context: *mut ::std::os::raw::c_void,
-    //         data: *mut ::std::os::raw::c_void,
-    //         size: i32,
-    //     ),
-    // >;
-
-    // extern "C" {
-    //     pub fn FNA3D_Image_SavePNG(
-    //         writeFunc: FNA3D_Image_WriteFunc,
-    //         context: *mut ::std::os::raw::c_void,
-    //         srcW: i32,
-    //         srcH: i32,
-    //         dstW: i32,
-    //         dstH: i32,
-    //         data: *mut u8,
-    //     );
-    // }
-
-    // extern "C" {
-    //     pub fn FNA3D_Image_SaveJPG(
-    //         writeFunc: FNA3D_Image_WriteFunc,
-    //         context: *mut ::std::os::raw::c_void,
-    //         srcW: i32,
-    //         srcH: i32,
-    //         dstW: i32,
-    //         dstH: i32,
-    //         data: *mut u8,
-    //         quality: i32,
-    //     );
-    // }
 }

@@ -6,7 +6,10 @@ use std::os::raw::c_void;
 
 use fna3d_sys as sys;
 
-use crate::{fna3d_enums as enums, fna3d_structs::*, utils::AsVec4};
+use crate::{
+    fna3d::{fna3d_enums as enums, fna3d_structs::*},
+    utils::AsVec4,
+};
 use enum_primitive::*;
 
 // --------------------------------------------------------------------------------
@@ -209,7 +212,7 @@ impl Device {
 
     pub fn apply_rasterizer_state(&mut self, rst: &mut RasterizerState) {
         unsafe {
-            sys::FNA3D_ApplyRasterizerState(self.raw, rst);
+            sys::FNA3D_ApplyRasterizerState(self.raw, rst.raw() as *mut _);
         }
     }
 
@@ -833,7 +836,7 @@ impl Device {
     }
 
     pub fn query_complete(&mut self, query: *mut Query) -> bool {
-        unsafe { sys::FNA3D_QueryComplete(self.raw, query) == 0 }
+        unsafe { sys::FNA3D_QueryComplete(self.raw, query) != 0 }
     }
 
     pub fn query_pixel_count(&mut self, query: *mut Query) -> i32 {
@@ -841,19 +844,19 @@ impl Device {
     }
 
     pub fn supports_dxt1(&self) -> bool {
-        unsafe { sys::FNA3D_SupportsDXT1(self.raw) == 0 }
+        unsafe { sys::FNA3D_SupportsDXT1(self.raw) != 0 }
     }
 
     pub fn supports_s3_tc(&self) -> bool {
-        unsafe { sys::FNA3D_SupportsS3TC(self.raw) == 0 }
+        unsafe { sys::FNA3D_SupportsS3TC(self.raw) != 0 }
     }
 
     pub fn supports_hardware_instancing(&self) -> bool {
-        unsafe { sys::FNA3D_SupportsHardwareInstancing(self.raw) == 0 }
+        unsafe { sys::FNA3D_SupportsHardwareInstancing(self.raw) != 0 }
     }
 
     pub fn supports_no_overwrite(&self) -> bool {
-        unsafe { sys::FNA3D_SupportsNoOverwrite(self.raw) == 0 }
+        unsafe { sys::FNA3D_SupportsNoOverwrite(self.raw) != 0 }
     }
 
     pub fn get_max_texture_slots(
