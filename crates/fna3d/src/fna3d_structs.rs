@@ -104,69 +104,130 @@ pub type Vec4 = sys::FNA3D_Vec4;
 
 #[derive(Debug, Clone)]
 pub struct BlendState {
-    pub color_source_blend: enums::Blend,
-    pub color_destination_blend: enums::Blend,
-    pub color_blend_function: enums::BlendFunction,
-    //
-    pub alpha_source_blend: enums::Blend,
-    pub alpha_destination_blend: enums::Blend,
-    pub alpha_blend_function: enums::BlendFunction,
-    //
-    pub color_write_enable: enums::ColorWriteChannels,
-    pub color_write_enable1: enums::ColorWriteChannels,
-    pub color_write_enable2: enums::ColorWriteChannels,
-    pub color_write_enable3: enums::ColorWriteChannels,
-    //
-    pub blend_factor: Color,
-    pub multi_sample_mask: i32,
+    raw: sys::FNA3D_BlendState,
 }
 
 impl BlendState {
-    pub fn as_sys_value(&self) -> sys::FNA3D_BlendState {
-        sys::FNA3D_BlendState {
-            colorSourceBlend: self.color_source_blend as u32,
-            colorDestinationBlend: self.color_destination_blend as u32,
-            colorBlendFunction: self.color_blend_function as u32,
-            //
-            alphaSourceBlend: self.alpha_source_blend as u32,
-            alphaDestinationBlend: self.alpha_destination_blend as u32,
-            alphaBlendFunction: self.alpha_blend_function as u32,
-            //
-            colorWriteEnable: self.color_write_enable as u32,
-            colorWriteEnable1: self.color_write_enable1 as u32,
-            colorWriteEnable2: self.color_write_enable2 as u32,
-            colorWriteEnable3: self.color_write_enable3 as u32,
-            //
-            blendFactor: self.blend_factor,
-            multiSampleMask: self.multi_sample_mask,
-        }
+    pub fn raw(&mut self) -> &mut sys::FNA3D_BlendState {
+        &mut self.raw
+    }
+
+    // ----------------------------------------
+    // Color blending
+
+    pub fn color_src_blend(&self) -> enums::Blend {
+        enums::Blend::from_u32(self.raw.colorSourceBlend).unwrap()
+    }
+
+    pub fn set_color_src_blend(&mut self, blend: enums::Blend) {
+        self.raw.colorSourceBlend = blend as u32;
+    }
+
+    pub fn color_dest_blend(&self) -> enums::Blend {
+        enums::Blend::from_u32(self.raw.colorDestinationBlend).unwrap()
+    }
+
+    pub fn set_color_dest_blend(&mut self, blend: enums::Blend) {
+        self.raw.colorDestinationBlend = blend as u32;
+    }
+
+    pub fn color_blend_fn(&self) -> enums::BlendFunction {
+        enums::BlendFunction::from_u32(self.raw.colorBlendFunction).unwrap()
+    }
+
+    pub fn set_color_blend_fn(&mut self, value: enums::BlendFunction) {
+        self.raw.colorBlendFunction = value as u32;
+    }
+
+    // ----------------------------------------
+    // Alpha blending
+
+    pub fn alpha_src_blend(&self) -> enums::Blend {
+        enums::Blend::from_u32(self.raw.alphaSourceBlend).unwrap()
+    }
+
+    pub fn set_alpha_src_blend(&mut self, blend: enums::Blend) {
+        self.raw.alphaSourceBlend = blend as u32;
+    }
+
+    pub fn alpha_dest_blend(&self) -> enums::Blend {
+        enums::Blend::from_u32(self.raw.alphaDestinationBlend).unwrap()
+    }
+
+    pub fn set_alpha_dest_blend(&mut self, blend: enums::Blend) {
+        self.raw.alphaDestinationBlend = blend as u32;
+    }
+
+    pub fn alpha_blend_fn(&self) -> enums::BlendFunction {
+        enums::BlendFunction::from_u32(self.raw.alphaBlendFunction).unwrap()
+    }
+
+    pub fn set_alpha_blend_fn(&mut self, blend_fn: enums::BlendFunction) {
+        self.raw.alphaBlendFunction = blend_fn as u32;
+    }
+
+    // ----------------------------------------
+    // Color write
+
+    pub fn color_write_enable(&self) -> enums::ColorWriteChannels {
+        enums::ColorWriteChannels::from_u32(self.raw.colorWriteEnable).unwrap()
+    }
+
+    pub fn set_color_write_enable(&mut self, channel: enums::ColorWriteChannels) {
+        self.raw.colorWriteEnable = channel as u32;
+    }
+
+    pub fn color_write_enable1(&self) -> enums::ColorWriteChannels {
+        enums::ColorWriteChannels::from_u32(self.raw.colorWriteEnable1).unwrap()
+    }
+
+    pub fn set_color_write_enable1(&mut self, channel: enums::ColorWriteChannels) {
+        self.raw.colorWriteEnable1 = channel as u32;
+    }
+
+    pub fn color_write_enable2(&self) -> enums::ColorWriteChannels {
+        enums::ColorWriteChannels::from_u32(self.raw.colorWriteEnable2).unwrap()
+    }
+
+    pub fn set_color_write_enable2(&mut self, channel: enums::ColorWriteChannels) {
+        self.raw.colorWriteEnable2 = channel as u32;
+    }
+
+    pub fn color_write_enable3(&self) -> enums::ColorWriteChannels {
+        enums::ColorWriteChannels::from_u32(self.raw.colorWriteEnable3).unwrap()
+    }
+
+    pub fn set_color_write_enable3(&mut self, channel: enums::ColorWriteChannels) {
+        self.raw.colorWriteEnable3 = channel as u32;
     }
 }
 
 impl Default for BlendState {
     fn default() -> Self {
         Self {
-            color_source_blend: enums::Blend::SourceAlpha,
-            color_destination_blend: enums::Blend::InverseSourceAlpha,
-            color_blend_function: enums::BlendFunction::Add,
-            //
-            alpha_source_blend: enums::Blend::SourceAlpha,
-            alpha_destination_blend: enums::Blend::InverseSourceAlpha,
-            alpha_blend_function: enums::BlendFunction::Add,
-            //
-            color_write_enable: enums::ColorWriteChannels::All,
-            color_write_enable1: enums::ColorWriteChannels::All,
-            color_write_enable2: enums::ColorWriteChannels::All,
-            color_write_enable3: enums::ColorWriteChannels::All,
-            //
-            blend_factor: Color {
-                r: 255,
-                g: 255,
-                b: 255,
-                a: 255,
+            raw: sys::FNA3D_BlendState {
+                colorSourceBlend: enums::Blend::SourceAlpha as u32,
+                colorDestinationBlend: enums::Blend::InverseSourceAlpha as u32,
+                colorBlendFunction: enums::BlendFunction::Add as u32,
+                //
+                alphaSourceBlend: enums::Blend::SourceAlpha as u32,
+                alphaDestinationBlend: enums::Blend::InverseSourceAlpha as u32,
+                alphaBlendFunction: enums::BlendFunction::Add as u32,
+                //
+                colorWriteEnable: enums::ColorWriteChannels::All as u32,
+                colorWriteEnable1: enums::ColorWriteChannels::All as u32,
+                colorWriteEnable2: enums::ColorWriteChannels::All as u32,
+                colorWriteEnable3: enums::ColorWriteChannels::All as u32,
+                //
+                blendFactor: Color {
+                    r: 255,
+                    g: 255,
+                    b: 255,
+                    a: 255,
+                },
+                // TODO: what does it mean??
+                multiSampleMask: -1,
             },
-            // TODO: what does it mean?? should we wrap it?
-            multi_sample_mask: -1,
         }
     }
 }

@@ -195,10 +195,9 @@ impl Device {
         }
     }
 
-    pub fn set_blend_state(&mut self, blend_state: &BlendState) {
+    pub fn set_blend_state(&mut self, blend_state: &mut BlendState) {
         unsafe {
-            // REMARK: this is SAFE because BlendState is copied in a specific Device
-            sys::FNA3D_SetBlendState(self.raw, &mut blend_state.as_sys_value() as *mut _);
+            sys::FNA3D_SetBlendState(self.raw, blend_state.raw() as *mut _);
         }
     }
 
