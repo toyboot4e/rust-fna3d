@@ -1,6 +1,6 @@
 = WIP!!!!
 
-Currently I'm trying to make an FNA-like framework and to improve this crate.
+Currently I'm trying to make an FNA-like framework and trying to improve this crate.
 
 I'm really not sure about dynamic libraries, Rust FFI and even FNA3D. I need much more time or help!
 
@@ -14,13 +14,15 @@ I'm really not sure about dynamic libraries and currently FNA3D is cloned into `
 
 ```sh
 $ git clone 'https://github.com/toyboot4e/rust-fna3d'
-$ cd rust-fna3d/crates/fna3d-sys
+$ cd rust-fna3d/fna3d-sys
 $ git clone --recursive 'https://github.com/FNA-XNA/FNA3D'
 $ cd FNA3D/MojoShader && cmake
 $ cd ../
 $ mkdir build
 $ cd build && cmake ../ && make
 ```
+
+And the built library is used directly (it's not copied to output directory).
 
 = Rust-FNA3D
 
@@ -32,7 +34,7 @@ Rust-FNA3D is a safe & handy wrapper around FNA3D in Rust. It's intended be used
 
 === What is FNA3D?
 
-https://github.com/FNA-XNA/FNA[FNA] is a reimplementation of the http://en.wikipedia.org/wiki/Microsoft_XNA[Microsoft XNA Game Studio 4.0 Refresh] libraries. FNA3D is the 3D graphics library for FNA written in C99, which corresponds to https://docs.microsoft.com/en-us/previous-versions/windows/silverlight/dotnet-windows-silverlight/bb197344(v=xnagamestudio.35)[Microsoft.Xna.Framework.Graphics Namespace].
+https://github.com/FNA-XNA/FNA[FNA] is a reimplementation of the http://en.wikipedia.org/wiki/Microsoft_XNA[Microsoft XNA Game Studio 4.0 Refresh] libraries. FNA3D is the 3D graphics library for FNA written in C99, which corresponds to the most of the internal implementation of https://docs.microsoft.com/en-us/previous-versions/windows/silverlight/dotnet-windows-silverlight/bb197329%28v%3Dxnagamestudio.35%29[GraphicsDevice].
 
 // === Where is an FNA-like framework?
 //

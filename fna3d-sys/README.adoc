@@ -6,11 +6,11 @@ Rust FFI bindings to FNA3D generated with https://github.com/rust-lang/rust-bind
 
 === Dependency to FNA3D and SDL2
 
-I'm really not sure how to solve it!!
+I'm really not sure how to solve them!!
 
-For now, FNA3D should be cloned into this directory (see the README in the root of the repository)
+Maybe Rust-SDL2-sys helps me out. For now, FNA3D should be cloned into this directory (see the README in the root of the repository)
 
 === The name (`fna3d-sys`)
 
-* The library name (`*-sys`) came from the https://doc.rust-lang.org/cargo/reference/build-scripts.html#-sys-packages[cargo book].
-* The library name is `fna3d-sys` while the target name (library name) is `fna3d_sys`.
+* It came from the https://doc.rust-lang.org/cargo/reference/build-scripts.html#-sys-packages[cargo book].
+* It is different from its library name (target name) `fna3d_sys`.
