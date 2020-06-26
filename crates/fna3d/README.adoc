@@ -3,8 +3,9 @@
 Not ready.
 
 * [x] enums
-* [x] structs and methods with rustic cases
-- [ ] wrap FNA3D structs with booleans and enumeration types
+* [ ] wrap structs and methods
+** [x] use snake case
+** [ ] wrap FNA3D structs with booleans and enumeration types
 * [ ] I need to learn how to solve dependencies to dynamic libraries and how to bundle it to release builds
 ** [ ] I need to learn how to do with both Rust-FNA3D and Rust-SDL2 (or should it not be used?)
 * [ ] I need to learn how to use FNA3D and improve this wrapper

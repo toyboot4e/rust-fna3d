@@ -3,3 +3,7 @@
 
 #include "FNA3D/include/FNA3D.h"
 #include "FNA3D/include/FNA3D_image.h"
+
+// TODO: why the follows don't work?
+// #include <FNA3D.h>
+// #include <FNA3D_image.h>

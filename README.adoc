@@ -16,7 +16,7 @@ I'm really not sure about dynamic libraries and currently FNA3D is cloned into `
 $ git clone 'https://github.com/toyboot4e/rust-fna3d'
 $ cd rust-fna3d/crates/fna3d-sys
 $ git clone --recursive 'https://github.com/FNA-XNA/FNA3D'
-$ cd FNA3D/MojoShader && make
+$ cd FNA3D/MojoShader && cmake
 $ cd ../
 $ mkdir build
 $ cd build && cmake ../ && make

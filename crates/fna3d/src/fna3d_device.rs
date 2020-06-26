@@ -195,18 +195,16 @@ impl Device {
         }
     }
 
-    pub fn set_blend_state(&mut self, blend_state: &mut BlendState) {
+    pub fn set_blend_state(&mut self, blend_state: &BlendState) {
         unsafe {
-            sys::FNA3D_SetBlendState(self.raw, blend_state as *mut _);
+            // REMARK: this is SAFE because BlendState is copied in a specific Device
+            sys::FNA3D_SetBlendState(self.raw, &mut blend_state.as_sys_value() as *mut _);
         }
     }
 
     pub fn set_depth_stencil_state(&mut self, depth_stencil_state: &mut DepthStencilState) {
         unsafe {
-            sys::FNA3D_SetDepthStencilState(
-                self.raw,
-                &mut depth_stencil_state.as_sys_value() as *mut _,
-            );
+            sys::FNA3D_SetDepthStencilState(self.raw, depth_stencil_state.raw() as *mut _);
         }
     }
 

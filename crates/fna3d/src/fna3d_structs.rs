@@ -77,11 +77,11 @@ pub mod mojo {
     pub type EffectStateChanges = sys::MOJOSHADER_effectStateChanges;
 }
 
+// TODO: add constructors, remove AsVec4
 pub type Color = sys::FNA3D_Color;
 pub type Rect = sys::FNA3D_Rect;
 pub type PresentationParameters = sys::FNA3D_PresentationParameters;
 
-pub type BlendState = sys::FNA3D_BlendState;
 pub type RasterizerState = sys::FNA3D_RasterizerState;
 pub type SamplerState = sys::FNA3D_SamplerState;
 pub type VertexElement = sys::FNA3D_VertexElement;
@@ -95,102 +95,266 @@ pub type Vec4 = sys::FNA3D_Vec4;
 // --------------------------------------------------------------------------------
 // Wrappers
 //
-// TODO: maybe make a macro to automate constructing such structs
+// We _could_ use macors to define field accessors. Probablly the
+// [paste](https://github.com/dtolnay/paste) is usefule for that. However, I prefered explicit
+// definitions this time.
 
-/// Wraps `fna3d::FNA3d_DepthStencilState`
-///
-/// Hides boolean types exposed as `u8` and enumeration types exposed as `u32`
-#[derive(Debug, Clone, PartialEq)]
-pub struct DepthStencilState {
-    pub depth_buffer_enable: bool,
-    pub depth_buffer_write_enable: bool,
-    pub depth_buffer_function: enums::CompareFunction,
-    pub stencil_enable: bool,
-    // TODO: maybe hide `i32` values?
-    pub stencil_mask: i32,
-    pub stencil_write_mask: i32,
-    pub two_sided_stencil_mode: bool,
-    pub stencil_fail: enums::StencilOperation,
-    pub stencil_depth_buffer_fail: enums::StencilOperation,
-    pub stencil_pass: enums::StencilOperation,
-    pub stencil_function: enums::CompareFunction,
-    pub ccw_stencil_fail: enums::StencilOperation,
-    pub ccw_stencil_depth_buffer_fail: enums::StencilOperation,
-    pub ccw_stencil_pass: enums::StencilOperation,
-    pub ccw_stencil_function: enums::CompareFunction,
-    pub reference_stencil: i32,
+// ----------------------------------------
+// BlendState
+
+#[derive(Debug, Clone)]
+pub struct BlendState {
+    pub color_source_blend: enums::Blend,
+    pub color_destination_blend: enums::Blend,
+    pub color_blend_function: enums::BlendFunction,
+    //
+    pub alpha_source_blend: enums::Blend,
+    pub alpha_destination_blend: enums::Blend,
+    pub alpha_blend_function: enums::BlendFunction,
+    //
+    pub color_write_enable: enums::ColorWriteChannels,
+    pub color_write_enable1: enums::ColorWriteChannels,
+    pub color_write_enable2: enums::ColorWriteChannels,
+    pub color_write_enable3: enums::ColorWriteChannels,
+    //
+    pub blend_factor: Color,
+    pub multi_sample_mask: i32,
 }
 
-impl DepthStencilState {
-    // FIXME: This creates needless copy from `&mut self`.
-    pub fn as_sys_value(&self) -> sys::FNA3D_DepthStencilState {
-        sys::FNA3D_DepthStencilState {
-            depthBufferEnable: self.depth_buffer_enable as u8,
-            depthBufferWriteEnable: self.depth_buffer_write_enable as u8,
-            depthBufferFunction: self.depth_buffer_function as u32,
-            stencilEnable: self.stencil_enable as u8,
-            stencilMask: self.stencil_mask,
-            stencilWriteMask: self.stencil_write_mask,
-            twoSidedStencilMode: self.two_sided_stencil_mode as u8,
-            stencilFail: self.stencil_fail as u32,
-            stencilDepthBufferFail: self.stencil_depth_buffer_fail as u32,
-            stencilPass: self.stencil_pass as u32,
-            stencilFunction: self.stencil_function as u32,
-            ccwStencilFail: self.ccw_stencil_fail as u32,
-            ccwStencilDepthBufferFail: self.stencil_depth_buffer_fail as u32,
-            ccwStencilPass: self.ccw_stencil_pass as u32,
-            ccwStencilFunction: self.ccw_stencil_function as u32,
-            referenceStencil: self.reference_stencil,
+impl BlendState {
+    pub fn as_sys_value(&self) -> sys::FNA3D_BlendState {
+        sys::FNA3D_BlendState {
+            colorSourceBlend: self.color_source_blend as u32,
+            colorDestinationBlend: self.color_destination_blend as u32,
+            colorBlendFunction: self.color_blend_function as u32,
+            //
+            alphaSourceBlend: self.alpha_source_blend as u32,
+            alphaDestinationBlend: self.alpha_destination_blend as u32,
+            alphaBlendFunction: self.alpha_blend_function as u32,
+            //
+            colorWriteEnable: self.color_write_enable as u32,
+            colorWriteEnable1: self.color_write_enable1 as u32,
+            colorWriteEnable2: self.color_write_enable2 as u32,
+            colorWriteEnable3: self.color_write_enable3 as u32,
+            //
+            blendFactor: self.blend_factor,
+            multiSampleMask: self.multi_sample_mask,
         }
+    }
+}
+
+impl Default for BlendState {
+    fn default() -> Self {
+        Self {
+            color_source_blend: enums::Blend::SourceAlpha,
+            color_destination_blend: enums::Blend::InverseSourceAlpha,
+            color_blend_function: enums::BlendFunction::Add,
+            //
+            alpha_source_blend: enums::Blend::SourceAlpha,
+            alpha_destination_blend: enums::Blend::InverseSourceAlpha,
+            alpha_blend_function: enums::BlendFunction::Add,
+            //
+            color_write_enable: enums::ColorWriteChannels::All,
+            color_write_enable1: enums::ColorWriteChannels::All,
+            color_write_enable2: enums::ColorWriteChannels::All,
+            color_write_enable3: enums::ColorWriteChannels::All,
+            //
+            blend_factor: Color {
+                r: 255,
+                g: 255,
+                b: 255,
+                a: 255,
+            },
+            // TODO: what does it mean?? should we wrap it?
+            multi_sample_mask: -1,
+        }
+    }
+}
+
+// ----------------------------------------
+// DepthStencilState
+
+/// Wraps `fna3d_sys::FNA3d_DepthStencilState`
+#[derive(Debug, Clone)]
+pub struct DepthStencilState {
+    raw: sys::FNA3D_DepthStencilState,
+}
+
+/// Wrap enums and booleans
+impl DepthStencilState {
+    pub fn raw(&mut self) -> &mut sys::FNA3D_DepthStencilState {
+        &mut self.raw
+    }
+
+    // ----------------------------------------
+    // depth buffer
+
+    pub fn is_depth_buffer_enabled(&self) -> bool {
+        self.raw.depthBufferEnable == 0
+    }
+
+    pub fn set_is_depth_buffer_enabled(&mut self, b: bool) {
+        self.raw.depthBufferEnable = b as u8;
+    }
+
+    pub fn is_depth_buffer_write_enabled(&self) -> bool {
+        self.raw.depthBufferWriteEnable == 0
+    }
+
+    pub fn set_is_depth_buffer_write_enabled(&mut self, b: bool) {
+        self.raw.depthBufferWriteEnable = b as u8;
+    }
+
+    pub fn depth_buffer_function(&self) -> enums::CompareFunction {
+        enums::CompareFunction::from_u32(self.raw.depthBufferFunction).unwrap()
+    }
+
+    pub fn set_depth_buffer_function(&mut self, f: enums::CompareFunction) {
+        self.raw.depthBufferFunction = f as u32;
+    }
+
+    // ----------------------------------------
+    // stencil
+
+    pub fn is_stencil_enabled(&self) -> bool {
+        self.raw.stencilEnable == 0
+    }
+
+    pub fn set_is_stencil_enabled(&mut self, b: bool) {
+        self.raw.stencilEnable = b as u8;
+    }
+
+    pub fn stencil_mask(&self) -> i32 {
+        self.raw.stencilMask
+    }
+
+    pub fn set_stencil_mask(&mut self, mask: i32) {
+        self.raw.stencilMask = mask;
+    }
+
+    pub fn stencik_write_mask(&self) -> i32 {
+        self.raw.stencilWriteMask
+    }
+
+    pub fn set_stencik_write_mask(&mut self, mask: i32) {
+        self.raw.stencilWriteMask = mask;
+    }
+
+    pub fn is_two_sided_stencil_mode(&self) -> bool {
+        self.raw.twoSidedStencilMode == 0
+    }
+
+    pub fn set_two_sided_stencil_mode(&mut self, b: bool) {
+        self.raw.twoSidedStencilMode = b as u8;
+    }
+
+    pub fn stencil_fail(&self) -> enums::StencilOperation {
+        enums::StencilOperation::from_u32(self.raw.stencilFail).unwrap()
+    }
+
+    pub fn set_stencil_fail(&mut self, stencil: enums::StencilOperation) {
+        self.raw.stencilFail = stencil as u32;
+    }
+
+    pub fn stencil_depth_buffer_fail(&self) -> enums::StencilOperation {
+        enums::StencilOperation::from_u32(self.raw.stencilDepthBufferFail).unwrap()
+    }
+
+    pub fn set_stencil_depth_buffer_fail(&mut self, stencil: enums::StencilOperation) {
+        self.raw.stencilDepthBufferFail = stencil as u32;
+    }
+
+    pub fn stencil_pass(&self) -> enums::StencilOperation {
+        enums::StencilOperation::from_u32(self.raw.stencilPass).unwrap()
+    }
+
+    pub fn set_stencil_pass(&mut self, stencil: enums::StencilOperation) {
+        self.raw.stencilPass = stencil as u32;
+    }
+
+    //     pub stencil_function: enums::CompareFunction,
+    pub fn stencil_function(&self) -> enums::CompareFunction {
+        enums::CompareFunction::from_u32(self.raw.depthBufferFunction).unwrap()
+    }
+
+    // ----------------------------------------
+    // ccw
+
+    pub fn ccw_stencil_fail(&self) -> enums::StencilOperation {
+        enums::StencilOperation::from_u32(self.raw.ccwStencilFail).unwrap()
+    }
+
+    pub fn set_ccw_stencil_fail(&mut self, stencil: enums::StencilOperation) {
+        self.raw.ccwStencilFail = stencil as u32;
+    }
+
+    pub fn ccw_stencil_depth_buffer_fail(&self) -> enums::StencilOperation {
+        enums::StencilOperation::from_u32(self.raw.ccwStencilDepthBufferFail).unwrap()
+    }
+
+    pub fn set_ccw_stencil_depth_buffer_fail(&mut self, stencil: enums::StencilOperation) {
+        self.raw.ccwStencilDepthBufferFail = stencil as u32;
+    }
+
+    pub fn ccw_stencil_pass(&self) -> enums::StencilOperation {
+        enums::StencilOperation::from_u32(self.raw.ccwStencilPass).unwrap()
+    }
+
+    pub fn set_ccw_stencil_pass(&mut self, stencil: enums::StencilOperation) {
+        self.raw.ccwStencilPass = stencil as u32;
+    }
+
+    pub fn ccw_stencil_function(&self) -> enums::StencilOperation {
+        enums::StencilOperation::from_u32(self.raw.ccwStencilFunction).unwrap()
+    }
+
+    pub fn set_ccw_stencil_function(&mut self, stencil: enums::StencilOperation) {
+        self.raw.ccwStencilFunction = stencil as u32;
+    }
+
+    pub fn reference_stencil(&self) -> i32 {
+        self.raw.referenceStencil
+    }
+
+    pub fn set_renference_stencil(&mut self, stencil: i32) {
+        self.raw.referenceStencil = stencil
     }
 }
 
 impl Default for DepthStencilState {
-    //  .(true, true, .Less, false, 0, 0, .Keep, .Keep, .Keep, .Always, 0);
-    // public static readonly DepthStencilState ZTestNoWrite = .(true, false, .Less, false, 0, 0, .Keep, .Keep, .Keep, .Always, 0);
-    // public static readonly DepthStencilState None = .(false, false, .Always, false, 0, 0, .Keep, .Keep, .Keep, .Always, 0);
     fn default() -> Self {
         Self {
-            depth_buffer_enable: true,
-            depth_buffer_write_enable: true,
-            depth_buffer_function: enums::CompareFunction::Less,
-            stencil_enable: false,
-            stencil_mask: 0,
-            stencil_write_mask: 0,
-            two_sided_stencil_mode: false, //
-            stencil_fail: enums::StencilOperation::Keep,
-            stencil_depth_buffer_fail: enums::StencilOperation::Keep,
-            stencil_pass: enums::StencilOperation::Keep,
-            stencil_function: enums::CompareFunction::Always,
-            ccw_stencil_fail: enums::StencilOperation::Keep, //
-            ccw_stencil_depth_buffer_fail: enums::StencilOperation::Keep, //
-            ccw_stencil_pass: enums::StencilOperation::Keep, //
-            ccw_stencil_function: enums::CompareFunction::Always, //
-            reference_stencil: 0,
+            raw: sys::FNA3D_DepthStencilState {
+                depthBufferEnable: true as u8,
+                depthBufferWriteEnable: true as u8,
+                depthBufferFunction: enums::CompareFunction::Less as u32,
+                stencilEnable: false as u8,
+                stencilMask: 0,
+                stencilWriteMask: 0,
+                twoSidedStencilMode: false as u8,
+                stencilFail: enums::StencilOperation::Keep as u32,
+                stencilDepthBufferFail: enums::StencilOperation::Keep as u32,
+                stencilPass: enums::StencilOperation::Keep as u32,
+                stencilFunction: enums::CompareFunction::Always as u32,
+                ccwStencilFail: enums::StencilOperation::Keep as u32,
+                ccwStencilDepthBufferFail: enums::StencilOperation::Keep as u32,
+                ccwStencilPass: enums::StencilOperation::Keep as u32,
+                ccwStencilFunction: enums::CompareFunction::Always as u32,
+                referenceStencil: 0,
+            },
         }
     }
 }
 
 impl DepthStencilState {
-    fn none() -> Self {
-        Self {
-            depth_buffer_enable: false,
-            depth_buffer_write_enable: false,
-            depth_buffer_function: enums::CompareFunction::Always,
-            stencil_enable: false,
-            stencil_mask: 0,
-            stencil_write_mask: 0,
-            two_sided_stencil_mode: false, //
-            stencil_fail: enums::StencilOperation::Keep,
-            stencil_depth_buffer_fail: enums::StencilOperation::Keep,
-            stencil_pass: enums::StencilOperation::Keep,
-            stencil_function: enums::CompareFunction::Always,
-            ccw_stencil_fail: enums::StencilOperation::Keep, //
-            ccw_stencil_depth_buffer_fail: enums::StencilOperation::Keep, //
-            ccw_stencil_pass: enums::StencilOperation::Keep, //
-            ccw_stencil_function: enums::CompareFunction::Always, //
-            reference_stencil: 0,
-        }
+    // TODO: what is this??
+    pub fn none() -> Self {
+        let mut me = Self::default();
+        me.set_is_depth_buffer_enabled(false);
+        me.set_is_depth_buffer_write_enabled(false);
+        // TODO: is this coorect?
+        me.set_depth_buffer_function(enums::CompareFunction::Always);
+        me
     }
 }
 
