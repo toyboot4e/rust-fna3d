@@ -1,12 +1,34 @@
 //! Wrappers of enum variants defined as constants by `bindgen`
 //!
 //! Because C enums are loosely typed, `bindgen` defines each variant of an enum as a constant.
-//! Here we wrap them into an `enum` using the `enum_primitive` crate. It provides a macro to
-//! convert types between each `enum` and primitive.
+//! Here we wrap them into `enum` s using the `enum_primitive` crate to implement `from_xxx`
+//! methods.
 //!
 //! # References
 //!
 //! * https://github.com/rust-lang/rust-bindgen/issues/1096
+//!
+//! # Example
+//!
+//! ```
+//! // Constants generated with `bindgen`:
+//! pub const FNA3D_ClearOptions_FNA3D_CLEAROPTIONS_TARGET: FNA3D_ClearOptions = 1;
+//! pub const FNA3D_ClearOptions_FNA3D_CLEAROPTIONS_DEPTHBUFFER: FNA3D_ClearOptions = 2;
+//! pub const FNA3D_ClearOptions_FNA3D_CLEAROPTIONS_STENCIL: FNA3D_ClearOptions = 4;
+//! pub type FNA3D_ClearOptions = u32;
+//!
+//! // We wrap them into an enum:
+//! use enum_primitive::*;
+//! enum_from_primitive! {
+//!     #[derive(Debug, Copy, Clone, PartialEq)]
+//!     #[repr(u32)]
+//!     pub enum ClearOptions {
+//!         Target = FNA3D_ClearOptions_FNA3D_CLEAROPTIONS_TARGET,
+//!         DepthBuffer = FNA3D_ClearOptions_FNA3D_CLEAROPTIONS_DEPTHBUFFER,
+//!         Stencil = FNA3D_ClearOptions_FNA3D_CLEAROPTIONS_STENCIL,
+//!     }
+//! }
+//! ```
 
 // TODO: make a macro to wrap u32 as enum
 
@@ -56,13 +78,11 @@ enum_from_primitive! {
     }
 }
 
-enum_from_primitive! {
-    #[derive(Debug, Copy, Clone, PartialEq)]
-    #[repr(u32)]
-    pub enum ClearOptions {
-        Target = sys::FNA3D_ClearOptions_FNA3D_CLEAROPTIONS_TARGET,
-        DepthBuffer = sys::FNA3D_ClearOptions_FNA3D_CLEAROPTIONS_DEPTHBUFFER,
-        Stencil = sys::FNA3D_ClearOptions_FNA3D_CLEAROPTIONS_STENCIL,
+bitflags::bitflags! {
+    pub struct ClearOptions: u32 {
+        const Target = sys::FNA3D_ClearOptions_FNA3D_CLEAROPTIONS_TARGET;
+        const DepthBuffer = sys::FNA3D_ClearOptions_FNA3D_CLEAROPTIONS_DEPTHBUFFER;
+        const Stencil = sys::FNA3D_ClearOptions_FNA3D_CLEAROPTIONS_STENCIL;
     }
 }
 

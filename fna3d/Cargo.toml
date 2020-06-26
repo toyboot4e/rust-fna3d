@@ -7,3 +7,4 @@ edition = "2018"
 [dependencies]
 enum_primitive = "0.1.1"
 fna3d-sys = { path = "../fna3d-sys" }
+bitflags = "1.2.1"
