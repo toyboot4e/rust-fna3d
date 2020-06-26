@@ -1,5 +1,5 @@
 [workspace]
 members = [
-    "crates/fna3d-sys",
-    "crates/fna3d",
+    "fna3d-sys",
+    "fna3d",
 ]

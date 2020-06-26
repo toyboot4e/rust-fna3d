@@ -28,7 +28,7 @@ Bindings for https://github.com/FNA-XNA/FNA3D[FNA3D] in Rust
 
 == Overview
 
-Rust-FNA3D is a safe & handy wrapper around FNA3D in Rust. It's intended be used to make a FNA-like framework.
+Rust-FNA3D is a safe & handy wrapper around FNA3D in Rust. It's intended be used to make an FNA-like framework.
 
 === What is FNA3D?
 
