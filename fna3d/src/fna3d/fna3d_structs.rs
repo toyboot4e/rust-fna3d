@@ -2,12 +2,24 @@
 //!
 //! Those types don't have methods
 
+// TODO: wrap masks with newtype struct?
 // TODO: remove `as u32` and maybe use `to_repr()`
 
 use enum_primitive::*;
 
 use crate::fna3d::fna3d_enums as enums;
 use fna3d_sys as sys;
+
+// --------------------------------------------------------------------------------
+// TODO: Lifetime boundaries
+
+// use std::marker::PhantomData;
+
+// #[derive(Debug, Copy, Clone)]
+// pub struct VertexBufferBinding<'a> {
+//     raw: sys::FNA3D_VertexBufferBinding,
+//     phantom: PhantomData<&'a u32>, // what type??
+// }
 
 // --------------------------------------------------------------------------------
 // Disposed types
@@ -25,6 +37,14 @@ pub type Query = sys::FNA3D_Query;
 /// Disposed with a corresponding function in `Device`
 pub type Texture = sys::FNA3D_Texture;
 
+// lifetime
+pub type VertexElement = sys::FNA3D_VertexElement;
+pub type VertexDeclaration = sys::FNA3D_VertexDeclaration;
+pub type VertexBufferBinding = sys::FNA3D_VertexBufferBinding;
+pub type RenderTargetBinding = sys::FNA3D_RenderTargetBinding;
+
+// and mojoshader types and sys::FNA3D_Device
+
 // --------------------------------------------------------------------------------
 // Type aliases
 
@@ -41,18 +61,13 @@ pub mod mojo {
     pub type EffectStateChanges = sys::MOJOSHADER_effectStateChanges;
 }
 
-// TODO: add constructors, remove AsVec4
+// TODO: wrap them
 pub type Color = sys::FNA3D_Color;
 pub type Rect = sys::FNA3D_Rect;
+pub type Vec4 = sys::FNA3D_Vec4;
 pub type PresentationParameters = sys::FNA3D_PresentationParameters;
 
-pub type VertexElement = sys::FNA3D_VertexElement;
-pub type VertexDeclaration = sys::FNA3D_VertexDeclaration;
-pub type VertexBufferBinding = sys::FNA3D_VertexBufferBinding;
-pub type RenderTargetBinding = sys::FNA3D_RenderTargetBinding;
-pub type Vec4 = sys::FNA3D_Vec4;
-
-// MONOSHADER_effect?
+// MOJOSHADER_effect?
 
 // --------------------------------------------------------------------------------
 // Wrappers

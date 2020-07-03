@@ -985,9 +985,12 @@ impl Device {
 
     /// Creates a vertex buffer to be used by Draw*Primitives.
     ///
-    /// * dynamic:		Set to 1 if this buffer will be updated frequently.
-    /// * usage:		Set to WRITEONLY if you do not intend to call GetData.
-    /// * size_in_bytes:		The length of the vertex buffer.
+    /// * dynamic:
+    ///   Set to 1 if this buffer will be updated frequently.
+    /// * usage:
+    ///   Set to WRITEONLY if you do not intend to call GetData.
+    /// * size_in_bytes:
+    ///   The length of the vertex buffer.
     ///
     /// Returns an allocated FNA3D_Buffer* object. Note that the contents of the
     /// buffer are undefined, so you must call SetData at least once before drawing!

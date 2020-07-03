@@ -8,7 +8,7 @@ Rust FFI bindings to FNA3D generated with https://github.com/rust-lang/rust-bind
 
 I'm really not sure how to solve them!!
 
-Maybe Rust-SDL2-sys helps me out. For now, FNA3D should be cloned into this directory (see the README in the root of the repository)
+Maybe Rust-SDL2-sys helps me. For now, FNA3D should be cloned into this directory (see the README in the root of the repository)
 
 === The name (`fna3d-sys`)
 

@@ -1,6 +1,4 @@
-= State
-
-Not ready.
+= WIP
 
 * [x] enums
 * [ ] wrap structs
@@ -9,7 +7,7 @@ Not ready.
 
 = fna3d
 
-Wrapper of Rust FFI to FNA3D generated with `bindgen` (i.e. `fna3d-sys`)
+Wrapper of FNA3D
 
 == Overview
 
