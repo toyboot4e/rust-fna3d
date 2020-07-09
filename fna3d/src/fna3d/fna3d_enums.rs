@@ -89,11 +89,21 @@ bitflags::bitflags! {
 enum_from_primitive! {
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
+    /// How vertex data is ordered
     pub enum PrimitiveType {
+        /// Renders the specified vertices as a sequence of isolated triangles. Each group of three
+        /// vertices defines a separate triangle. Back-face culling is affected by the current
+        /// winding-order render state.
         TriangleList = sys::FNA3D_PrimitiveType_FNA3D_PRIMITIVETYPE_TRIANGLELIST,
+        /// Renders the vertices as a triangle strip. The back-face culling flag is flipped
+        /// automatically on even-numbered triangles.
         TriangleStrip = sys::FNA3D_PrimitiveType_FNA3D_PRIMITIVETYPE_TRIANGLESTRIP,
+        /// Renders the vertices as a list of isolated straight line segments; the count may be any
+        /// positive integer.
         LineList = sys::FNA3D_PrimitiveType_FNA3D_PRIMITIVETYPE_LINELIST,
+        /// Renders the vertices as a single polyline; the count may be any positive integer.
         LineStrip = sys::FNA3D_PrimitiveType_FNA3D_PRIMITIVETYPE_LINESTRIP,
+        /// Treats each vertex as a single point. Vertex n defines point n. N points are drawn.
         PointListExt = sys::FNA3D_PrimitiveType_FNA3D_PRIMITIVETYPE_POINTLIST_EXT,
     }
 }
@@ -112,12 +122,12 @@ enum_from_primitive! {
     #[repr(u32)]
     pub enum SurfaceFormat {
         Color = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_COLOR,
-        Rgb565 = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_BGR565,
-        Rgba5551 = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_BGRA5551,
-        Rgba4444 = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_BGRA4444,
-        DXT1 = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_DXT1,
-        DXT3 = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_DXT3,
-        DXT5 = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_DXT5,
+        Bgr565 = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_BGR565,
+        Bgra5551 = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_BGRA5551,
+        Bgra4444 = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_BGRA4444,
+        Dxt1 = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_DXT1,
+        Dxt3 = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_DXT3,
+        Dxt5 = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_DXT5,
         NormalizedByte2 = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_NORMALIZEDBYTE2,
         NormalizedByte4 = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_NORMALIZEDBYTE4,
         Rgba1010102 = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_RGBA1010102,
@@ -131,7 +141,32 @@ enum_from_primitive! {
         HalfVector2 = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_HALFVECTOR2,
         HalfVector4 = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_HALFVECTOR4,
         HdrBlendable = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_HDRBLENDABLE,
-        ColorRgbaEx = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_COLORBGRA_EXT,
+        ColorBgraExt = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_COLORBGRA_EXT,
+    }
+}
+
+impl SurfaceFormat {
+    pub fn size(&self) -> usize {
+        match self {
+            SurfaceFormat::Dxt1 => 8,
+            SurfaceFormat::Dxt3 | SurfaceFormat::Dxt5 => 16,
+            SurfaceFormat::Alpha8 => 1,
+            SurfaceFormat::Bgr565
+            | SurfaceFormat::Bgra4444
+            | SurfaceFormat::Bgra5551
+            | SurfaceFormat::HalfSingle
+            | SurfaceFormat::NormalizedByte2 => 2,
+            SurfaceFormat::Color
+            | SurfaceFormat::Single
+            | SurfaceFormat::Rg32
+            | SurfaceFormat::HalfVector2
+            | SurfaceFormat::NormalizedByte4
+            | SurfaceFormat::Rgba1010102
+            | SurfaceFormat::ColorBgraExt => 4,
+            SurfaceFormat::HalfVector4 | SurfaceFormat::Rgba64 | SurfaceFormat::Vector2 => 8,
+            SurfaceFormat::Vector4 => 16,
+            SurfaceFormat::HdrBlendable => panic!("SurfaceFormat::HdrBlendable is only used for RenderTarget and should not get size (?)"),
+        }
     }
 }
 
@@ -179,33 +214,62 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
+    /// Blend state
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum Blend {
+        /// Each component of the color is multiplied by {1, 1, 1, 1}.
         One = sys::FNA3D_Blend_FNA3D_BLEND_ONE,
+        /// Each component of the color is multiplied by {0, 0, 0, 0}.
         Zero = sys::FNA3D_Blend_FNA3D_BLEND_ZERO,
+        /// Each component of the color is multiplied by the source color.
+        /// {Rs, Gs, Bs, As}, where Rs, Gs, Bs, As are color source values.
         SourceColor = sys::FNA3D_Blend_FNA3D_BLEND_SOURCECOLOR,
+        /// Each component of the color is multiplied by the inverse of the source color.
+        /// {1 - Rs, 1 - Gs, 1 - Bs, 1 - As}, where Rs, Gs, Bs, As are color source values.
         InverseSourceColor = sys::FNA3D_Blend_FNA3D_BLEND_INVERSESOURCECOLOR,
+        /// Each component of the color is multiplied by the alpha value of the source.
+        /// {As, As, As, As}, where As is the source alpha value.
         SourceAlpha = sys::FNA3D_Blend_FNA3D_BLEND_SOURCEALPHA,
+        /// Each component of the color is multiplied by the inverse of the alpha value of the source.
+        /// {1 - As, 1 - As, 1 - As, 1 - As}, where As is the source alpha value.
         InverseSourceAlpha = sys::FNA3D_Blend_FNA3D_BLEND_INVERSESOURCEALPHA,
+        /// Each component color is multiplied by the destination color.
+        /// {Rd, Gd, Bd, Ad}, where Rd, Gd, Bd, Ad are color destination values.
         DestinationColor = sys::FNA3D_Blend_FNA3D_BLEND_DESTINATIONCOLOR,
+        /// Each component of the color is multiplied by the inversed destination color.
+        /// {1 - Rd, 1 - Gd, 1 - Bd, 1 - Ad}, where Rd, Gd, Bd, Ad are color destination values.
         InveseDestinationColor = sys::FNA3D_Blend_FNA3D_BLEND_INVERSEDESTINATIONCOLOR,
+        /// Each component of the color is multiplied by the alpha value of the destination.
+        /// {Ad, Ad, Ad, Ad}, where Ad is the destination alpha value.
         DestinaitonAlpha = sys::FNA3D_Blend_FNA3D_BLEND_DESTINATIONALPHA,
+        /// Each component of the color is multiplied by the inversed alpha value of the destination.
+        /// {1 - Ad, 1 - Ad, 1 - Ad, 1 - Ad}, where Ad is the destination alpha value.
         InverseDetinationAlpha = sys::FNA3D_Blend_FNA3D_BLEND_INVERSEDESTINATIONALPHA,
+        /// Each component of the color is multiplied by a constant in the <see cref="GraphicsDevice.BlendFactor"/>.
         BlendFactor = sys::FNA3D_Blend_FNA3D_BLEND_BLENDFACTOR,
+        /// Each component of the color is multiplied by a inversed constant in the <see cref="GraphicsDevice.BlendFactor"/>.
         InverseBlendFactor = sys::FNA3D_Blend_FNA3D_BLEND_INVERSEBLENDFACTOR,
+        /// Each component of the color is multiplied by either the alpha of the source color, or the inverse of the alpha of the source color, whichever is greater.
+        /// {f, f, f, 1}, where f = min(As, 1 - As), where As is the source alpha value.
         SourceAlphaSaturation = sys::FNA3D_Blend_FNA3D_BLEND_SOURCEALPHASATURATION,
     }
 }
 
 enum_from_primitive! {
+    /// Defines function for color blending.
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum BlendFunction {
+        /// The function will add destination to the source. (srcColor * srcBlend) + (destColor * destBlend)
         Add = sys::FNA3D_BlendFunction_FNA3D_BLENDFUNCTION_ADD,
+        /// The function will subtract destination from source. (srcColor * srcBlend) - (destColor * destBlend)
         Substract = sys::FNA3D_BlendFunction_FNA3D_BLENDFUNCTION_SUBTRACT,
+        /// The function will subtract source from destination. (destColor * destBlend) - (srcColor * srcBlend)
         ReverseSubstract = sys::FNA3D_BlendFunction_FNA3D_BLENDFUNCTION_REVERSESUBTRACT,
+        /// The function will extract minimum of the source and destination. min((srcColor * srcBlend),(destColor * destBlend))
         Max = sys::FNA3D_BlendFunction_FNA3D_BLENDFUNCTION_MAX,
+        /// The function will extract maximum of the source and destination. max((srcColor * srcBlend),(destColor * destBlend))
         Min = sys::FNA3D_BlendFunction_FNA3D_BLENDFUNCTION_MIN,
     }
 }
@@ -301,7 +365,7 @@ enum_from_primitive! {
 enum_from_primitive! {
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
-    pub enum VertextElementFormat {
+    pub enum VertexElementFormat {
         Single = sys::FNA3D_VertexElementFormat_FNA3D_VERTEXELEMENTFORMAT_SINGLE,
         Vector2 = sys::FNA3D_VertexElementFormat_FNA3D_VERTEXELEMENTFORMAT_VECTOR2,
         Vector3 = sys::FNA3D_VertexElementFormat_FNA3D_VERTEXELEMENTFORMAT_VECTOR3,
@@ -321,7 +385,7 @@ enum_from_primitive! {
 enum_from_primitive! {
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
-    pub enum VertextElementUsage {
+    pub enum VertexElementUsage {
         Position = sys::FNA3D_VertexElementUsage_FNA3D_VERTEXELEMENTUSAGE_POSITION,
         Color = sys::FNA3D_VertexElementUsage_FNA3D_VERTEXELEMENTUSAGE_COLOR,
         TextureCoordinate = sys::FNA3D_VertexElementUsage_FNA3D_VERTEXELEMENTUSAGE_TEXTURECOORDINATE,

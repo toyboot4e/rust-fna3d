@@ -1,8 +1,11 @@
 //! Wrapper of `FNA3D_Device`
 
-use std::ptr;
-// this should be `std::ffi::c_void` but `bindgen` uses:
-use std::os::raw::c_void;
+use std::{
+    convert::TryFrom,
+    // this should be `std::ffi::c_void` but `bindgen` uses:
+    os::raw::c_void,
+    ptr,
+};
 
 use fna3d_sys as sys;
 
@@ -11,6 +14,11 @@ use crate::{
     utils::AsVec4,
 };
 use enum_primitive::*;
+
+// TODO: i32 vs u32 for indices or width/height
+// TODO: option vs raw pointer
+// TODO: actually some `&mut` are semantically `&self`
+// TODO: memory managenemt and lifetimes
 
 // --------------------------------------------------------------------------------
 // Helpers
@@ -69,11 +77,12 @@ impl Device {
     ///
     /// Returns a device ready for use. Be sure to only call device functions from
     /// the thread that it was created on!
-    pub fn from_params(params: &mut PresentationParameters, do_debug: bool) -> Self {
-        let dbg = if do_debug { 1 } else { 0 };
+    pub fn from_params(params: &PresentationParameters, do_debug: bool) -> Self {
+        // TODO: modify bindgen and do not clone for borrow checker. it's a big struct
+        let params = &mut params.clone();
         Self {
             // debug mode
-            raw: unsafe { sys::FNA3D_CreateDevice(params, dbg) },
+            raw: unsafe { sys::FNA3D_CreateDevice(params, do_debug as u8) },
         }
     }
 }
@@ -225,6 +234,25 @@ impl Device {
             );
         }
     }
+
+    /// Draws data from vertex buffers.
+    ///
+    /// * prim:
+    ///   The primitive topology of the vertex data.
+    /// * vertexStart:
+    ///   The starting offset to read from the vertex buffer.
+    /// * primitiveCount:
+    ///   The number of primitives to draw.
+    pub fn draw_primitives(
+        &mut self,
+        prim: enums::PrimitiveType,
+        vertex_start: i32,
+        primitive_count: i32,
+    ) {
+        unsafe {
+            sys::FNA3D_DrawPrimitives(self.raw, prim as u32, vertex_start, primitive_count);
+        }
+    }
 }
 
 /// Mutable render states
@@ -354,11 +382,16 @@ impl Device {
     pub fn verify_sampler(
         &mut self,
         index: i32,
-        texture: &mut Texture,
+        // TODO: unnecessary mutable references
+        texture: *mut Texture,
         sampler: &mut SamplerState,
     ) {
+        // let texture = match texture {
+        //     Some(t) => t as *mut _,
+        //     None => ptr::null_mut(),
+        // };
         unsafe {
-            sys::FNA3D_VerifySampler(self.raw, index, texture, sampler.raw() as *mut _);
+            sys::FNA3D_VerifySampler(self.raw, index, texture, sampler.raw_mut() as *mut _);
         }
     }
 
@@ -376,7 +409,7 @@ impl Device {
         sampler: &mut SamplerState,
     ) {
         unsafe {
-            sys::FNA3D_VerifyVertexSampler(self.raw, index, texture, sampler.raw() as *mut _);
+            sys::FNA3D_VerifyVertexSampler(self.raw, index, texture, sampler.raw_mut() as *mut _);
         }
     }
 
@@ -399,17 +432,17 @@ impl Device {
     pub fn apply_vertex_buffer_bindings(
         &mut self,
         bindings: &mut VertexBufferBinding,
-        num_bindings: i32,
-        bindings_updated: u8,
-        base_vertex: i32,
+        num_bindings: usize,
+        bindings_updated: bool,
+        base_vertex: usize,
     ) {
         unsafe {
             sys::FNA3D_ApplyVertexBufferBindings(
                 self.raw,
                 bindings,
-                num_bindings,
-                bindings_updated,
-                base_vertex,
+                num_bindings as i32,
+                bindings_updated as u8,
+                base_vertex as i32,
             );
         }
     }
@@ -541,12 +574,14 @@ impl Device {
     pub fn create_texture_2d(
         &mut self,
         format: enums::SurfaceFormat,
-        width: i32,
-        height: i32,
-        level_count: i32,
-        is_render_target: u8,
-        // TODO: maybe make a wrapper
+        width: u32,
+        height: u32,
+        level_count: u32,
+        is_render_target: bool,
     ) -> *mut Texture {
+        let width = i32::try_from(width).unwrap();
+        let height = i32::try_from(height).unwrap();
+        let level_count = i32::try_from(level_count).unwrap();
         unsafe {
             sys::FNA3D_CreateTexture2D(
                 self.raw,
@@ -554,7 +589,7 @@ impl Device {
                 width,
                 height,
                 level_count,
-                is_render_target,
+                is_render_target as u8,
             )
         }
     }
@@ -1102,11 +1137,14 @@ impl Device {
     /// buffer are undefined, so you must call SetData at least once before drawing!
     pub fn gen_index_buffer(
         &mut self,
-        dynamic: u8,
+        is_dynamic: bool,
         usage: enums::BufferUsage,
-        size_in_bytes: i32,
+        size_in_bytes: u32,
     ) -> *mut Buffer {
-        unsafe { sys::FNA3D_GenIndexBuffer(self.raw, dynamic, usage as u32, size_in_bytes) }
+        let size_in_bytes = i32::try_from(size_in_bytes).unwrap();
+        unsafe {
+            sys::FNA3D_GenIndexBuffer(self.raw, is_dynamic as u8, usage as u32, size_in_bytes)
+        }
     }
 
     /// Sends an index buffer to be destroyed by the renderer. Note that we call it
@@ -1372,12 +1410,19 @@ impl Device {
     pub fn get_max_texture_slots(
         &mut self,
         // FIXME: this..
-        textures: *mut i32,
-        vertex_textures: *mut i32,
-    ) {
+    ) -> (usize, usize) {
+        let (mut textures, mut vertex_textures): (i32, i32) = (0, 0);
         unsafe {
-            sys::FNA3D_GetMaxTextureSlots(self.raw, textures, vertex_textures);
+            sys::FNA3D_GetMaxTextureSlots(
+                self.raw,
+                &mut textures as *mut _,
+                &mut vertex_textures as *mut _,
+            );
         }
+        (
+            usize::from_i32(textures).unwrap(),
+            usize::from_i32(vertex_textures).unwrap(),
+        )
     }
 
     /// Returns the highest multisample count supported for anti-aliasing.

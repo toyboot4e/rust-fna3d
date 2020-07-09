@@ -1,9 +1,10 @@
 = WIP
 
 * [x] enums
-* [ ] wrap structs
+* [ ] wrap structs with lifetimes
+* [ ] modify sys crate and remove unnecessary `&mut`
 * [ ] solve dependency to FNA3D
-* [ ] I need to learn how to use FNA3D and improve this wrapper
+* [ ] learn how to use FNA3D and improve this wrapper
 
 = fna3d
 
@@ -12,3 +13,9 @@ Wrapper of FNA3D
 == Overview
 
 `fna3d-sys` generates Rust FFI to FNA3D using https://github.com/rust-lang/rust-bindgen[bindgen]. `fna3d` wraps them in Rust code and makes it safe & handy.
+
+== Policy
+
+* prefer `u32` to `i32`
+* use lifetimes
+* prefer to modify output of `bindgen` and remove unnecessary `&mut`

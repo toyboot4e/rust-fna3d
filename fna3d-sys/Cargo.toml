@@ -3,6 +3,8 @@ name = "fna3d-sys"
 version = "0.1.0"
 authors = ["toyboot4e <toyboot4e@gmail.com>"]
 edition = "2018"
+# https://doc.rust-lang.org/cargo/reference/build-scripts.html#the-links-manifest-key
+links = "fna3d"
 
 [lib]
 name = "fna3d_sys"

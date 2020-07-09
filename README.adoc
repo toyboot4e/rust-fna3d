@@ -4,12 +4,6 @@ Currently I'm trying to make an FNA-like framework and trying to improve this cr
 
 I'm really not sure about dynamic libraries, Rust FFI and even FNA3D. I need much more time or help!
 
-* [ ] Tiled map rendering
-** [ ] `Graphics/Vertices/*`
-** [ ] `GrapihcsDevice` without lifetime
-** [ ] `SDL_Window`?
-* [ ] `GrapihcsDevice` with lifetime
-
 == Getting started?
 
 Nothing is ready!!! But at least I could call version printing function in FNA3D on macOS (see the test function in `fna3d-sys/lib.rs`).

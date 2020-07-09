@@ -77,7 +77,7 @@ pub type PresentationParameters = sys::FNA3D_PresentationParameters;
 // definitions this time.
 
 // ----------------------------------------
-// SamplerState
+// RasterizerState
 
 #[derive(Debug, Clone)]
 pub struct RasterizerState {
@@ -99,6 +99,7 @@ impl Default for RasterizerState {
     }
 }
 
+/// Constructors
 impl RasterizerState {
     pub fn raw(&mut self) -> &mut sys::FNA3D_RasterizerState {
         &mut self.raw
@@ -162,6 +163,9 @@ impl RasterizerState {
     }
 }
 
+// ----------------------------------------
+// SamplerState
+
 #[derive(Debug, Clone)]
 pub struct SamplerState {
     raw: sys::FNA3D_SamplerState,
@@ -184,7 +188,7 @@ impl Default for SamplerState {
 }
 
 impl SamplerState {
-    pub fn raw(&mut self) -> &mut sys::FNA3D_SamplerState {
+    pub fn raw_mut(&mut self) -> &mut sys::FNA3D_SamplerState {
         &mut self.raw
     }
 
@@ -351,6 +355,59 @@ impl Default for BlendState {
                 multiSampleMask: -1,
             },
         }
+    }
+}
+
+/// Constructors (taken from FNA)
+impl BlendState {
+    pub fn with_blend(
+        color_src: enums::Blend,
+        alpha_src: enums::Blend,
+        color_dest: enums::Blend,
+        alpha_dest: enums::Blend,
+    ) -> Self {
+        let mut me = Self::default();
+        me.raw.colorSourceBlend = color_src as u32;
+        me.raw.alphaSourceBlend = alpha_src as u32;
+        me.raw.colorDestinationBlend = color_dest as u32;
+        me.raw.alphaDestinationBlend = alpha_dest as u32;
+        me
+    }
+
+    pub fn additive() -> Self {
+        Self::with_blend(
+            enums::Blend::SourceAlpha,
+            enums::Blend::SourceAlpha,
+            enums::Blend::One,
+            enums::Blend::One,
+        )
+    }
+
+    pub fn alpha_blend() -> Self {
+        Self::with_blend(
+            enums::Blend::One,
+            enums::Blend::One,
+            enums::Blend::InverseSourceAlpha,
+            enums::Blend::InverseSourceAlpha,
+        )
+    }
+
+    pub fn not_premultiplied() -> Self {
+        Self::with_blend(
+            enums::Blend::SourceAlpha,
+            enums::Blend::SourceAlpha,
+            enums::Blend::InverseSourceAlpha,
+            enums::Blend::InverseSourceAlpha,
+        )
+    }
+
+    pub fn opaque() -> Self {
+        Self::with_blend(
+            enums::Blend::Zero,
+            enums::Blend::Zero,
+            enums::Blend::One,
+            enums::Blend::One,
+        )
     }
 }
 
