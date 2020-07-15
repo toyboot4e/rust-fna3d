@@ -18,11 +18,13 @@ use std::{
     sync::Mutex,
 };
 
+// TODO: detect error?
 /// Decodes PNG/JPG/GIF data into raw RGBA8 texture data from an arbitrary IO
 ///
 /// FNA3D_Image uses `stb_image` (`stbi`) and it uses callback functions to enable arbitrary IO.
 ///
-/// You may want to wrap a `Read` struct with `std::io::BufWriter`.
+/// You may want to wrap a `Read` struct with `std::io::BufWriter`. Be sure to free the memory with
+/// FNA3D_Image_Free after use!
 pub fn load_image_from_reader<R: Read + Seek>(
     reader: R,
     force_size: Option<[u32; 2]>,
@@ -53,28 +55,23 @@ struct StbiCallbacks<R: Read + Seek> {
 }
 
 impl<R: Read + Seek> StbiCallbacks<R> {
-    // TODO: should I use BufReader or not? (considering underlying buffer)
     fn transmute_cx(cx: *mut c_void) -> *mut StbiCallbackState<R> {
         // TODO: error if it's an invalid pointer
         unsafe { std::mem::transmute(cx) }
     }
 
-    //// Reads up to `size` bytes
+    /// Reads up to `size` bytes
     unsafe extern "C" fn read(
         context: *mut ::std::os::raw::c_void,
         output: *mut ::std::os::raw::c_char,
         size: i32,
     ) -> i32 {
-        let size_u = size as usize;
-        println!("READ_0");
+        let n_bytes = size as usize;
         let cx = &mut *Self::transmute_cx(context);
-        println!("READ_1");
 
         // FIXME: Preallocate the buffer!
-        let mut buf = Vec::<u8>::with_capacity(size_u);
-        println!("READ_2");
+        let mut buf = Vec::<u8>::with_capacity(n_bytes);
         let len_read = cx.reader.read(&mut buf).expect("error in anf fs read func");
-        println!("READ_3");
 
         if len_read == 0 {
             cx.is_end = true;
@@ -85,13 +82,12 @@ impl<R: Read + Seek> StbiCallbacks<R> {
         }
     }
 
+    /// Skips `n` bytes
     unsafe extern "C" fn skip(context: *mut ::std::os::raw::c_void, n: i32) {
         let cx = &mut *Self::transmute_cx(context);
         cx.reader
-            .seek(SeekFrom::Current(0))
+            .seek(SeekFrom::Current(n as i64))
             .expect("error in anf skip func");
-
-        // stream.Seek(n, SeekOrigin.Current);
     }
 
     // TODO: do we have to peek??
@@ -135,7 +131,6 @@ fn load(
     } else {
         [-1, -1]
     };
-    println!("X");
     let pixels = unsafe {
         sys::FNA3D_Image_Load(
             read_fn,
@@ -150,7 +145,6 @@ fn load(
             do_zoom as u8,
         )
     };
-    println!("Y");
     (pixels, len as usize, [w as u32, h as u32])
 }
 
