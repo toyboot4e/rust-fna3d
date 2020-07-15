@@ -79,9 +79,13 @@ enum_from_primitive! {
 }
 
 bitflags::bitflags! {
+    /// Specifies the buffers for clearing when calling `Device::clear`
     pub struct ClearOptions: u32 {
+        /// Color buffer
         const Target = sys::FNA3D_ClearOptions_FNA3D_CLEAROPTIONS_TARGET;
+        /// Depth buffer
         const DepthBuffer = sys::FNA3D_ClearOptions_FNA3D_CLEAROPTIONS_DEPTHBUFFER;
+        /// Stencil buffer
         const Stencil = sys::FNA3D_ClearOptions_FNA3D_CLEAROPTIONS_STENCIL;
     }
 }
@@ -111,9 +115,10 @@ enum_from_primitive! {
 enum_from_primitive! {
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
+    /// Size for index in `IndexBuffer` and `DynamicIndexBuffer`
     pub enum IndexElementSize {
-        Bit16 = sys::FNA3D_IndexElementSize_FNA3D_INDEXELEMENTSIZE_16BIT,
-        Bit32 = sys::FNA3D_IndexElementSize_FNA3D_INDEXELEMENTSIZE_32BIT,
+        Bits16 = sys::FNA3D_IndexElementSize_FNA3D_INDEXELEMENTSIZE_16BIT,
+        Bits32 = sys::FNA3D_IndexElementSize_FNA3D_INDEXELEMENTSIZE_32BIT,
     }
 }
 
@@ -199,7 +204,7 @@ enum_from_primitive! {
     #[repr(u32)]
     pub enum BufferUsage {
         None = sys::FNA3D_BufferUsage_FNA3D_BUFFERUSAGE_NONE,
-        WhiteOnly = sys::FNA3D_BufferUsage_FNA3D_BUFFERUSAGE_WRITEONLY,
+        WriteOnly = sys::FNA3D_BufferUsage_FNA3D_BUFFERUSAGE_WRITEONLY,
     }
 }
 
@@ -214,7 +219,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
-    /// Blend state
+    /// Blend mode. Component of `BlendState`
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum Blend {
@@ -257,19 +262,19 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
-    /// Defines function for color blending.
+    /// Function for color blending. Component of `BlendState`
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum BlendFunction {
-        /// The function will add destination to the source. (srcColor * srcBlend) + (destColor * destBlend)
+        /// `(src_color * src_blend) + (dest_color * dest_blend)`
         Add = sys::FNA3D_BlendFunction_FNA3D_BLENDFUNCTION_ADD,
-        /// The function will subtract destination from source. (srcColor * srcBlend) - (destColor * destBlend)
+        /// `(src_color * src_blend) - (dest_color * dest_blend)`
         Substract = sys::FNA3D_BlendFunction_FNA3D_BLENDFUNCTION_SUBTRACT,
-        /// The function will subtract source from destination. (destColor * destBlend) - (srcColor * srcBlend)
+        /// `(dest_color * dest_blend) - (src_color * src_blend)`
         ReverseSubstract = sys::FNA3D_BlendFunction_FNA3D_BLENDFUNCTION_REVERSESUBTRACT,
-        /// The function will extract minimum of the source and destination. min((srcColor * srcBlend),(destColor * destBlend))
+        /// `min((src_color * src_blend),(dest_color * dest_blend))`
         Max = sys::FNA3D_BlendFunction_FNA3D_BLENDFUNCTION_MAX,
-        /// The function will extract maximum of the source and destination. max((srcColor * srcBlend),(destColor * destBlend))
+        /// `max((src_color * src_blend),(dest_color * dest_blend))`
         Min = sys::FNA3D_BlendFunction_FNA3D_BLENDFUNCTION_MIN,
     }
 }
@@ -277,6 +282,7 @@ enum_from_primitive! {
 enum_from_primitive! {
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
+    /// Specifies color channels for render target blending operations
     pub enum ColorWriteChannels {
         None = sys::FNA3D_ColorWriteChannels_FNA3D_COLORWRITECHANNELS_NONE,
         Red = sys::FNA3D_ColorWriteChannels_FNA3D_COLORWRITECHANNELS_RED,
@@ -339,9 +345,15 @@ enum_from_primitive! {
 enum_from_primitive! {
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
+    /// Modes for addressing texels (texture pixels) using texture coordinates that are outside of
+    /// the range of `0.0` to `1.0`.
     pub enum TextureAddressMode {
+        /// Texels outside range will form the tile at every integer junction.
         Wrap = sys::FNA3D_TextureAddressMode_FNA3D_TEXTUREADDRESSMODE_WRAP,
+        /// Texels outside range will be setted to color of `0.0` or `1.0` texel.
         Clamp = sys::FNA3D_TextureAddressMode_FNA3D_TEXTUREADDRESSMODE_CLAMP,
+        /// Same as `TextureAddressMode::Wrap` but tiles will also flipped at every integer
+        /// junction.
         Mirror = sys::FNA3D_TextureAddressMode_FNA3D_TEXTUREADDRESSMODE_MIRROR,
     }
 }

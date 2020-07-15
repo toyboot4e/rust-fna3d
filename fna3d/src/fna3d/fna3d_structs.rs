@@ -176,6 +176,7 @@ impl Default for SamplerState {
         Self {
             raw: sys::FNA3D_SamplerState {
                 filter: enums::TextureFilter::Linear as u32,
+                // texture coordinates u, v, and w
                 addressU: enums::TextureAddressMode::Wrap as u32,
                 addressV: enums::TextureAddressMode::Wrap as u32,
                 addressW: enums::TextureAddressMode::Wrap as u32,
