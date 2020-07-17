@@ -1,4 +1,4 @@
-//! Wrapper FNA3D. Most functions are re-exported as methods of `Device`.
+//! Wrapper of FNA3D. Most functions are re-exported as methods of `Device`.
 //!
 //! * `fna3d` corresponds to `FNA3D.h`
 //! * `fna3d::img` corresponds to `FNA3D_Image.h`.
@@ -28,7 +28,7 @@ pub mod utils {
 
     use crate::fna3d::fna3d_enums as enums;
 
-    // TODO: use trait
+    // TODO: remove this trait and wrap `FNA3D_Color`
     pub trait AsVec4 {
         fn as_vec4(&self) -> sys::FNA3D_Vec4;
     }

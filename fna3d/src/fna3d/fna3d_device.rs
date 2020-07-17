@@ -1,4 +1,20 @@
 //! Wrapper of `FNA3D_Device`
+//!
+//! # Things considered
+//!
+//! ## Rustic API
+//!
+//! bool and enum. avoiding raw pointers.
+//!
+//! ## XNA compatibility
+//!
+//! The following functions have odd arguments for XNA compatibilities and re-exported in a better
+//! fashion:
+//!
+//! * `FNA3D_DrawIndexedPrimitives`
+//! * `FNA3D_SetVertexBufferData`
+//!
+//! Details are commented.
 
 use std::{
     // this should be `std::ffi::c_void` but `bindgen` uses:
@@ -14,10 +30,13 @@ use crate::{
 };
 use enum_primitive::*;
 
+// TODO: refine API
+
 // TODO: i32 vs u32 (vs usize) for indices or width/height
 // TODO: option vs raw pointer
 // TODO: actually some `&mut` are semantically `&self`
 // TODO: memory managenemt and lifetimes
+// TODO: method to convert each enum to u32 (maybe use `to_repr`)
 
 // --------------------------------------------------------------------------------
 // Helpers
@@ -115,6 +134,7 @@ impl Device {
     }
 }
 
+// TODO: note about GPU and compare draw functions
 /// Draw
 /// ---
 impl Device {
@@ -142,55 +162,54 @@ impl Device {
 
     /// Draws data from vertex/index buffers.
     ///
-    /// * `prim`:
+    /// * `type_`:
     ///   The primitive topology of the vertex data.
-    /// * `base_vertex`:
+    /// * `start_vertex`:
     ///   The starting offset to read from the vertex buffer.
-    /// * `min_vertex_index`:
-    ///   The lowest index value expected from the index buffer.
-    /// * `num_vertices`:
-    ///   The highest offset expected from the index buffer.
     /// * `start_index`:
     ///   The starting offset to read from the index buffer.
-    /// * `prim_count`:
+    /// * `n_primitives`:
     ///   The number of primitives to draw.
     /// * `indices`:
     ///   The index buffer to bind for this draw call.
-    /// * `idx_elem_size`:
+    /// * `index_elem_size`:
     ///   The size of the index type for this index buffer.
     pub fn draw_indexed_primitives(
         &mut self,
-        prim: enums::PrimitiveType,
-        base_vertex: i32,
-        min_vertex_index: i32,
-        num_vertices: i32,
-        start_index: i32,
-        prim_count: i32,
-        indices: &mut Buffer,
-        idx_elem_size: enums::IndexElementSize,
+        type_: enums::PrimitiveType,
+        start_vertex: u32,
+        // min_vertex_index: i32,
+        // num_vertices: i32,
+        start_index: u32,
+        n_primitives: u32,
+        indices: *mut Buffer,
+        index_elem_size: enums::IndexElementSize,
     ) {
         unsafe {
             sys::FNA3D_DrawIndexedPrimitives(
                 self.raw,
-                prim as sys::FNA3D_PrimitiveType,
-                base_vertex,
-                min_vertex_index,
-                num_vertices,
-                start_index,
-                prim_count,
+                type_ as sys::FNA3D_PrimitiveType,
+                start_vertex as i32,
+                // min_vertex_index,
+                -1, // this is just for XNA compatibility and is ignored
+                // num_vertices,
+                -1, // this is just for XNA compatibility and is ignored
+                start_index as i32,
+                n_primitives as i32,
                 indices,
-                idx_elem_size as u32,
+                index_elem_size as sys::FNA3D_IndexElementSize,
             );
         }
     }
 
+    // TODO: search about this function and wrap
     /// Draws data from vertex/index buffers with instancing enabled.
     ///
     /// * `instance_count`:
     ///   The number of instances that will be drawn.
     pub fn draw_instanced_primitives(
         &mut self,
-        prim: enums::PrimitiveType,
+        type_: enums::PrimitiveType,
         base_vertex: i32,
         min_vertex_index: i32,
         num_vertices: i32,
@@ -198,12 +217,12 @@ impl Device {
         prim_count: i32,
         instance_count: i32,
         indices: &mut Buffer,
-        idx_elem_size: enums::IndexElementSize,
+        index_elem_size: enums::IndexElementSize,
     ) {
         unsafe {
             sys::FNA3D_DrawInstancedPrimitives(
                 self.raw,
-                prim as sys::FNA3D_PrimitiveType,
+                type_ as sys::FNA3D_PrimitiveType,
                 base_vertex,
                 min_vertex_index,
                 num_vertices,
@@ -211,7 +230,7 @@ impl Device {
                 prim_count,
                 instance_count,
                 indices,
-                idx_elem_size as u32,
+                index_elem_size as sys::FNA3D_IndexElementSize,
             );
         }
     }
@@ -226,14 +245,19 @@ impl Device {
     ///   The number of primitives to draw.
     pub fn draw_primitives(
         &mut self,
-        prim: enums::PrimitiveType,
+        type_: enums::PrimitiveType,
         vertex_start: u32,
         prim_count: u32,
     ) {
         let vertex_start = vertex_start as i32;
         let prim_count = prim_count as i32;
         unsafe {
-            sys::FNA3D_DrawPrimitives(self.raw, prim as u32, vertex_start, prim_count);
+            sys::FNA3D_DrawPrimitives(
+                self.raw,
+                type_ as sys::FNA3D_PrimitiveType,
+                vertex_start,
+                prim_count,
+            );
         }
     }
 }
@@ -366,14 +390,10 @@ impl Device {
     pub fn verify_sampler(
         &mut self,
         index: i32,
-        // TODO: unnecessary mutable references
         texture: *mut Texture,
+        // TODO: remove unnecessary mutable references
         sampler: &mut SamplerState,
     ) {
-        // let texture = match texture {
-        //     Some(t) => t as *mut _,
-        //     None => ptr::null_mut(),
-        // };
         unsafe {
             sys::FNA3D_VerifySampler(self.raw, index, texture, sampler.raw_mut() as *mut _);
         }
@@ -458,7 +478,7 @@ impl Device {
                 render_targets.as_mut_ptr(),
                 num_render_targets as i32,
                 depth_stencil_buffer.as_mut_ptr(),
-                depth_format as u32,
+                depth_format as sys::FNA3D_DepthFormat,
             );
         }
     }
@@ -1073,39 +1093,35 @@ impl Device {
         }
     }
 
-    // TODO: refine vertex buffer function API as index buffer functions
     /// Sets a region of the vertex buffer with client data.
     ///
-    /// * `buffer`:
+    /// * `buf`:
     ///   The vertex buffer to be updated.
-    /// * `offsetInBytes`:
+    /// * `buf_offset_in_bytes`:
     ///   The starting offset of the buffer to write into.
     /// * `data`:
     ///   The client data to write into the buffer.
-    /// * `elementSizeInBytes`:
-    ///   The size of each element in the client buffer.
-    /// * `options`:
+    /// * `opts`:
     ///   Try not to call NONE if this is a dynamic buffer!
-    pub fn set_vertex_buffer_data(
+    pub fn set_vertex_buffer_data<T>(
         &mut self,
-        buffer: *mut Buffer,
-        offset_in_bytes: u32,
-        data: *mut c_void,
-        // element_count: u32,
-        elem_size_in_bytes: u32,
-        // vertex_stride: u32,
-        options: enums::SetDataOptions,
+        buf: *mut Buffer,
+        buf_offset_in_bytes: u32,
+        data: &mut [T],
+        opts: enums::SetDataOptions,
     ) {
+        let elem_size_in_bytes = data.len() * std::mem::size_of::<T>();
         unsafe {
+            // Note that it has odd API for XNA compatibility
             sys::FNA3D_SetVertexBufferData(
                 self.raw,
-                buffer,
-                offset_in_bytes as i32,
-                data,
+                buf,
+                buf_offset_in_bytes as i32,
+                data as *mut _ as *mut _,
                 elem_size_in_bytes as i32,
                 1, // see `FNA3D.h` for details (XNA compatibility)
                 1, // see `FNA3D.h` for details (XNA compatibility)
-                options as u32,
+                opts as u32,
             );
         }
     }
@@ -1114,7 +1130,7 @@ impl Device {
     ///
     /// * `buffer`:
     ///   The vertex buffer to be read from.
-    /// * `offset_in_bytes`:
+    /// * `buf_offset_in_bytes`:
     ///   The starting offset of the buffer to write into.
     /// * `data`:
     ///   The client data to write into from the buffer.
@@ -1123,7 +1139,7 @@ impl Device {
     pub fn get_vertex_buffer_data(
         &mut self,
         buffer: &mut Buffer,
-        offset_in_bytes: i32,
+        buf_offset_in_bytes: i32,
         data: *mut ::std::os::raw::c_void,
         // element_count: i32,
         elem_size_in_bytes: u32,
@@ -1133,7 +1149,7 @@ impl Device {
             sys::FNA3D_GetVertexBufferData(
                 self.raw,
                 buffer,
-                offset_in_bytes,
+                buf_offset_in_bytes,
                 data,
                 // element_count,
                 1,
@@ -1194,8 +1210,6 @@ impl Device {
     ///   The starting offset of the buffer to write into.
     /// * `data`:
     ///   The client data to write into the buffer.
-    // * `data_len`:
-    //   The size (in bytes) of the client data.
     /// * `opts`:
     ///   Try not to call NONE if this is a dynamic buffer!
     pub fn set_index_buffer_data<T>(
@@ -1203,8 +1217,6 @@ impl Device {
         buf: *mut Buffer,
         buf_offset_in_bytes: u32,
         data: &[T],
-        // data: *mut c_void,
-        // data_len: i32,
         opts: enums::SetDataOptions,
     ) {
         let data_len_in_bytes = data.len() * std::mem::size_of::<T>();

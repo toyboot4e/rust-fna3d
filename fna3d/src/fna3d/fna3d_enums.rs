@@ -115,9 +115,11 @@ enum_from_primitive! {
 enum_from_primitive! {
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
-    /// Size for index in `IndexBuffer` and `DynamicIndexBuffer`
+    /// Size for index in `IndexBuffer` or `DynamicIndexBuffer`
     pub enum IndexElementSize {
+        /// `i16` will be used as index type
         Bits16 = sys::FNA3D_IndexElementSize_FNA3D_INDEXELEMENTSIZE_16BIT,
+        /// `i32` will be used as index type
         Bits32 = sys::FNA3D_IndexElementSize_FNA3D_INDEXELEMENTSIZE_32BIT,
     }
 }
@@ -202,6 +204,7 @@ enum_from_primitive! {
 enum_from_primitive! {
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
+    /// Hint for optimizing memory placement of graphics buffers
     pub enum BufferUsage {
         None = sys::FNA3D_BufferUsage_FNA3D_BUFFERUSAGE_NONE,
         WriteOnly = sys::FNA3D_BufferUsage_FNA3D_BUFFERUSAGE_WRITEONLY,
@@ -211,9 +214,15 @@ enum_from_primitive! {
 enum_from_primitive! {
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
+    /// How vertex or index buffer data will be flushed during a SetData operation.
     pub enum SetDataOptions {
+        /// The SetData operation can overwrite the portions of existing data.
         None = sys::FNA3D_SetDataOptions_FNA3D_SETDATAOPTIONS_NONE,
+        /// The SetData operation will discard the entire buffer. A pointer to a new memory area is
+        /// returned and rendering from the previous area do notstall
         Discard = sys::FNA3D_SetDataOptions_FNA3D_SETDATAOPTIONS_DISCARD,
+        /// The SetData operation will not overwrite existing data. This allows the driver to
+        /// return immediately from a SetData operation and continue rendering.
         NoOverwrite = sys::FNA3D_SetDataOptions_FNA3D_SETDATAOPTIONS_NOOVERWRITE,
     }
 }
@@ -390,6 +399,25 @@ enum_from_primitive! {
         NormalizedShort4 = sys::FNA3D_VertexElementFormat_FNA3D_VERTEXELEMENTFORMAT_NORMALIZEDSHORT4,
         HalfVector2 = sys::FNA3D_VertexElementFormat_FNA3D_VERTEXELEMENTFORMAT_HALFVECTOR2,
         HalfVector4 = sys::FNA3D_VertexElementFormat_FNA3D_VERTEXELEMENTFORMAT_HALFVECTOR4,
+    }
+}
+
+impl VertexElementFormat {
+    pub fn size(&self) -> u8 {
+        match self {
+            VertexElementFormat::Single => 4,
+            VertexElementFormat::Vector2 => 8,
+            VertexElementFormat::Vector3 => 12,
+            VertexElementFormat::Vector4 => 16,
+            VertexElementFormat::Color => 4,
+            VertexElementFormat::Byte4 => 4,
+            VertexElementFormat::Short2 => 4,
+            VertexElementFormat::Short4 => 8,
+            VertexElementFormat::NormalizedShort2 => 4,
+            VertexElementFormat::NormalizedShort4 => 8,
+            VertexElementFormat::HalfVector2 => 4,
+            VertexElementFormat::HalfVector4 => 8,
+        }
     }
 }
 
