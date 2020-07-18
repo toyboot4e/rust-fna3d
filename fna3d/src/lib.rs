@@ -17,7 +17,7 @@ pub use crate::fna3d::fna3d_enums::*;
 pub use crate::fna3d::fna3d_functions::*;
 pub use crate::fna3d::fna3d_structs::*;
 
-// FNA3D_Image.h
+// FNA3D_Image.h (exported as `img`)
 pub mod img;
 
 pub mod docs;
@@ -54,7 +54,7 @@ pub mod utils {
             backBufferWidth: 1280,
             backBufferHeight: 720,
             backBufferFormat: surface as u32,
-            multiSampleCount: 1,
+            multiSampleCount: 0,
             // this is actually `SDL_Window*`
             deviceWindowHandle: handle,
             isFullScreen: is_fullscreen as u8,

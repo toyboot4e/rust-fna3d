@@ -1,4 +1,4 @@
-//! Struct types in FNA3D except `Device`
+//! Structure types in FNA3D other than `Device`
 //!
 //! Those types don't have methods
 
@@ -48,8 +48,7 @@ pub mod mojo {
     pub type EffectStateChanges = sys::MOJOSHADER_effectStateChanges;
 }
 
-// TODO: wrap them
-pub type Color = sys::FNA3D_Color;
+pub type Color = sys::FNA3D_Color; // TODO: wrap
 pub type Rect = sys::FNA3D_Rect;
 pub type Vec4 = sys::FNA3D_Vec4;
 pub type PresentationParameters = sys::FNA3D_PresentationParameters;
@@ -57,8 +56,8 @@ pub type PresentationParameters = sys::FNA3D_PresentationParameters;
 // MOJOSHADER_effect?
 
 // --------------------------------------------------------------------------------
-// Wrappers
-//
+// Vertex
+
 // We _could_ use macors to define field accessors. Probablly the
 // [paste](https://github.com/dtolnay/paste) is usefule for that. However, I prefered explicit
 // definitions this time.
@@ -155,6 +154,9 @@ impl VertexDeclaration {
         self.raw.elementCount
     }
 }
+
+// --------------------------------------------------------------------------------
+// States
 
 // ----------------------------------------
 // RasterizerState

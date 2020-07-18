@@ -12,19 +12,18 @@ pub type SkipFunc = sys::FNA3D_Image_SkipFunc;
 pub type EofFunc = sys::FNA3D_Image_EOFFunc;
 
 use std::{
-    fs::File,
-    io::{BufReader, Read, Seek, SeekFrom},
+    io::{Read, Seek, SeekFrom},
     os::raw::c_void,
-    sync::Mutex,
 };
 
-// TODO: detect error?
+// TODO: detect error (nullptr returned)
+
 /// Decodes PNG/JPG/GIF data into raw RGBA8 texture data from an arbitrary IO
 ///
 /// FNA3D_Image uses `stb_image` (`stbi`) and it uses callback functions to enable arbitrary IO.
 ///
-/// You may want to wrap a `Read` struct with `std::io::BufWriter`. Be sure to free the memory with
-/// FNA3D_Image_Free after use!
+/// You may want to wrap a `Read` struct with `std::io::BufReader`. Be sure to free the memory with
+/// `FNA3D_Image_Free` after use!
 pub fn load_image_from_reader<R: Read + Seek>(
     reader: R,
     force_size: Option<[u32; 2]>,
@@ -63,36 +62,38 @@ impl<R: Read + Seek> StbiCallbacks<R> {
     /// Reads up to `size` bytes
     unsafe extern "C" fn read(
         context: *mut ::std::os::raw::c_void,
-        output: *mut ::std::os::raw::c_char,
-        size: i32,
+        out_ptr: *mut ::std::os::raw::c_char,
+        out_size: i32,
     ) -> i32 {
-        let n_bytes = size as usize;
         let cx = &mut *Self::transmute_cx(context);
 
-        // FIXME: Preallocate the buffer!
-        let mut buf = Vec::<u8>::with_capacity(n_bytes);
-        let len_read = cx.reader.read(&mut buf).expect("error in anf fs read func");
-
-        if len_read == 0 {
-            cx.is_end = true;
-            return 0;
+        let out = std::slice::from_raw_parts_mut(out_ptr as *mut u8, out_size as usize);
+        // FIXME: this is a hack
+        let len_read = if out_size > 8064 {
+            cx.reader.read_exact(out).unwrap();
+            out_size
         } else {
-            std::ptr::copy(&mut buf, output as *mut _, len_read);
-            return len_read as i32;
-        }
+            cx.reader.read(out).unwrap() as i32
+        };
+
+        log::trace!("stbi readFunc: {} -> {}", out_size, len_read);
+
+        len_read as i32
     }
 
     /// Skips `n` bytes
     unsafe extern "C" fn skip(context: *mut ::std::os::raw::c_void, n: i32) {
+        println!("skip n: {}", n);
         let cx = &mut *Self::transmute_cx(context);
         cx.reader
             .seek(SeekFrom::Current(n as i64))
-            .expect("error in anf skip func");
+            .unwrap_or_else(|err| panic!("error in anf skip func {}", err));
     }
 
     // TODO: do we have to peek??
     unsafe extern "C" fn eof(context: *mut ::std::os::raw::c_void) -> i32 {
         let cx = &mut *Self::transmute_cx(context);
+        println!("eof fn: {}", cx.is_end);
         cx.is_end as i32
     }
 }
@@ -115,8 +116,8 @@ impl<R: Read + Seek> StbiCallbacks<R> {
 /// * `do_zoom`
 ///   When forcing dimensions, enable this to crop instead of stretch.
 ///
-/// Returns a block of memory suitable for use with FNA3D_SetTextureData2D.
-/// Be surunc to free the memory with FNA3D_Image_Free after use!
+/// Returns a block of memory suitable for use with `FNA3D_SetTextureData2D`.
+/// Be sure to free the memory with `FNA3D_Image_Free` after use!
 fn load(
     read_fn: ReadFunc,
     skip_fn: SkipFunc,

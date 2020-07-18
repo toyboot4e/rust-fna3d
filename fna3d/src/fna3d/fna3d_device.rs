@@ -88,18 +88,17 @@ impl Device {
     /// Creates a rendering context for use on the calling thread.
     ///
     /// * `params`:
-    /// The initial device/backbuffer settings.
+    ///   The initial device/backbuffer settings.
     /// * `do_debug`:
-    /// Enable debugging and backend validation features at the cost of reduced overall
-    /// performance.
+    ///   Enable debugging and backend validation features at the cost of reduced overall
+    ///   performance.
     ///
     /// Returns a device ready for use. Be sure to only call device functions from
     /// the thread that it was created on!
-    pub fn from_params(params: &mut PresentationParameters, do_debug: bool) -> Self {
-        Self {
-            // debug mode
-            raw: unsafe { sys::FNA3D_CreateDevice(params, do_debug as u8) },
-        }
+    pub fn from_params(mut params: PresentationParameters, do_debug: bool) -> Self {
+        let raw = unsafe { sys::FNA3D_CreateDevice(&mut params, do_debug as u8) };
+        // TODO: set up PresentationParameters
+        Self { raw }
     }
 }
 
