@@ -5,6 +5,10 @@
 // TODO: wrap masks with newtype struct?
 // TODO: remove `as u32` and maybe use `to_repr()`
 
+// We _could_ use macors to define field accessors. Probablly the
+// [paste](https://github.com/dtolnay/paste) is usefule for that. However, I prefered explicit
+// definitions this time.
+
 use enum_primitive::*;
 
 use crate::fna3d::fna3d_enums as enums;
@@ -15,14 +19,25 @@ use fna3d_sys as sys;
 //
 // Those types have corresponding disposing function in `Device`
 
+/// `IndexBuffer` or `VertexBuffer` in FNA.
+///
+/// It is not strictly typed and more information have to be supplied with `BufferUsage`,
+/// `VertexDeclaration` and `IndexElementSize`.
+///
 /// Disposed with a corresponding function in `Device`
 pub type Buffer = sys::FNA3D_Buffer;
+
 /// Disposed with a corresponding function in `Device`
 pub type Renderbuffer = sys::FNA3D_Renderbuffer;
+
 /// Disposed with a corresponding function in `Device`
 pub type Effect = sys::FNA3D_Effect;
+
 /// Disposed with a corresponding function in `Device`
 pub type Query = sys::FNA3D_Query;
+
+/// Pointer to the actual texture loaded
+///
 /// Disposed with a corresponding function in `Device`
 pub type Texture = sys::FNA3D_Texture;
 
@@ -58,100 +73,57 @@ pub type PresentationParameters = sys::FNA3D_PresentationParameters;
 // --------------------------------------------------------------------------------
 // Vertex
 
-// We _could_ use macors to define field accessors. Probablly the
-// [paste](https://github.com/dtolnay/paste) is usefule for that. However, I prefered explicit
-// definitions this time.
+// ----------------------------------------
+// VertexDeclaration
 
-// pub type VertexElement = sys::FNA3D_VertexElement;
+// Defines per-vertex data layout
+pub type VertexDeclaration = sys::FNA3D_VertexDeclaration;
+
 #[derive(Debug, Clone)]
-pub struct VertexElement {
-    raw: sys::FNA3D_VertexElement,
-}
+pub struct VertexDeclarationUtils {}
 
-impl VertexElement {
-    pub fn raw(&self) -> &sys::FNA3D_VertexElement {
-        &self.raw
+impl VertexDeclarationUtils {
+    pub fn from_elems(elems: &'static [sys::FNA3D_VertexElement]) -> sys::FNA3D_VertexDeclaration {
+        sys::FNA3D_VertexDeclaration {
+            vertexStride: Self::elem_stride(elems) as i32,
+            elementCount: elems.len() as u32 as i32,
+            elements: elems.as_ptr() as *mut _,
+        }
     }
 
+    /// Length of the vertex data i.e. the biggest (offset + size) element
+    fn elem_stride(elems: &[sys::FNA3D_VertexElement]) -> u32 {
+        elems
+            .iter()
+            .map(|e| e.offset as u32 + Self::size(e.vertexElementFormat))
+            .max()
+            .unwrap()
+    }
+
+    #[inline]
+    fn size(format_raw: u32) -> u32 {
+        enums::VertexElementFormat::from_u32(format_raw)
+            .unwrap()
+            .size() as u32
+    }
+}
+
+pub type VertexElement = sys::FNA3D_VertexElement;
+pub struct VertexElementUtils {}
+
+impl VertexElementUtils {
     pub fn new(
         offset: i32,
         format: enums::VertexElementFormat,
         usage: enums::VertexElementUsage,
         usage_index: i32,
-    ) -> Self {
-        Self {
-            raw: sys::FNA3D_VertexElement {
-                offset,
-                vertexElementFormat: format as sys::FNA3D_VertexElementFormat,
-                vertexElementUsage: usage as sys::FNA3D_VertexElementUsage,
-                usageIndex: usage_index,
-            },
+    ) -> sys::FNA3D_VertexElement {
+        sys::FNA3D_VertexElement {
+            offset,
+            vertexElementFormat: format as sys::FNA3D_VertexElementFormat,
+            vertexElementUsage: usage as sys::FNA3D_VertexElementUsage,
+            usageIndex: usage_index,
         }
-    }
-}
-
-/// Accessors
-impl VertexElement {
-    pub fn offset(&self) -> i32 {
-        self.raw.offset
-    }
-
-    pub fn format(&self) -> enums::VertexElementFormat {
-        enums::VertexElementFormat::from_u32(self.raw.vertexElementFormat).unwrap()
-    }
-
-    pub fn usage(&self) -> enums::VertexElementUsage {
-        enums::VertexElementUsage::from_u32(self.raw.vertexElementUsage).unwrap()
-    }
-
-    pub fn usage_index(&self) -> i32 {
-        self.raw.usageIndex
-    }
-}
-
-// ----------------------------------------
-// VertexDeclaration
-
-/// Defines per-vertex data
-#[derive(Debug, Clone)]
-pub struct VertexDeclaration {
-    raw: sys::FNA3D_VertexDeclaration,
-    elems: Vec<VertexElement>,
-}
-
-impl VertexDeclaration {
-    pub fn raw(&self) -> &sys::FNA3D_VertexDeclaration {
-        &self.raw
-    }
-
-    pub fn from_elems(elems: Vec<VertexElement>) -> Self {
-        Self {
-            raw: sys::FNA3D_VertexDeclaration {
-                vertexStride: Self::elem_stride(&elems) as i32,
-                elementCount: elems.len() as u32 as i32,
-                elements: elems.as_ptr() as *mut _,
-            },
-            elems: elems,
-        }
-    }
-
-    fn elem_stride(elems: &[VertexElement]) -> u32 {
-        elems
-            .iter()
-            .map(|e| e.offset() as u32 + e.format().size() as u32)
-            .max()
-            .unwrap()
-    }
-}
-
-/// Accessors
-impl VertexDeclaration {
-    pub fn stride(&self) -> i32 {
-        self.raw.vertexStride
-    }
-
-    pub fn len_elems(&self) -> i32 {
-        self.raw.elementCount
     }
 }
 
@@ -248,6 +220,7 @@ impl RasterizerState {
 // ----------------------------------------
 // SamplerState
 
+/// Wrap, mirror, etc.
 #[derive(Debug, Clone)]
 pub struct SamplerState {
     raw: sys::FNA3D_SamplerState,

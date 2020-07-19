@@ -37,6 +37,7 @@ use enum_primitive::*;
 // TODO: actually some `&mut` are semantically `&self`
 // TODO: memory managenemt and lifetimes
 // TODO: method to convert each enum to u32 (maybe use `to_repr`)
+// TODO: do we need buf_offsets_in_bytes? (maybe slice it before calling corresponding functions)
 
 // --------------------------------------------------------------------------------
 // Helpers
@@ -57,21 +58,46 @@ impl<'a, T> AsMutPtr<T> for Option<&'a mut T> {
 // --------------------------------------------------------------------------------
 // Device
 
-/// Used to implement `GraphicsDevice`
+/// † The central state †
 ///
-/// # Note
+/// Most functionality of FNA3D is put in this struct:
 ///
-/// - Use disposing functions for:
-///     - `Buffer`
-///     - `Renderbuffer`
-///     - `Effect`
-///     - `Query`
-///     - `Texture`
+/// * [Begin/End frame](#beginend-frame)
+/// * [Mutable render states](#mutable-render-states)
+/// * [Immutable render states](#immutable-render-states)
+/// * [Render targets](#render-targets)
+/// * [Textures](#textures)
+/// * [Renderbuffers](#renderbuffers)
+/// * [Index buffers](#index-buffers)
+/// * [Vertex buffers](#vertex-buffers)
+/// * [Effects](#effects)
+/// * [Feature queries](#feature-queries)
+///
+/// # Notes
+///
+/// ## Drop
+///
+/// - `Buffer`
+/// - `Renderbuffer`
+/// - `Effect`
+/// - `Query`
+/// - `Texture`
+///
+/// ## Rendering cycle
+///
+/// * `begin_frame`
+/// * `set_vertex_buffer_data` (n times)
+/// * `set_vertex_buffer_bindings`
+/// * `end_frame`
+///
+/// ## Rustic API
+///
+/// * Prefer to pass length as `Slice::len`
 pub struct Device {
     raw: *mut sys::FNA3D_Device,
 }
 
-// TODO: is this correct?
+// TODO: proper drop
 impl Drop for Device {
     fn drop(&mut self) {
         unsafe {
@@ -159,6 +185,7 @@ impl Device {
         }
     }
 
+    // TODO: how to set texture
     /// Draws data from vertex/index buffers.
     ///
     /// * `type_`:
@@ -234,6 +261,7 @@ impl Device {
         }
     }
 
+    // TODO: note about immediate mode and performance
     /// Draws data from vertex buffers.
     ///
     /// * `prim`:
@@ -269,7 +297,8 @@ impl Device {
     /// the renderer may need to adjust these dimensions to fit the backend's
     /// potentially goofy coordinate systems.
     ///
-    /// * `viewport`: The new view dimensions for future draw calls.
+    /// * `viewport`:
+    ///   The new view dimensions for future draw calls.
     pub fn set_viewport(&mut self, viewport: &mut Viewport) {
         unsafe {
             sys::FNA3D_SetViewport(self.raw, viewport);
@@ -281,7 +310,8 @@ impl Device {
     /// the renderer may need to adjust these dimensions to fit the backend's
     /// potentially goofy coordinate systems.
     ///
-    /// * `scissor`: The new scissor box for future draw calls.
+    /// * `scissor`:
+    ///   The new scissor box for future draw calls.
     pub fn set_scissor_rect(&mut self, mut scissor: Option<Rect>) {
         unsafe {
             sys::FNA3D_SetScissorRect(self.raw, scissor.as_mut().as_mut_ptr());
@@ -290,7 +320,8 @@ impl Device {
 
     /// Gets the blending factor used for current draw calls.
     ///
-    /// * `blend_factor`: Filled with color being used as the device blend factor.
+    /// * `blend_factor`:
+    ///   Filled with color being used as the device blend factor.
     pub fn get_blend_factor(&mut self, mut blend_factor: Color) {
         unsafe {
             sys::FNA3D_GetBlendFactor(self.raw, &mut blend_factor as *mut _);
@@ -391,10 +422,15 @@ impl Device {
         index: i32,
         texture: *mut Texture,
         // TODO: remove unnecessary mutable references
-        sampler: &mut SamplerState,
+        sampler: *mut SamplerState,
     ) {
         unsafe {
-            sys::FNA3D_VerifySampler(self.raw, index, texture, sampler.raw_mut() as *mut _);
+            sys::FNA3D_VerifySampler(
+                self.raw,
+                index,
+                texture,
+                sampler as *mut sys::FNA3D_SamplerState as *mut _,
+            );
         }
     }
 
@@ -402,17 +438,25 @@ impl Device {
     /// calls. This should only be called on slots that have modified texture/sampler
     /// state. Redundant calls may negatively affect performance!
     ///
-    /// * `index`:	The vertex sampler slot to update.
-    /// * `texture`:	The texture bound to this sampler.
-    /// * `sampler`:	The new parameters to use for this slot's texture sampling.
+    /// * `index`:
+    ///   The vertex sampler slot to update.
+    /// * `texture`:
+    ///   The texture bound to this sampler.
+    /// * `sampler`:
+    ///   The new parameters to use for this slot's texture sampling.
     pub fn verify_vertex_sampler(
         &mut self,
         index: i32,
-        texture: &mut Texture,
-        sampler: &mut SamplerState,
+        texture: *mut Texture,
+        sampler: *mut SamplerState,
     ) {
         unsafe {
-            sys::FNA3D_VerifyVertexSampler(self.raw, index, texture, sampler.raw_mut() as *mut _);
+            sys::FNA3D_VerifyVertexSampler(
+                self.raw,
+                index,
+                texture,
+                sampler as *mut sys::FNA3D_SamplerState as *mut _,
+            );
         }
     }
 
@@ -422,29 +466,26 @@ impl Device {
     ///
     /// * `bindings`:
     ///   The vertex buffers and their attribute data.
-    /// * `num_bindings`:
-    ///   The number of elements in the bindings array.
-    /// * `bindings_updated`:
+    /// * `is_bindings_updated`:
     ///   If the bindings array hasn't changed since the last update, this can be false. We'll only
     ///   update the shader state, updating vertex attribute data only if we 100% have to, for a
     ///   tiny performance improvement.
     /// * `base_vertex`:
-    ///   This should be the same as the `baseVertex` parameter from your Draw*Primitives call, if
-    ///   applicable. Not every rendering backend has native base vertex support, so we work
+    ///   This should be the same as the `base_vertex` parameter from your `draw*primitives` call,
+    ///   if applicable. Not every rendering backend has native base vertex support, so we work
     ///   around it by passing this here.
     pub fn apply_vertex_buffer_bindings(
         &mut self,
-        bindings: &mut VertexBufferBinding,
-        num_bindings: usize,
-        bindings_updated: bool,
-        base_vertex: usize,
+        bindings: &[VertexBufferBinding],
+        is_bindings_updated: bool,
+        base_vertex: i32,
     ) {
         unsafe {
             sys::FNA3D_ApplyVertexBufferBindings(
                 self.raw,
-                bindings,
-                num_bindings as i32,
-                bindings_updated as u8,
+                bindings.as_ptr() as *mut _,
+                bindings.len() as i32,
+                is_bindings_updated as u8,
                 base_vertex as i32,
             );
         }
@@ -506,12 +547,18 @@ impl Device {
     ///  basically one giant CPU/GPU sync point, do NOT ever call this during any
     ///  performance-critical situation! Just use it for screenshots.
     ///
-    /// * `x`:		The x offset of the backbuffer region to read.
-    /// * `y`:		The y offset of the backbuffer region to read.
-    /// * `w`:		The width of the backbuffer region to read.
-    /// * `h`:		The height of the backbuffer region to read.
-    /// * `data`:	The pointer to read the backbuffer data into.
-    /// * `data_len`:	The size of the backbuffer data in bytes.
+    /// * `x`:
+    ///   The x offset of the backbuffer region to read.
+    /// * `y`:
+    ///   The y offset of the backbuffer region to read.
+    /// * `w`:
+    ///   The width of the backbuffer region to read.
+    /// * `h`:
+    ///   The height of the backbuffer region to read.
+    /// * `data`:
+    ///   The pointer to read the backbuffer data into.
+    /// * `data_len`:
+    ///   The size of the backbuffer data in bytes.
     pub fn read_backbuffer(
         &mut self,
         x: i32,
@@ -529,8 +576,10 @@ impl Device {
 
     /// Gets the current dimensions of the backbuffer.
     ///
-    /// * `w`:	Filled with the backbuffer's width.
-    /// * `h`:	Filled with the backbuffer's height.
+    /// * `w`:
+    ///   Filled with the backbuffer's width.
+    /// * `h`:
+    ///   Filled with the backbuffer's height.
     pub fn get_backbuffer_size(&mut self) -> (i32, i32) {
         let (mut w, mut h) = (0, 0);
         unsafe {
@@ -581,8 +630,8 @@ impl Device {
     /// * `is_render_target`:
     ///   Set this to 1 when using this with `set_render_targets`.
     ///
-    /// Returns an allocated `FNA3D_Texture*` object. Note that the contents of the
-    /// texture are undefined, so you must call `SetData` at least once before drawing!
+    /// Returns an allocated `Texture*` object. Note that the contents of the
+    /// texture are undefined, so you must call `set_texture_data_2d` at least once before drawing!
     pub fn create_texture_2d(
         &mut self,
         fmt: enums::SurfaceFormat,
@@ -693,9 +742,9 @@ impl Device {
     /// * `level`:
     ///   The mipmap level being updated.
     /// * `data`:
-    ///    A pointer to the image data.
+    ///   A pointer to the image data.
     /// * `data_len`:
-    ///   The size of the image data in bytes.
+    ///   The  of the image data in bytes.
     pub fn set_texture_data_2d(
         &mut self,
         texture: *mut Texture,
@@ -1052,7 +1101,11 @@ impl Device {
             sys::FNA3D_AddDisposeRenderbuffer(self.raw, renderbuffer);
         }
     }
+}
 
+/// Vertex buffers
+/// ---
+impl Device {
     /// Creates a vertex buffer to be used by Draw*Primitives.
     ///
     /// * `dynamic`:
@@ -1094,6 +1147,9 @@ impl Device {
 
     /// Sets a region of the vertex buffer with client data.
     ///
+    /// This is wrapped in `VertexBuffer:SetData` in FNA. Remember to call
+    /// `apply_vertex_buffer_bindings` before drawing.
+    ///
     /// * `buf`:
     ///   The vertex buffer to be updated.
     /// * `buf_offset_in_bytes`:
@@ -1109,7 +1165,7 @@ impl Device {
         data: &mut [T],
         opts: enums::SetDataOptions,
     ) {
-        let elem_size_in_bytes = data.len() * std::mem::size_of::<T>();
+        let data_len_in_bytes = data.len() * std::mem::size_of::<T>();
         unsafe {
             // Note that it has odd API for XNA compatibility
             sys::FNA3D_SetVertexBufferData(
@@ -1117,9 +1173,9 @@ impl Device {
                 buf,
                 buf_offset_in_bytes as i32,
                 data as *mut _ as *mut _,
-                elem_size_in_bytes as i32,
-                1, // see `FNA3D.h` for details (XNA compatibility)
-                1, // see `FNA3D.h` for details (XNA compatibility)
+                data_len_in_bytes as i32,
+                1, // see `FNA3D.h` for details (XNA compatibility thing)
+                1, // see `FNA3D.h` for details (XNA compatibility thing)
                 opts as u32,
             );
         }
@@ -1161,6 +1217,7 @@ impl Device {
 }
 
 /// Index buffers
+/// ---
 impl Device {
     /// Creates an index buffer to be used by Draw*Primitives.
     ///
@@ -1202,6 +1259,8 @@ impl Device {
     }
 
     /// Sets a region of the index buffer with client data.
+    ///
+    /// This is wrapped in `IndexBuffer:SetData` in FNA
     ///
     /// * `buf`:
     ///   The index buffer to be updated.
@@ -1469,7 +1528,7 @@ impl Device {
 
     /// Returns the number of sampler slots supported by the renderer.
     pub fn get_max_texture_slots(
-        &mut self,
+        &self,
         // FIXME: this..
     ) -> (usize, usize) {
         let (mut textures, mut vertex_textures): (i32, i32) = (0, 0);

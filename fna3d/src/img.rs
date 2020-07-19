@@ -1,4 +1,7 @@
-//! `FNA3D_Image.h`
+//! `FNA3D_Image.h`. It should be wrapped into methods such as `Texture2D::from_reader`
+//!
+//! Currently the implementation is pretty hacky and should NOT be used. Prefer other bindings to
+//! `stb_image` or use SDL's RW struct.
 
 use fna3d_sys as sys;
 
@@ -16,9 +19,9 @@ use std::{
     os::raw::c_void,
 };
 
-// TODO: detect error (nullptr returned)
-
 /// Decodes PNG/JPG/GIF data into raw RGBA8 texture data from an arbitrary IO
+///
+/// Returns nullptr if failed.
 ///
 /// FNA3D_Image uses `stb_image` (`stbi`) and it uses callback functions to enable arbitrary IO.
 ///
@@ -79,11 +82,12 @@ impl<R: Read + Seek> StbiCallbacks<R> {
         log::trace!("stbi readFunc: {} -> {}", out_size, len_read);
 
         len_read as i32
+        // out_size
     }
 
     /// Skips `n` bytes
     unsafe extern "C" fn skip(context: *mut ::std::os::raw::c_void, n: i32) {
-        println!("skip n: {}", n);
+        log::trace!("stbi skipFunc: {}", n);
         let cx = &mut *Self::transmute_cx(context);
         cx.reader
             .seek(SeekFrom::Current(n as i64))
@@ -93,7 +97,7 @@ impl<R: Read + Seek> StbiCallbacks<R> {
     // TODO: do we have to peek??
     unsafe extern "C" fn eof(context: *mut ::std::os::raw::c_void) -> i32 {
         let cx = &mut *Self::transmute_cx(context);
-        println!("eof fn: {}", cx.is_end);
+        log::trace!("stbi eofFunc: {}", cx.is_end);
         cx.is_end as i32
     }
 }

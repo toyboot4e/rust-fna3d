@@ -10,13 +10,14 @@ pub fn linked_version() -> u32 {
 
 pub fn hook_log_functions_default() {
     unsafe {
+        // info, warn, error respectively
         sys::FNA3D_HookLogFunctions(Some(log), Some(log), Some(log));
     }
     // ::std::option::Option<unsafe extern "C" fn(msg: *const ::std::os::raw::c_char)>;
     unsafe extern "C" fn log(msg: *const ::std::os::raw::c_char) {
         let slice = ::std::ffi::CStr::from_ptr(msg);
         let string = slice.to_string_lossy().into_owned();
-        println!("string buffer size without nul terminator: {}", string);
+        println!("{}", string);
     }
 }
 
