@@ -20,6 +20,9 @@ pub use crate::fna3d::fna3d_structs::*;
 // FNA3D_Image.h (exported as `img`)
 pub mod img;
 
+// mojoshader.h (exprted as `mojo`)
+pub mod mojo;
+
 pub mod docs;
 
 pub mod utils {
@@ -45,24 +48,51 @@ pub mod utils {
     }
 
     /// `handle` is actually `SDL_Window*` in Rust-SDL2-sys
-    pub fn params_from_window_handle(handle: *mut c_void) -> sys::FNA3D_PresentationParameters {
-        let surface = enums::SurfaceFormat::Color;
-        let stencil = enums::DepthFormat::D24S8;
-        let target = enums::RenderTargetUsage::PlatformContents;
-        let is_fullscreen = false;
+    pub fn params_from_window_handle(
+        window_handle: *mut c_void,
+    ) -> sys::FNA3D_PresentationParameters {
         sys::FNA3D_PresentationParameters {
             backBufferWidth: 1280,
             backBufferHeight: 720,
-            backBufferFormat: surface as u32,
+            backBufferFormat: enums::SurfaceFormat::Color as u32,
             multiSampleCount: 0,
             // this is actually `SDL_Window*`
-            deviceWindowHandle: handle,
-            isFullScreen: is_fullscreen as u8,
-            depthStencilFormat: stencil as u32,
-            presentationInterval: enums::PresentInterval::Defalt as u32,
+            deviceWindowHandle: window_handle,
+            isFullScreen: false as u8,
+            depthStencilFormat: enums::DepthFormat::D24S8 as u32,
+            presentationInterval: enums::PresentInterval::Default as u32,
             displayOrientation: enums::DisplayOrientation::Defaut as u32,
-            // FIXME:
-            renderTargetUsage: target as u32,
+            renderTargetUsage: enums::RenderTargetUsage::PlatformContents as u32,
         }
     }
+}
+
+#[allow(dead_code)]
+pub mod colors {
+    use super::Color;
+
+    pub fn rgb(r: u8, g: u8, b: u8) -> Color {
+        Color {
+            r: r,
+            g: g,
+            b: b,
+            a: 0,
+        }
+    }
+
+    pub fn rgba(r: u8, g: u8, b: u8, a: u8) -> Color {
+        Color {
+            r: r,
+            g: g,
+            b: b,
+            a: a,
+        }
+    }
+
+    pub const CORNFLOWER_BLUE: Color = Color {
+        r: 100,
+        g: 149,
+        b: 237,
+        a: 0,
+    };
 }

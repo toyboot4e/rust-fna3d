@@ -54,15 +54,7 @@ pub type RenderTargetBinding = sys::FNA3D_RenderTargetBinding;
 
 pub type Viewport = sys::FNA3D_Viewport;
 
-pub mod mojo {
-    //! Aliases
-    use fna3d_sys as sys;
-
-    pub type Effect = sys::MOJOSHADER_effect;
-    pub type EffectTechnique = sys::MOJOSHADER_effectTechnique;
-    pub type EffectStateChanges = sys::MOJOSHADER_effectStateChanges;
-}
-
+/// Constructors and predefined colors goes to `colors` module
 pub type Color = sys::FNA3D_Color; // TODO: wrap
 pub type Rect = sys::FNA3D_Rect;
 pub type Vec4 = sys::FNA3D_Vec4;
@@ -144,6 +136,7 @@ impl Default for RasterizerState {
             raw: sys::FNA3D_RasterizerState {
                 fillMode: enums::FillMode::Solid as u32,
                 cullMode: enums::CullMode::CullCounterClockwiseFace as u32,
+                // cullMode: enums::CullMode::None as u32,
                 depthBias: 0 as f32,
                 slopeScaleDepthBias: 0 as f32,
                 scissorTestEnable: false as u8,
@@ -155,7 +148,11 @@ impl Default for RasterizerState {
 
 /// Constructors
 impl RasterizerState {
-    pub fn raw(&mut self) -> &mut sys::FNA3D_RasterizerState {
+    pub fn raw(&self) -> &sys::FNA3D_RasterizerState {
+        &self.raw
+    }
+
+    pub fn raw_mut(&mut self) -> &mut sys::FNA3D_RasterizerState {
         &mut self.raw
     }
 
@@ -468,7 +465,11 @@ impl BlendState {
 }
 
 impl BlendState {
-    pub fn raw(&mut self) -> &mut sys::FNA3D_BlendState {
+    pub fn raw(&self) -> &sys::FNA3D_BlendState {
+        &self.raw
+    }
+
+    pub fn raw_mut(&mut self) -> &mut sys::FNA3D_BlendState {
         &mut self.raw
     }
 
@@ -565,7 +566,7 @@ impl BlendState {
 // ----------------------------------------
 // DepthStencilState
 
-/// Wraps `fna3d_sys::FNA3d_DepthStencilState`
+/// Depthstencil state
 #[derive(Debug, Clone)]
 pub struct DepthStencilState {
     raw: sys::FNA3D_DepthStencilState,
@@ -598,7 +599,11 @@ impl Default for DepthStencilState {
 
 /// Wrap enums and booleans
 impl DepthStencilState {
-    pub fn raw(&mut self) -> &mut sys::FNA3D_DepthStencilState {
+    pub fn raw(&self) -> &sys::FNA3D_DepthStencilState {
+        &self.raw
+    }
+
+    pub fn raw_mut(&mut self) -> &mut sys::FNA3D_DepthStencilState {
         &mut self.raw
     }
 

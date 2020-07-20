@@ -19,6 +19,7 @@ fn main() -> Result<()> {
     println!("cargo:rustc-link-lib=dylib=FNA3D");
 
     self::gen_bindings("fna3d_wrapper.h", "fna3d_bindings.rs");
+    self::gen_bindings("mojoshader_wrapper.h", "mojoshader_bindings.rs");
 
     Ok(())
 }
@@ -61,6 +62,8 @@ fn gen_bindings(wrapper: impl AsRef<Path>, dest_file_name: impl AsRef<Path>) {
     println!("cargo:rerun-if-changed={}", wrapper.display());
     let bindings = bindgen::Builder::default()
         .header(format!("{}", wrapper.display()))
+        // SUPPORT MOJOSHADER EFFECT
+        .clang_arg("-DMOJOSHADER_EFFECT_SUPPORT")
         // Tell cargo to invalidate the built crate whenever any of the
         // included header files changed.
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))

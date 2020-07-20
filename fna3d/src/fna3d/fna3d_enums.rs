@@ -50,7 +50,7 @@ enum_from_primitive! {
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum PresentInterval {
-        Defalt = sys::FNA3D_PresentInterval_FNA3D_PRESENTINTERVAL_DEFAULT,
+        Default = sys::FNA3D_PresentInterval_FNA3D_PRESENTINTERVAL_DEFAULT,
         One = sys::FNA3D_PresentInterval_FNA3D_PRESENTINTERVAL_ONE,
         Two = sys::FNA3D_PresentInterval_FNA3D_PRESENTINTERVAL_TWO,
         Immediate = sys::FNA3D_PresentInterval_FNA3D_PRESENTINTERVAL_IMMEDIATE,

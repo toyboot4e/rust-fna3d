@@ -26,6 +26,7 @@ use fna3d_sys as sys;
 
 use crate::{
     fna3d::{fna3d_enums as enums, fna3d_structs::*},
+    mojo,
     utils::AsVec4,
 };
 use enum_primitive::*;
@@ -68,8 +69,8 @@ impl<'a, T> AsMutPtr<T> for Option<&'a mut T> {
 /// * [Render targets](#render-targets)
 /// * [Textures](#textures)
 /// * [Renderbuffers](#renderbuffers)
-/// * [Index buffers](#index-buffers)
 /// * [Vertex buffers](#vertex-buffers)
+/// * [Index buffers](#index-buffers)
 /// * [Effects](#effects)
 /// * [Feature queries](#feature-queries)
 ///
@@ -299,9 +300,9 @@ impl Device {
     ///
     /// * `viewport`:
     ///   The new view dimensions for future draw calls.
-    pub fn set_viewport(&mut self, viewport: &mut Viewport) {
+    pub fn set_viewport(&mut self, viewport: &Viewport) {
         unsafe {
-            sys::FNA3D_SetViewport(self.raw, viewport);
+            sys::FNA3D_SetViewport(self.raw, viewport as *const _ as *mut _);
         }
     }
 
@@ -377,10 +378,11 @@ impl Device {
     /// called when the state actually changes. Redundant calls may negatively affect
     /// performance!
     ///
-    /// * `blend_state`: The new parameters to use for color blending.
-    pub fn set_blend_state(&mut self, blend_state: &mut BlendState) {
+    /// * `blend_state`:
+    ///   The new parameters to use for color blending.
+    pub fn set_blend_state(&mut self, blend_state: &BlendState) {
         unsafe {
-            sys::FNA3D_SetBlendState(self.raw, blend_state.raw() as *mut _);
+            sys::FNA3D_SetBlendState(self.raw, blend_state.raw() as *const _ as *mut _);
         }
     }
 
@@ -388,10 +390,14 @@ impl Device {
     /// be called when the states actually change. Redundant calls may negatively
     /// affect performance!
     ///
-    /// * `depth_stencil_state`: The new parameters to use for depth/stencil work.
-    pub fn set_depth_stencil_state(&mut self, depth_stencil_state: &mut DepthStencilState) {
+    /// * `depth_stencil_state`:
+    ///   The new parameters to use for depth/stencil work.
+    pub fn set_depth_stencil_state(&mut self, depth_stencil_state: &DepthStencilState) {
         unsafe {
-            sys::FNA3D_SetDepthStencilState(self.raw, depth_stencil_state.raw() as *mut _);
+            sys::FNA3D_SetDepthStencilState(
+                self.raw,
+                depth_stencil_state.raw() as *const _ as *mut _,
+            );
         }
     }
 
@@ -401,9 +407,9 @@ impl Device {
     /// render target state changes.
     ///
     /// * `rasterizer_state`: The new parameters to use for rasterization work.
-    pub fn apply_rasterizer_state(&mut self, rst: &mut RasterizerState) {
+    pub fn apply_rasterizer_state(&mut self, rst: &RasterizerState) {
         unsafe {
-            sys::FNA3D_ApplyRasterizerState(self.raw, rst.raw() as *mut _);
+            sys::FNA3D_ApplyRasterizerState(self.raw, rst.raw() as *const _ as *mut _);
         }
     }
 
@@ -448,14 +454,14 @@ impl Device {
         &mut self,
         index: i32,
         texture: *mut Texture,
-        sampler: *mut SamplerState,
+        sampler: &SamplerState,
     ) {
         unsafe {
             sys::FNA3D_VerifyVertexSampler(
                 self.raw,
                 index,
                 texture,
-                sampler as *mut sys::FNA3D_SamplerState as *mut _,
+                sampler as *const _ as *mut sys::FNA3D_SamplerState,
             );
         }
     }
@@ -463,6 +469,9 @@ impl Device {
     /// Updates the vertex attribute state to read from a set of vertex buffers. This
     /// should be the very last thing you call before making a draw call, as this
     /// does all the final prep work for the shader program before it's ready to use.
+    ///
+    /// Make sure you call [`apply_effect`] before calling this function (or you'll know as the
+    /// program crashes)
     ///
     /// * `bindings`:
     ///   The vertex buffers and their attribute data.
@@ -474,6 +483,8 @@ impl Device {
     ///   This should be the same as the `base_vertex` parameter from your `draw*primitives` call,
     ///   if applicable. Not every rendering backend has native base vertex support, so we work
     ///   around it by passing this here.
+    ///
+    /// - [`apply_effect`]: #method.apply_effect
     pub fn apply_vertex_buffer_bindings(
         &mut self,
         bindings: &[VertexBufferBinding],
@@ -1326,49 +1337,46 @@ impl Device {
 impl Device {
     /// Parses and compiles a Direct3D 9 Effects Framework binary.
     ///
+    /// Returns `(effect, effect_data)`
+    ///
     /// * `effect_code`:
     ///   The D3D9 Effect binary blob.
     /// * `effect_code_length`:
     ///   The size (in bytes) of the blob.
-    /// * `effect`:
-    ///    Filled with the compiled FNA3D_Effect*.
-    /// * `effect_data`:
-    ///    Filled with the parsed Effect Framework data. This pointer is valid until
-    ///    the effect is disposed.
     pub fn create_effect(
         &mut self,
         effect_code: *mut u8,
         effect_code_length: u32,
-        // FIXME: I'm really not sure about tihs
-        effect: *mut *mut Effect,
-        effect_data: *mut *mut mojo::Effect,
-    ) {
+    ) -> (*mut Effect, *mut mojo::Effect) {
+        let mut effect = std::ptr::null_mut();
+        let mut data = std::ptr::null_mut();
         unsafe {
             sys::FNA3D_CreateEffect(
                 self.raw,
                 effect_code,
                 effect_code_length,
-                effect,
-                effect_data,
+                &mut effect,
+                &mut data,
             );
         }
+        (effect, data as *mut _)
     }
 
     /// Copies a compiled Effect, including its current technique/parameter data.
     ///
-    /// * `clone_source`:	The FNA3D_Effect to copy.
-    /// * `effect`:	Filled with the new compiled FNA3D_Effect*.
-    /// * `effect_data`:	Filled with the copied Effect Framework data.
-    pub fn clone_effect(
-        &mut self,
-        clone_source: *mut Effect,
-        effect: *mut *mut Effect,
-        // FIXME: where sho
-        effect_data: *mut *mut mojo::Effect,
-    ) {
+    /// * `clone_source`:
+    ///   The FNA3D_Effect to copy.
+    /// * `effect`:
+    ///   Filled with the new compiled FNA3D_Effect*.
+    /// * `effect_data`:
+    ///   Filled with the copied Effect Framework data.
+    pub fn clone_effect(&mut self, clone_source: *mut Effect) -> (*mut Effect, *mut mojo::Effect) {
+        let mut effect = std::ptr::null_mut();
+        let mut data = std::ptr::null_mut();
         unsafe {
-            sys::FNA3D_CloneEffect(self.raw, clone_source, effect, effect_data);
+            sys::FNA3D_CloneEffect(self.raw, clone_source, &mut effect, &mut data);
         }
+        (effect, data as *mut _)
     }
 
     /// Sends an Effect to be destroyed by the renderer. Note that we call it
@@ -1393,26 +1401,29 @@ impl Device {
         technique: *mut mojo::EffectTechnique,
     ) {
         unsafe {
-            sys::FNA3D_SetEffectTechnique(self.raw, effect, technique);
+            sys::FNA3D_SetEffectTechnique(self.raw, effect, technique as *mut _);
         }
     }
 
     /// Applies an effect pass from a given Effect, setting the active shader program
     /// and committing any parameter data changes to be used by future draw calls.
     ///
-    /// * `effect`:		The Effect to be applied.
-    /// * `pass`:		The current technique's pass index to be applied.
-    /// * `state_changes`:	Structure to be filled with any render state changes
-    ///			made by the Effect. This must be valid for the entire
-    /// 			duration that this Effect is being applied.
+    /// * `effect`:
+    ///   The Effect to be applied.
+    /// * `pass`:
+    ///   The current technique's pass index to be applied.
+    /// * `state_changes`:
+    ///   Structure to be filled with any render state changes
+    ///	  made by the Effect. This must be valid for the entire
+    ///   duration that this Effect is being applied.
     pub fn apply_effect(
         &mut self,
         effect: *mut Effect,
         pass: u32,
-        state_changes: *mut mojo::EffectStateChanges,
+        state_changes: &mojo::EffectStateChanges,
     ) {
         unsafe {
-            sys::FNA3D_ApplyEffect(self.raw, effect, pass, state_changes);
+            sys::FNA3D_ApplyEffect(self.raw, effect, pass, state_changes as *const _ as *mut _);
         }
     }
 
@@ -1431,7 +1442,7 @@ impl Device {
         state_changes: *mut mojo::EffectStateChanges,
     ) {
         unsafe {
-            sys::FNA3D_BeginPassRestore(self.raw, effect, state_changes);
+            sys::FNA3D_BeginPassRestore(self.raw, effect, state_changes as *mut _);
         }
     }
 
@@ -1563,6 +1574,7 @@ impl Device {
 }
 
 /// Debug
+/// ---
 impl Device {
     /// Sets an arbitrary string constant to be stored in a rendering API trace,
     /// useful for labeling call streams for debugging purposes.
