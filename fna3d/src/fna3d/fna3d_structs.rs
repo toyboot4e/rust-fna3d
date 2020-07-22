@@ -41,7 +41,9 @@ pub type Query = sys::FNA3D_Query;
 /// Disposed with a corresponding function in `Device`
 pub type Texture = sys::FNA3D_Texture;
 
-// lifetime
+/// Slice of vertex buffer
+///
+/// Vertex buffer is a "typed" `*Buffer` with `VertexDeclaration` by user
 pub type VertexBufferBinding = sys::FNA3D_VertexBufferBinding;
 pub type RenderTargetBinding = sys::FNA3D_RenderTargetBinding;
 
@@ -68,7 +70,11 @@ pub type PresentationParameters = sys::FNA3D_PresentationParameters;
 // ----------------------------------------
 // VertexDeclaration
 
-// Defines per-vertex data layout
+/// Declares memory layout of a vertex data
+///
+/// Users can use custom vertex data using a corresponding declaration.
+///
+/// Composed of `VertexElement`s
 pub type VertexDeclaration = sys::FNA3D_VertexDeclaration;
 
 #[derive(Debug, Clone)]
@@ -100,6 +106,9 @@ impl VertexDeclarationUtils {
     }
 }
 
+/// An element of vertex data / component of `VertexDeclaration`
+///
+/// Needs to be related with `VertexElementFormat` and `VertexElementUsage`
 pub type VertexElement = sys::FNA3D_VertexElement;
 pub struct VertexElementUtils {}
 

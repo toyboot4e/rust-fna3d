@@ -1,7 +1,7 @@
 //! `FNA3D_Image.h`. It should be wrapped into methods such as `Texture2D::from_reader`
 //!
-//! Currently the implementation is pretty hacky and should NOT be used. Prefer other bindings to
-//! `stb_image` or use SDL's RW struct.
+//! Currently the implementation is pretty crappy and should NOT be used. Prefer other bindings to
+//! `stb_image` or use SDL's RW struct. Or maybe use `image` crate.
 
 use fna3d_sys as sys;
 
@@ -36,14 +36,16 @@ pub fn load_image_from_reader<R: Read + Seek>(
         reader,
         is_end: false,
     };
-    self::load(
-        Some(StbiCallbacks::<R>::read),
-        Some(StbiCallbacks::<R>::skip),
-        Some(StbiCallbacks::<R>::eof),
-        unsafe { std::mem::transmute(&context) },
-        force_size,
-        do_zoom,
-    )
+    unsafe {
+        self::load(
+            Some(StbiCallbacks::<R>::read),
+            Some(StbiCallbacks::<R>::skip),
+            Some(StbiCallbacks::<R>::eof),
+            std::mem::transmute(&context),
+            force_size,
+            do_zoom,
+        )
+    }
 }
 
 struct StbiCallbackState<R: Read + Seek> {
@@ -57,9 +59,11 @@ struct StbiCallbacks<R: Read + Seek> {
 }
 
 impl<R: Read + Seek> StbiCallbacks<R> {
-    fn transmute_cx(cx: *mut c_void) -> *mut StbiCallbackState<R> {
+    // If we want to remove this transumute function, we (only) have to modify the output of
+    // bindgen. But I prefered to leave it and use `transmute`.
+    unsafe fn transmute_cx(cx: *mut c_void) -> *mut StbiCallbackState<R> {
         // TODO: error if it's an invalid pointer
-        unsafe { std::mem::transmute(cx) }
+        std::mem::transmute(cx)
     }
 
     /// Reads up to `size` bytes
@@ -72,12 +76,13 @@ impl<R: Read + Seek> StbiCallbacks<R> {
 
         let out = std::slice::from_raw_parts_mut(out_ptr as *mut u8, out_size as usize);
         // FIXME: this is a hack
-        let len_read = if out_size > 8064 {
-            cx.reader.read_exact(out).unwrap();
-            out_size
-        } else {
-            cx.reader.read(out).unwrap() as i32
-        };
+        let len_read = cx.reader.read(out).unwrap() as u32;
+        // let len_read = if out_size > 8064 {
+        //     cx.reader.read_exact(out).unwrap();
+        //     out_size
+        // } else {
+        //     cx.reader.read(out).unwrap() as i32
+        // };
 
         log::trace!("stbi readFunc: {} -> {}", out_size, len_read);
 
@@ -122,7 +127,7 @@ impl<R: Read + Seek> StbiCallbacks<R> {
 ///
 /// Returns a block of memory suitable for use with `FNA3D_SetTextureData2D`.
 /// Be sure to free the memory with `FNA3D_Image_Free` after use!
-fn load(
+unsafe fn load(
     read_fn: ReadFunc,
     skip_fn: SkipFunc,
     eof_fn: EofFunc,
@@ -136,20 +141,18 @@ fn load(
     } else {
         [-1, -1]
     };
-    let pixels = unsafe {
-        sys::FNA3D_Image_Load(
-            read_fn,
-            skip_fn,
-            eof_fn,
-            context,
-            &mut w,
-            &mut h,
-            &mut len,
-            force_size[0],
-            force_size[1],
-            do_zoom as u8,
-        )
-    };
+    let pixels = sys::FNA3D_Image_Load(
+        read_fn,
+        skip_fn,
+        eof_fn,
+        context,
+        &mut w,
+        &mut h,
+        &mut len,
+        force_size[0],
+        force_size[1],
+        do_zoom as u8,
+    );
     (pixels, len as usize, [w as u32, h as u32])
 }
 

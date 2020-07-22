@@ -3,9 +3,12 @@
 //! * `fna3d` corresponds to `FNA3D.h`
 //! * `fna3d::img` corresponds to `FNA3D_Image.h`.
 //!
-//! > NOTE: some methods require mutable references while they are NOT immutable. This is because C
-//! pointers for non-constant values are translated as `*mut T`. We can actually define them as
-//! `*const T` but it requires us to modify the output by `bindgen`.
+//! Most functions are defined as methods of [`Device`]
+//!
+//! [`Device`]: ./struct.Device.html
+
+pub use bitflags;
+pub use enum_primitive;
 
 // Rust FFI bindings to FNA3D. Probablly you don't have to touch it directly.
 pub use fna3d_sys as sys;

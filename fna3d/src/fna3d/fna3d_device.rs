@@ -123,9 +123,9 @@ impl Device {
     /// Returns a device ready for use. Be sure to only call device functions from
     /// the thread that it was created on!
     pub fn from_params(mut params: PresentationParameters, do_debug: bool) -> Self {
-        let raw = unsafe { sys::FNA3D_CreateDevice(&mut params, do_debug as u8) };
-        // TODO: set up PresentationParameters
-        Self { raw }
+        Self {
+            raw: unsafe { sys::FNA3D_CreateDevice(&mut params, do_debug as u8) },
+        }
     }
 }
 
@@ -313,9 +313,9 @@ impl Device {
     ///
     /// * `scissor`:
     ///   The new scissor box for future draw calls.
-    pub fn set_scissor_rect(&mut self, mut scissor: Option<Rect>) {
+    pub fn set_scissor_rect(&mut self, scissor: &Rect) {
         unsafe {
-            sys::FNA3D_SetScissorRect(self.raw, scissor.as_mut().as_mut_ptr());
+            sys::FNA3D_SetScissorRect(self.raw, scissor as *const _ as *mut _);
         }
     }
 
@@ -423,19 +423,13 @@ impl Device {
     ///   The texture bound to this sampler.
     /// * `sampler`:
     ///   The new parameters to use for this slot's texture sampling.
-    pub fn verify_sampler(
-        &mut self,
-        index: i32,
-        texture: *mut Texture,
-        // TODO: remove unnecessary mutable references
-        sampler: *mut SamplerState,
-    ) {
+    pub fn verify_sampler(&mut self, index: i32, texture: *mut Texture, sampler: &SamplerState) {
         unsafe {
             sys::FNA3D_VerifySampler(
                 self.raw,
                 index,
                 texture,
-                sampler as *mut sys::FNA3D_SamplerState as *mut _,
+                sampler as *const _ as *const sys::FNA3D_SamplerState as *mut _,
             );
         }
     }
@@ -509,7 +503,7 @@ impl Device {
     /// Sets the color/depth/stencil buffers to write future draw calls to.
     ///
     /// * `render_targets`:
-    ///    The targets to write to, or `None` for the backbuffer.
+    ///    The targets to write to, or `None` for the backbuffer (screen).
     /// * `num_render_targets`:
     ///    The size of the renderTargets array (can be 0).
     /// * `depth_stencil_buffer`:
@@ -755,7 +749,7 @@ impl Device {
     /// * `data`:
     ///   A pointer to the image data.
     /// * `data_len`:
-    ///   The  of the image data in bytes.
+    ///   The length of the image data in bytes.
     pub fn set_texture_data_2d(
         &mut self,
         texture: *mut Texture,
@@ -1057,17 +1051,17 @@ impl Device {
     /// Returns a color FNA3D_Renderbuffer object.
     pub fn gen_color_renderbuffer(
         &mut self,
-        width: i32,
-        height: i32,
+        width: u32,
+        height: u32,
         fmt: enums::SurfaceFormat,
         multi_sample_count: i32,
-        texture: &mut Texture,
+        texture: *mut Texture,
     ) -> *mut Renderbuffer {
         unsafe {
             sys::FNA3D_GenColorRenderbuffer(
                 self.raw,
-                width,
-                height,
+                width as i32,
+                height as i32,
                 fmt as u32,
                 multi_sample_count,
                 texture,
@@ -1085,16 +1079,16 @@ impl Device {
     /// Returns a depth/stencil FNA3D_Renderbuffer object.
     pub fn gen_depth_stencil_renderbuffer(
         &mut self,
-        width: i32,
-        height: i32,
+        width: u32,
+        height: u32,
         fmt: enums::DepthFormat,
         multi_sample_count: i32,
     ) -> *mut Renderbuffer {
         unsafe {
             sys::FNA3D_GenDepthStencilRenderbuffer(
                 self.raw,
-                width,
-                height,
+                width as i32,
+                height as i32,
                 fmt as u32,
                 multi_sample_count,
             )
@@ -1173,7 +1167,7 @@ impl Device {
         &mut self,
         buf: *mut Buffer,
         buf_offset_in_bytes: u32,
-        data: &mut [T],
+        data: &mut [T], // FIXME: is it immutable?
         opts: enums::SetDataOptions,
     ) {
         let data_len_in_bytes = data.len() * std::mem::size_of::<T>();
@@ -1271,7 +1265,7 @@ impl Device {
 
     /// Sets a region of the index buffer with client data.
     ///
-    /// This is wrapped in `IndexBuffer:SetData` in FNA
+    /// The buffer will be copied so you can free it after calling this
     ///
     /// * `buf`:
     ///   The index buffer to be updated.

@@ -4,6 +4,9 @@
 //! Here we wrap them into `enum` s using the `enum_primitive` crate to implement `from_xxx`
 //! methods.
 //!
+//! However, `bindgen` also has an option to convert C enum variants into a Rust enum. Shoul I
+//! have prefered it..?
+//!
 //! # References
 //!
 //! * https://github.com/rust-lang/rust-bindgen/issues/1096
@@ -28,7 +31,13 @@
 //!         Stencil = FNA3D_ClearOptions_FNA3D_CLEAROPTIONS_STENCIL,
 //!     }
 //! }
+//!
+//! assert_eq!(ClearOptions::Target, ClearOptions::from_u32(1).unwrap());
 //! ```
+//!
+//! Make sure to not deal bitflags as an enum. We can use `bitflags` crate for them.
+
+// TODO: was it possible to make such enums automatically?
 
 // TODO: make a macro to wrap u32 as enum
 
@@ -40,8 +49,6 @@
 
 // TODO: should we use u8 or stick with u32?
 // TODO: do we not need to use enum_primitive?
-// TODO: was it possible to make such enums automatically?
-// TODO: MOJOSHADER_effect?
 
 use enum_primitive::*;
 use fna3d_sys as sys;
@@ -82,11 +89,11 @@ bitflags::bitflags! {
     /// Specifies the buffers for clearing when calling `Device::clear`
     pub struct ClearOptions: u32 {
         /// Color buffer
-        const Target = sys::FNA3D_ClearOptions_FNA3D_CLEAROPTIONS_TARGET;
+        const TARGET = sys::FNA3D_ClearOptions_FNA3D_CLEAROPTIONS_TARGET;
         /// Depth buffer
-        const DepthBuffer = sys::FNA3D_ClearOptions_FNA3D_CLEAROPTIONS_DEPTHBUFFER;
+        const DEPTH_BUFFER = sys::FNA3D_ClearOptions_FNA3D_CLEAROPTIONS_DEPTHBUFFER;
         /// Stencil buffer
-        const Stencil = sys::FNA3D_ClearOptions_FNA3D_CLEAROPTIONS_STENCIL;
+        const STENCIL = sys::FNA3D_ClearOptions_FNA3D_CLEAROPTIONS_STENCIL;
     }
 }
 
@@ -125,6 +132,10 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
+    /// Surface pixel data format (memory layout)
+    ///
+    /// In FNA, "surface" is pixel data of a 2D image. `SurfaceFormat` specifies each pixel's data
+    /// format (memory layout).
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum SurfaceFormat {
@@ -368,6 +379,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
+    /// Filtering types for texture fileter
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum TextureFilter {
@@ -384,6 +396,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
+    /// Data type of an element of a vertex data
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum VertexElementFormat {
@@ -421,8 +434,8 @@ impl VertexElementFormat {
     }
 }
 
-// line 854
 enum_from_primitive! {
+    /// Data usage of an element of a vertex data. Typed with `VertexElementFormat`
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum VertexElementUsage {

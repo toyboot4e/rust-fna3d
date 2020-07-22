@@ -1,9 +1,8 @@
 = WIP
 
 * [x] enums
-* [ ] wrap structs with lifetimes
-* [ ] modify sys crate and remove unnecessary `&mut`
-* [ ] solve dependency to FNA3D
+* [ ] wrap structs with lifetimes?
+* [ ] solve dependency to FNA3D (maybe copy the binary to output?)
 * [ ] learn how to use FNA3D and improve this wrapper
 
 = fna3d
@@ -16,6 +15,6 @@ Wrapper of FNA3D
 
 == Policy
 
-* prefer `u32` to `i32`
-* use lifetimes
-* prefer to modify output of `bindgen` and remove unnecessary `&mut`
+* assume that https://doc.rust-lang.org/std/os/raw/type.c_int.html[c_int] has 32 bits length
+* prefer `u32` to `i32` in arguments and don't care about input values bigger than 31 bits
+* use lifetimes?
