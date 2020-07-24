@@ -6,7 +6,7 @@ I'm really not sure about dynamic libraries, Rust FFI and even FNA3D. I need muc
 
 == Getting started?
 
-Nothing is ready!!! But at least I could call version printing function in FNA3D on macOS (see the test function in `fna3d-sys/lib.rs`).
+It onlt works on macOS for now.
 
 === Setting up dependency to FNA3D
 
@@ -18,15 +18,15 @@ $ cd rust-fna3d/fna3d-sys
 $ git clone --recursive 'https://github.com/FNA-XNA/FNA3D'
 $ cd FNA3D/MojoShader && cmake
 $ cd ../
-$ mkdir build
-$ cd build && cmake ../ && make
+$ mkdir build && cd build
+$ cmake ../ && make
 ```
 
 And the built library is used directly (it's not copied to output directory).
 
 = Rust-FNA3D
 
-Bindings for https://github.com/FNA-XNA/FNA3D[FNA3D] in Rust
+Wrapper of https://github.com/FNA-XNA/FNA3D[FNA3D] in Rust
 
 == Overview
 
@@ -34,16 +34,20 @@ Rust-FNA3D is a safe & handy wrapper around FNA3D in Rust. It's intended be used
 
 === What is FNA3D?
 
-https://github.com/FNA-XNA/FNA[FNA] is a reimplementation of the http://en.wikipedia.org/wiki/Microsoft_XNA[Microsoft XNA Game Studio 4.0 Refresh] libraries. FNA3D is the 3D graphics library for FNA written in C99, which corresponds to the most of the internal implementation of https://docs.microsoft.com/en-us/previous-versions/windows/silverlight/dotnet-windows-silverlight/bb197329%28v%3Dxnagamestudio.35%29[GraphicsDevice].
+https://github.com/FNA-XNA/FNA[FNA] is a reimplementation of the http://en.wikipedia.org/wiki/Microsoft_XNA[Microsoft XNA Game Studio 4.0 Refresh] libraries. FNA3D is the 3D graphics library for FNA written in C99, which is used to implement the FNA's https://docs.microsoft.com/en-us/previous-versions/windows/silverlight/dotnet-windows-silverlight/bb197344(v=xnagamestudio.35)[Graphics] namespace.
 
 === Why is a wrapper needed?
 
-Rust relies on a strict type system which is not compatible with C's one.
+Because Rust relies on a strict type system which is different from C's one.
 
-// === Where is an FNA-like framework?
-//
-// I would make one named Anf.
-//
-// === Where is a Nez-like framework on Rust?
-//
-// I would make one named Zen.
+== Framework using Rust-FNA3D
+
+I'm making one and I hope I can publish it soon.
+
+== Other repositories using FNA3D
+
+* https://gist.github.com/jessechounard/d4252efc12ee24494484611d92b1debe[Simple texture rendering in FNA3D] \(C)
+* https://github.com/silenttowergames/stonetower[Stonetower] \(C)
+* https://github.com/KillaMaaki/BNA[BNA] (https://www.beeflang.org/[Beef])
+* https://github.com/prime31/Odin-Libs[Odin-Libs] (https://odin-lang.org/[Odin])
+* https://github.com/prime31/via[Via] (https://vlang.io/[V])
