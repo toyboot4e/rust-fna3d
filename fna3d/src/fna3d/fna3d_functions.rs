@@ -23,7 +23,7 @@ pub fn hook_log_functions_default() {
 
 /// [SDL_WindowFlags](https://wiki.libsdl.org/SDL_WindowFlags), which is required by
 /// [SDL_CreateWindow](https://wiki.libsdl.org/SDL_CreateWindow)
-pub struct SdlWindowFlags(u32);
+pub struct SdlWindowFlags(pub u32);
 
 pub fn prepare_window_attributes() -> SdlWindowFlags {
     SdlWindowFlags(unsafe { sys::FNA3D_PrepareWindowAttributes() })

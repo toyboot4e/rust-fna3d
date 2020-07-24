@@ -1,9 +1,12 @@
 //! Wrapper of FNA3D. Most functions are re-exported as methods of `Device`.
 //!
-//! * `fna3d` corresponds to `FNA3D.h`
-//! * `fna3d::img` corresponds to `FNA3D_Image.h`.
+//! | module        | corresponding header file |
+//! |---------------|---------------------------|
+//! | `fna3d`       | `fna3d.h`                 |
+//! | `fna3d::img`  | `fna3d_image.h`           |
+//! | `fna3d::mojo` | `mojoshader.h`            |
 //!
-//! Most functions are defined as methods of [`Device`]
+//! Most functions are defined as methods of [`Device`].
 //!
 //! [`Device`]: ./struct.Device.html
 
@@ -65,7 +68,8 @@ pub mod utils {
             depthStencilFormat: enums::DepthFormat::D24S8 as u32,
             presentationInterval: enums::PresentInterval::Default as u32,
             displayOrientation: enums::DisplayOrientation::Defaut as u32,
-            renderTargetUsage: enums::RenderTargetUsage::PlatformContents as u32,
+            renderTargetUsage: enums::RenderTargetUsage::DiscardContents as u32,
+            // renderTargetUsage: enums::RenderTargetUsage::PlatformContents as u32,
         }
     }
 }
@@ -74,12 +78,21 @@ pub mod utils {
 pub mod colors {
     use super::Color;
 
+    pub fn default() -> Color {
+        Color {
+            r: 255,
+            g: 255,
+            b: 255,
+            a: 255,
+        }
+    }
+
     pub fn rgb(r: u8, g: u8, b: u8) -> Color {
         Color {
             r: r,
             g: g,
             b: b,
-            a: 0,
+            a: 255,
         }
     }
 
@@ -96,6 +109,6 @@ pub mod colors {
         r: 100,
         g: 149,
         b: 237,
-        a: 0,
+        a: 255,
     };
 }

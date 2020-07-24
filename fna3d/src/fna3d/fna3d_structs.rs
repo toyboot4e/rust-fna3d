@@ -144,6 +144,7 @@ impl Default for RasterizerState {
         Self {
             raw: sys::FNA3D_RasterizerState {
                 fillMode: enums::FillMode::Solid as u32,
+                // FIXME: should I use None?
                 cullMode: enums::CullMode::CullCounterClockwiseFace as u32,
                 // cullMode: enums::CullMode::None as u32,
                 depthBias: 0 as f32,
@@ -394,6 +395,7 @@ impl Default for BlendState {
     fn default() -> Self {
         Self {
             raw: sys::FNA3D_BlendState {
+                // FIXME: should I use Blend::One?
                 colorSourceBlend: enums::Blend::SourceAlpha as u32,
                 colorDestinationBlend: enums::Blend::InverseSourceAlpha as u32,
                 colorBlendFunction: enums::BlendFunction::Add as u32,
@@ -407,11 +409,17 @@ impl Default for BlendState {
                 colorWriteEnable2: enums::ColorWriteChannels::All as u32,
                 colorWriteEnable3: enums::ColorWriteChannels::All as u32,
                 //
+                // blendFactor: Color {
+                //     r: 255,
+                //     g: 255,
+                //     b: 255,
+                //     a: 255,
+                // },
                 blendFactor: Color {
-                    r: 255,
-                    g: 255,
-                    b: 255,
-                    a: 255,
+                    r: 0xff,
+                    g: 0xff,
+                    b: 0xff,
+                    a: 0xff,
                 },
                 // TODO: what does it mean??
                 multiSampleMask: -1,

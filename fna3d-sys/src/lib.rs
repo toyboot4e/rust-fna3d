@@ -19,7 +19,7 @@
 include!(concat!(env!("OUT_DIR"), "/fna3d_bindings.rs"));
 
 pub mod mojo {
-    //! MojoShader
+    //! MojoShader (strictly typed)
 
     include!(concat!(env!("OUT_DIR"), "/mojoshader_bindings.rs"));
 }

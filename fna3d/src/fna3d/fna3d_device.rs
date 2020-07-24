@@ -61,8 +61,6 @@ impl<'a, T> AsMutPtr<T> for Option<&'a mut T> {
 
 /// † The central state †
 ///
-/// Most functionality of FNA3D is put in this struct:
-///
 /// * [Begin/End frame](#beginend-frame)
 /// * [Mutable render states](#mutable-render-states)
 /// * [Immutable render states](#immutable-render-states)
@@ -74,8 +72,6 @@ impl<'a, T> AsMutPtr<T> for Option<&'a mut T> {
 /// * [Effects](#effects)
 /// * [Feature queries](#feature-queries)
 ///
-/// # Notes
-///
 /// ## Drop
 ///
 /// - `Buffer`
@@ -83,17 +79,6 @@ impl<'a, T> AsMutPtr<T> for Option<&'a mut T> {
 /// - `Effect`
 /// - `Query`
 /// - `Texture`
-///
-/// ## Rendering cycle
-///
-/// * `begin_frame`
-/// * `set_vertex_buffer_data` (n times)
-/// * `set_vertex_buffer_bindings`
-/// * `end_frame`
-///
-/// ## Rustic API
-///
-/// * Prefer to pass length as `Slice::len`
 pub struct Device {
     raw: *mut sys::FNA3D_Device,
 }
