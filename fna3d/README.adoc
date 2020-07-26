@@ -1,20 +1,13 @@
-= WIP
-
-* [x] enums
-* [ ] wrap structs with lifetimes?
-* [ ] solve dependency to FNA3D (maybe copy the binary to output?)
-* [ ] learn how to use FNA3D and improve this wrapper
-
 = fna3d
 
-Wrapper of FNA3D
+Wrapper of fna3d-sys
 
 == Overview
 
-`fna3d-sys` generates Rust FFI to FNA3D using https://github.com/rust-lang/rust-bindgen[bindgen]. `fna3d` wraps them in Rust code and makes it safe & handy.
+`fna3d-sys` generates Rust FFI to FNA3D using https://github.com/rust-lang/rust-bindgen[bindgen]. `fna3d` wraps them in Rust code to makes it handy.
+
+Most functions are wrapped as methods of `Device`.
 
 == Policy
 
-* assume that https://doc.rust-lang.org/std/os/raw/type.c_int.html[c_int] has 32 bits length
-* prefer `u32` to `i32` in arguments and don't care about input values bigger than 31 bits
-* use lifetimes?
+* For `i32` type parameters, use `u32` then cast them to `i32` without considering safety (use of 32th bit)

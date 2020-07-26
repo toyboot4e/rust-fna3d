@@ -1,9 +1,6 @@
 use fna3d_sys as sys;
+use std::ffi::c_void;
 
-// this should be replaced with `std::ffi::c_void`
-use std::os::raw::c_void;
-
-// from line 2301
 pub fn linked_version() -> u32 {
     unsafe { sys::FNA3D_LinkedVersion() }
 }
@@ -21,7 +18,7 @@ pub fn hook_log_functions_default() {
     }
 }
 
-/// [SDL_WindowFlags](https://wiki.libsdl.org/SDL_WindowFlags), which is required by
+/// [SDL_WindowFlags](https://wiki.libsdl.org/SDL_WindowFlags), which is used for
 /// [SDL_CreateWindow](https://wiki.libsdl.org/SDL_CreateWindow)
 pub struct SdlWindowFlags(pub u32);
 

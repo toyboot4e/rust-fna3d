@@ -1,8 +1,9 @@
 = WIP!!!!
 
-Currently I'm trying to make an FNA-like framework and trying to improve this crate.
+== TODOs
 
-I'm really not sure about dynamic libraries, Rust FFI and even FNA3D. I need much more time or help!
+* [ ] automatically solve dependency to FNA3D
+* [ ] make an FNA-like framework using this crate
 
 == Getting started?
 
@@ -30,7 +31,7 @@ Wrapper of https://github.com/FNA-XNA/FNA3D[FNA3D] in Rust
 
 == Overview
 
-Rust-FNA3D is a safe & handy wrapper around FNA3D in Rust. It's intended be used to make an FNA-like framework.
+It's intended be used to make an FNA-like framework.
 
 === What is FNA3D?
 
@@ -40,14 +41,24 @@ https://github.com/FNA-XNA/FNA[FNA] is a reimplementation of the http://en.wikip
 
 Because Rust relies on a strict type system which is different from C's one.
 
-== Framework using Rust-FNA3D
+Note that Rust-FNA3D does NOT consider `Drop` and lifetimes, and they are delegated to a framework on top of it.
 
-I'm making one and I hope I can publish it soon.
+== References
 
-== Other repositories using FNA3D
+=== Framework using FNA3D
+
+I'm making one.
+
+=== Other repositories using FNA3D
 
 * https://gist.github.com/jessechounard/d4252efc12ee24494484611d92b1debe[Simple texture rendering in FNA3D] \(C)
 * https://github.com/silenttowergames/stonetower[Stonetower] \(C)
 * https://github.com/KillaMaaki/BNA[BNA] (https://www.beeflang.org/[Beef])
 * https://github.com/prime31/Odin-Libs[Odin-Libs] (https://odin-lang.org/[Odin])
 * https://github.com/prime31/via[Via] (https://vlang.io/[V])
+
+==== Other C graphics libraries
+
+* https://github.com/floooh/sokol[Sokol]
++
+A minimal cross-platform standalone C headers
