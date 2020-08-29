@@ -2,6 +2,10 @@
 
 Wrapper of fna3d-sys
 
+== TODOs
+
+* wrap structs in a nice way..
+
 == Overview
 
 `fna3d-sys` generates Rust FFI to FNA3D using https://github.com/rust-lang/rust-bindgen[bindgen]. `fna3d` wraps them in Rust code to makes it handy.

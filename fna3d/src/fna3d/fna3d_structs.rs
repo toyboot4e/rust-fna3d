@@ -1,9 +1,11 @@
 //! Structure types in FNA3D other than `Device`
 //!
 //! Those types don't have methods
-
-// TODO: wrap masks with newtype struct?
-// TODO: remove `as u32` and maybe use `to_repr()`
+//!
+//! * TODO: wrap masks with newtype struct?
+//! * TODO: remove `as u32` and maybe use `to_repr()`
+//! * TODO: wrap structs
+//! * TODO: impl more traits
 
 // We _could_ use macors to define field accessors. Probablly the
 // [paste](https://github.com/dtolnay/paste) is usefule for that. However, I prefered explicit
@@ -17,7 +19,7 @@ use fna3d_sys as sys;
 // --------------------------------------------------------------------------------
 // Disposed types
 //
-// Those types have corresponding disposing function in `Device`
+// Those types have corresponding disposing functions in `Device`
 
 /// `IndexBuffer` or `VertexBuffer` in FNA.
 ///
@@ -36,7 +38,7 @@ pub type Effect = sys::FNA3D_Effect;
 /// Disposed with a corresponding function in `Device`
 pub type Query = sys::FNA3D_Query;
 
-/// Pointer to the actual texture loaded
+/// GPU texture
 ///
 /// Disposed with a corresponding function in `Device`
 pub type Texture = sys::FNA3D_Texture;
@@ -56,8 +58,49 @@ pub type RenderTargetBinding = sys::FNA3D_RenderTargetBinding;
 
 pub type Viewport = sys::FNA3D_Viewport;
 
-/// Constructors and predefined colors goes to `colors` module
-pub type Color = sys::FNA3D_Color; // TODO: wrap
+#[derive(Debug, Clone, Copy)]
+pub struct Color {
+    raw: sys::FNA3D_Color,
+}
+
+impl Color {
+    pub fn raw(&self) -> sys::FNA3D_Color {
+        self.raw
+    }
+
+    pub fn as_vec4(&self) -> sys::FNA3D_Vec4 {
+        sys::FNA3D_Vec4 {
+            x: self.raw.r as f32 / 255 as f32,
+            y: self.raw.g as f32 / 255 as f32,
+            z: self.raw.b as f32 / 255 as f32,
+            w: self.raw.a as f32 / 255 as f32,
+        }
+    }
+
+    pub fn rgba(r: u8, g: u8, b: u8, a: u8) -> Self {
+        Self {
+            raw: sys::FNA3D_Color {
+                r: r,
+                g: g,
+                b: b,
+                a: a,
+            },
+        }
+    }
+
+    pub fn rgb(r: u8, g: u8, b: u8) -> Self {
+        Self::rgba(r, g, b, 255)
+    }
+
+    pub fn white() -> Self {
+        Self::rgb(255, 255, 255)
+    }
+
+    pub fn cornflower_blue() -> Self {
+        Self::rgb(100, 149, 237)
+    }
+}
+
 pub type Rect = sys::FNA3D_Rect;
 pub type Vec4 = sys::FNA3D_Vec4;
 pub type PresentationParameters = sys::FNA3D_PresentationParameters;
@@ -415,12 +458,7 @@ impl Default for BlendState {
                 //     b: 255,
                 //     a: 255,
                 // },
-                blendFactor: Color {
-                    r: 0xff,
-                    g: 0xff,
-                    b: 0xff,
-                    a: 0xff,
-                },
+                blendFactor: Color::rgba(0xff, 0xff, 0xff, 0xff).raw(),
                 // TODO: what does it mean??
                 multiSampleMask: -1,
             },

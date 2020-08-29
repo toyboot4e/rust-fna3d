@@ -1,4 +1,5 @@
-//! Aliases
+//! MojoShader types re-exported
+
 use fna3d_sys as sys;
 
 // FNA3D.h does NOT provide concrete definition

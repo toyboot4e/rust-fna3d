@@ -1,12 +1,12 @@
-//! Wrapper of FNA3D. Most functions are re-exported as methods of `Device`.
+//! Wrapper of [FNA3D](https://github.com/FNA-XNA/FNA3D)
 //!
-//! | module        | corresponding header file |
-//! |---------------|---------------------------|
-//! | `fna3d`       | `fna3d.h`                 |
-//! | `fna3d::img`  | `fna3d_image.h`           |
-//! | `fna3d::mojo` | `mojoshader.h`            |
+//! Most functions are re-exported as [`Device`] methods.
 //!
-//! Most functions are defined as methods of [`Device`].
+//! | modules       | corresponding header files |
+//! |---------------|----------------------------|
+//! | `fna3d`       | `fna3d.h`                  |
+//! | `fna3d::img`  | `fna3d_image.h`            |
+//! | `fna3d::mojo` | `mojoshader.h`             |
 //!
 //! [`Device`]: ./struct.Device.html
 
@@ -37,22 +37,6 @@ pub mod utils {
 
     use crate::fna3d::fna3d_enums as enums;
 
-    // TODO: remove this trait and wrap `FNA3D_Color`
-    pub trait AsVec4 {
-        fn as_vec4(&self) -> sys::FNA3D_Vec4;
-    }
-
-    impl AsVec4 for sys::FNA3D_Color {
-        fn as_vec4(&self) -> sys::FNA3D_Vec4 {
-            sys::FNA3D_Vec4 {
-                x: self.r as f32 / 255 as f32,
-                y: self.g as f32 / 255 as f32,
-                z: self.b as f32 / 255 as f32,
-                w: self.a as f32 / 255 as f32,
-            }
-        }
-    }
-
     /// `handle` is actually `SDL_Window*` in Rust-SDL2-sys
     pub fn params_from_window_handle(
         window_handle: *mut c_void,
@@ -72,43 +56,4 @@ pub mod utils {
             // renderTargetUsage: enums::RenderTargetUsage::PlatformContents as u32,
         }
     }
-}
-
-#[allow(dead_code)]
-pub mod colors {
-    use super::Color;
-
-    pub fn default() -> Color {
-        Color {
-            r: 255,
-            g: 255,
-            b: 255,
-            a: 255,
-        }
-    }
-
-    pub fn rgb(r: u8, g: u8, b: u8) -> Color {
-        Color {
-            r: r,
-            g: g,
-            b: b,
-            a: 255,
-        }
-    }
-
-    pub fn rgba(r: u8, g: u8, b: u8, a: u8) -> Color {
-        Color {
-            r: r,
-            g: g,
-            b: b,
-            a: a,
-        }
-    }
-
-    pub const CORNFLOWER_BLUE: Color = Color {
-        r: 100,
-        g: 149,
-        b: 237,
-        a: 255,
-    };
 }

@@ -57,7 +57,7 @@ I'm making one.
 * https://github.com/prime31/Odin-Libs[Odin-Libs] (https://odin-lang.org/[Odin])
 * https://github.com/prime31/via[Via] (https://vlang.io/[V])
 
-==== Other C graphics libraries
+=== Other C graphics libraries
 
 * https://github.com/floooh/sokol[Sokol]
 +

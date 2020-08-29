@@ -27,7 +27,6 @@ use fna3d_sys as sys;
 use crate::{
     fna3d::{fna3d_enums as enums, fna3d_structs::*},
     mojo,
-    utils::AsVec4,
 };
 use enum_primitive::*;
 
@@ -59,9 +58,9 @@ impl<'a, T> AsMutPtr<T> for Option<&'a mut T> {
 // --------------------------------------------------------------------------------
 // Device
 
-/// † The central state †
+/// The central state
 ///
-/// * [Begin/End frame](#beginend-frame)
+/// * [Init/Quit](#init-quit)
 /// * [Mutable render states](#mutable-render-states)
 /// * [Immutable render states](#immutable-render-states)
 /// * [Render targets](#render-targets)
@@ -96,7 +95,11 @@ impl Device {
     pub fn raw(&self) -> *mut sys::FNA3D_Device {
         self.raw
     }
+}
 
+/// Init/Quit
+/// ---
+impl Device {
     /// Creates a rendering context for use on the calling thread.
     ///
     /// * `params`:
@@ -112,15 +115,10 @@ impl Device {
             raw: unsafe { sys::FNA3D_CreateDevice(&mut params, do_debug as u8) },
         }
     }
-}
 
-/// Begin/end frame
-/// ---
-impl Device {
-    /// The first thing you call when rendering a frame
-    pub fn begin_frame(&mut self) {
+    pub fn destroy(self) {
         unsafe {
-            sys::FNA3D_BeginFrame(self.raw);
+            sys::FNA3D_DestroyDevice(self.raw);
         }
     }
 
@@ -171,8 +169,9 @@ impl Device {
         }
     }
 
-    // TODO: how to set texture
-    /// Draws data from vertex/index buffers.
+    /// Draws data from vertex/index buffers
+    ///
+    /// Use `verify_sampler_state` to set texture.
     ///
     /// * `type_`:
     ///   The primitive topology of the vertex data.
@@ -214,11 +213,12 @@ impl Device {
         }
     }
 
-    // TODO: search about this function and wrap
     /// Draws data from vertex/index buffers with instancing enabled.
     ///
     /// * `instance_count`:
     ///   The number of instances that will be drawn.
+    ///
+    /// * TODO: what is this
     pub fn draw_instanced_primitives(
         &mut self,
         type_: enums::PrimitiveType,
@@ -228,7 +228,7 @@ impl Device {
         start_index: i32,
         prim_count: i32,
         instance_count: i32,
-        indices: &mut Buffer,
+        indices: *mut Buffer,
         index_elem_size: enums::IndexElementSize,
     ) {
         unsafe {
@@ -310,7 +310,7 @@ impl Device {
     ///   Filled with color being used as the device blend factor.
     pub fn get_blend_factor(&mut self, mut blend_factor: Color) {
         unsafe {
-            sys::FNA3D_GetBlendFactor(self.raw, &mut blend_factor as *mut _);
+            sys::FNA3D_GetBlendFactor(self.raw, &mut blend_factor.raw() as *mut _);
         }
     }
 
@@ -319,7 +319,7 @@ impl Device {
     /// * `blend_factor`: The color to use as the device blend factor.
     pub fn set_blend_factor(&mut self, mut blend_factor: Color) {
         unsafe {
-            sys::FNA3D_SetBlendFactor(self.raw, &mut blend_factor as *mut _);
+            sys::FNA3D_SetBlendFactor(self.raw, &mut blend_factor.raw() as *mut _);
         }
     }
 
@@ -495,12 +495,17 @@ impl Device {
     ///    The depth/stencil renderbuffer (can be `None`).
     /// * `depth_format`:
     ///    The format of the depth/stencil renderbuffer.
+    /// * `preserve_depth_stencil_contents`:
+    ///   Set this to `true` to store the depth/stencil contents
+    ///   for future use. Most of the time you'll want to
+    ///   keep this at 0 to not waste GPU bandwidth.
     pub fn set_render_targets(
         &mut self,
         render_targets: Option<&mut RenderTargetBinding>,
         num_render_targets: u32,
         depth_stencil_buffer: Option<&mut Renderbuffer>,
         depth_format: enums::DepthFormat,
+        preserve_depth_stencil_contents: bool,
     ) {
         unsafe {
             sys::FNA3D_SetRenderTargets(
@@ -509,6 +514,7 @@ impl Device {
                 num_render_targets as i32,
                 depth_stencil_buffer.as_mut_ptr(),
                 depth_format as sys::FNA3D_DepthFormat,
+                preserve_depth_stencil_contents as u8,
             );
         }
     }
@@ -719,8 +725,6 @@ impl Device {
     ///
     /// * `texture`:
     ///   The texture to be updated.
-    /// * `fmt`:
-    ///   Should match the format provided to `create_texture_2D`.
     /// * `x`:
     ///   The x offset of the subregion being updated.
     /// * `y`:
@@ -751,7 +755,6 @@ impl Device {
             sys::FNA3D_SetTextureData2D(
                 self.raw,
                 texture,
-                fmt as u32,
                 x as i32,
                 y as i32,
                 w as i32,
@@ -767,8 +770,6 @@ impl Device {
     ///
     /// * `texture`:
     ///   The texture to be updated.
-    /// * `fmt`:
-    ///   Should match the format provided to CreateTexture3D.
     /// * `x`:
     ///   The x offset of the subregion being updated.
     /// * `y`:
@@ -790,7 +791,6 @@ impl Device {
     pub fn set_texture_data_3d(
         &mut self,
         texture: &mut Texture,
-        fmt: enums::SurfaceFormat,
         x: i32,
         y: i32,
         z: i32,
@@ -802,9 +802,7 @@ impl Device {
         data_len: i32,
     ) {
         unsafe {
-            sys::FNA3D_SetTextureData3D(
-                self.raw, texture, fmt as u32, x, y, z, w, h, d, level, data, data_len,
-            );
+            sys::FNA3D_SetTextureData3D(self.raw, texture, x, y, z, w, h, d, level, data, data_len);
         }
     }
 
@@ -833,7 +831,6 @@ impl Device {
     pub fn set_texture_data_cube(
         &mut self,
         texture: &mut Texture,
-        fmt: enums::SurfaceFormat,
         x: i32,
         y: i32,
         w: i32,
@@ -847,7 +844,6 @@ impl Device {
             sys::FNA3D_SetTextureDataCube(
                 self.raw,
                 texture,
-                fmt as u32,
                 x,
                 y,
                 w,
@@ -905,8 +901,6 @@ impl Device {
     ///
     /// * `texture`:
     ///   The texture object being read.
-    /// * `fmt`:
-    ///   Should match the format provided to CreateTexture2D.
     /// * `x`:
     ///   The x offset of the subregion being read.
     /// * `y`:
@@ -924,18 +918,24 @@ impl Device {
     pub fn get_texture_data_2d(
         &mut self,
         texture: &mut Texture,
-        fmt: enums::SurfaceFormat,
         x: i32,
         y: i32,
         w: i32,
         h: i32,
         level: i32,
-        data: *mut c_void,
-        data_len: i32,
+        data: &[u8],
     ) {
         unsafe {
             sys::FNA3D_GetTextureData2D(
-                self.raw, texture, fmt as u32, x, y, w, h, level, data, data_len,
+                self.raw,
+                texture,
+                x,
+                y,
+                w,
+                h,
+                level,
+                data as *const _ as *mut _,
+                data.len() as i32,
             );
         }
     }
@@ -945,7 +945,6 @@ impl Device {
     /// unless there's absolutely no other way to use the image data!
     ///
     /// * `texture`:	The texture object being read.
-    /// * `fmt`:	Should match the format provided to CreateTexture3D.
     /// * `x`:		The x offset of the subregion being read.
     /// * `y`:		The y offset of the subregion being read.
     /// * `z`:		The z offset of the subregion being read.
@@ -958,7 +957,6 @@ impl Device {
     pub fn get_texture_data_3d(
         &mut self,
         texture: &mut Texture,
-        fmt: enums::SurfaceFormat,
         x: i32,
         y: i32,
         z: i32,
@@ -970,9 +968,7 @@ impl Device {
         data_len: i32,
     ) {
         unsafe {
-            sys::FNA3D_GetTextureData3D(
-                self.raw, texture, fmt as u32, x, y, z, w, h, d, level, data, data_len,
-            );
+            sys::FNA3D_GetTextureData3D(self.raw, texture, x, y, z, w, h, d, level, data, data_len);
         }
     }
 
@@ -994,7 +990,6 @@ impl Device {
     pub fn get_texture_data_cube(
         &mut self,
         texture: *mut Texture,
-        fmt: enums::SurfaceFormat,
         x: i32,
         y: i32,
         w: i32,
@@ -1008,7 +1003,6 @@ impl Device {
             sys::FNA3D_GetTextureDataCube(
                 self.raw,
                 texture,
-                fmt as u32,
                 x,
                 y,
                 w,
@@ -1129,7 +1123,7 @@ impl Device {
     /// deletes the resource instead of the programmer).
     ///
     /// * `buffer`: The FNA3D_Buffer to be destroyed.
-    pub fn add_dispose_vertex_buffer(&mut self, buffer: &mut Buffer) {
+    pub fn add_dispose_vertex_buffer(&mut self, buffer: *mut Buffer) {
         unsafe {
             sys::FNA3D_AddDisposeVertexBuffer(self.raw, buffer);
         }
@@ -1183,7 +1177,7 @@ impl Device {
     ///   The size of each element in the client buffer.
     pub fn get_vertex_buffer_data(
         &mut self,
-        buffer: &mut Buffer,
+        buffer: *mut Buffer,
         buf_offset_in_bytes: i32,
         data: *mut ::std::os::raw::c_void,
         // element_count: i32,
@@ -1242,7 +1236,7 @@ impl Device {
     /// deletes the resource instead of the programmer).
     ///
     /// * `buffer`: The FNA3D_Buffer to be destroyed.
-    pub fn add_dispose_index_buffer(&mut self, buf: &mut Buffer) {
+    pub fn add_dispose_index_buffer(&mut self, buf: *mut Buffer) {
         unsafe {
             sys::FNA3D_AddDisposeIndexBuffer(self.raw, buf);
         }
@@ -1292,7 +1286,7 @@ impl Device {
     //   The size (in bytes) of the client data.
     pub fn get_index_buffer_data<T>(
         &mut self,
-        buf: &mut Buffer,
+        buf: *mut Buffer,
         buf_offset_in_bytes: i32,
         data: &[T],
         // data: *mut c_void,

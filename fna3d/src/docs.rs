@@ -1,9 +1,11 @@
 //! Explains how to make a C wrapper
 //!
+//! Bundling C binary is out of scope of this document.
+//!
 //! # Guide to making a wrapper for C
 //!
-//! The follows are what Rust-FNA3D take care to wrap Rust-FNA3D-sys, which is Rust FFI bindings
-//! to FNA3D generated with `bindgen`.
+//! The follows explain what Rust-FNA3D take care to wrap Rust-FNA3D-sys, which is Rust FFI
+//! bindings to FNA3D generated with `bindgen`.
 //!
 //! ## References
 //!
@@ -12,15 +14,17 @@
 //!
 //! ## 1. Output of `bindgen`
 //!
-//! Why we need to wrap structs
+//! We need to wrap the output of `bindgen` using rusty types to provide with a cozy interface.
 //!
 //! ### 1-1 enums, bit flags and booleans
 //!
-//! `bindgen` translates `enum` s as `u32` and `bool` s as `u8` because C is not so strict about
-//! enums and them. To provide with a cozy interface, we need to wrap them.
+//! Since C is loosly typed, `bindgen` translates `enum` s as `u32` and `bool` s as `u8`. But they
+//! should be accessed via `SomeEnumType` or `bool`. So we wrap `bindgen` functions with ours.
 //!
-//! `enum_primitive` is a great crate to make `enum` s from primitive values. `bitflags` is also
-//! good for making bit flags.
+//! I'm using these crates:
+//!
+//! * `enum_primitive`: to generate `enum` s from primitive values
+//! * `bitflags`: for making bit flags
 //!
 //! ### 1-2 Zero-sized structs
 //!
@@ -34,11 +38,23 @@
 //! }
 //! ```
 //!
-//! ### 1-3. *void
+//! ### 1-3. `*c_void`
 //!
-//! `c_void` is used to represent a function pointer.
-//! There's a corresponding page in Rust nomicon:
-//! [https://doc.rust-lang.org/nomicon/ffi.html#representing-opaque-structs](https://doc.rust-lang.org/nomicon/ffi.html#representing-opaque-structs)
+//! It is used to represent e.g. a function pointer. There's a [corresponding page] in Rust
+//! nomicon.
+//!
+//! [corresponding page]: https://doc.rust-lang.org/nomicon/ffi.html#representing-opaque-structs
+//!
+//! ### 1-4. structs
+//!
+//! They are `Copy` be default and it's unfortunate if the C `struct` is big. Also, as I mentioned
+//! in `1-2`, some types of fields are loosely typed. So I wrapped C structs with another (which may
+//! not be `Copy`) and provided with accessor methods of each field.
+//!
+//! This is a lot of work and ridiculous. Maybe macros could be used (though I didn't...)
+//!
+//! You may not need wrap C structs in such a way, especially when they are used in internals and
+//! hidden under rusty APIs in high level crates.
 //!
 //! ## 2. Wrapping constants
 //!
@@ -53,9 +69,6 @@
 //! pub const FNA3D_IndexElementSize_FNA3D_INDEXELEMENTSIZE_32BIT: FNA3D_IndexElementSize = 1;
 //! pub type FNA3D_IndexElementSize = u32;
 //! ```
-//!
-//! In C, they are defined as an `enum IndexElementSize`, however, since C's not strict about `enum`sm `bindgen`
-//! defined them as constants (and an alias of `u32`).
 //!
 //! We want to wram them with an `enum`:
 //!
@@ -73,7 +86,7 @@
 //! ```
 //!
 //! [enum_primitive](https://crates.io/crates/enum_primitive) crate was used to implement
-//! `IndexElementSize::from_u32` automatically.
+//! `IndexElementSize::from_u32` automatically. TODO: is this way up to date?s
 //!
 //! References:
 //!
@@ -81,6 +94,8 @@
 //! > * [bindgen #1096: Improve codegen for C style enums](https://github.com/rust-lang/rust-bindgen/issues/1096)
 //!
 //! ### 2-2. Wrapping bit flags
+//!
+//! NOTE: this is in case where we don't use the `rustified-enum` option of `bindgen`.
 //!
 //! Consider the constants as an example:
 //!

@@ -1,4 +1,4 @@
-//! `FNA3D_Image.h`. It should be wrapped into methods such as `Texture2D::from_reader`
+//! `FNA3D_Image.h`
 //!
 //! Currently the implementation is pretty crappy and should NOT be used. Prefer other bindings to
 //! `stb_image` or use SDL's RW struct. Or maybe use `image` crate.
