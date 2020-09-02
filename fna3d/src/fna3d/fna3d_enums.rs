@@ -1,59 +1,12 @@
 //! Wrappers of enum variants defined as constants by `bindgen`
 //!
-//! Because C enums are loosely typed, `bindgen` defines each variant of an enum as a constant.
-//! Here we wrap them into `enum` s using the `enum_primitive` crate to implement `from_xxx`
-//! methods.
-//!
-//! However, `bindgen` also has an option to convert C enum variants into a Rust enum. Shoul I
-//! have prefered it..?
-//!
-//! # References
-//!
-//! * https://github.com/rust-lang/rust-bindgen/issues/1096
-//!
-//! # Example
-//!
-//! ```
-//! // Constants generated with `bindgen`:
-//! pub const FNA3D_ClearOptions_FNA3D_CLEAROPTIONS_TARGET: FNA3D_ClearOptions = 1;
-//! pub const FNA3D_ClearOptions_FNA3D_CLEAROPTIONS_DEPTHBUFFER: FNA3D_ClearOptions = 2;
-//! pub const FNA3D_ClearOptions_FNA3D_CLEAROPTIONS_STENCIL: FNA3D_ClearOptions = 4;
-//! pub type FNA3D_ClearOptions = u32;
-//!
-//! // We wrap them into an enum:
-//! use enum_primitive::*;
-//! enum_from_primitive! {
-//!     #[derive(Debug, Copy, Clone, PartialEq)]
-//!     #[repr(u32)]
-//!     pub enum ClearOptions {
-//!         Target = FNA3D_ClearOptions_FNA3D_CLEAROPTIONS_TARGET,
-//!         DepthBuffer = FNA3D_ClearOptions_FNA3D_CLEAROPTIONS_DEPTHBUFFER,
-//!         Stencil = FNA3D_ClearOptions_FNA3D_CLEAROPTIONS_STENCIL,
-//!     }
-//! }
-//!
-//! assert_eq!(ClearOptions::Target, ClearOptions::from_u32(1).unwrap());
-//! ```
-//!
-//! Make sure to not deal bitflags as an enum. We can use `bitflags` crate for them.
-
-// TODO: was it possible to make such enums automatically?
-
-// TODO: make a macro to wrap u32 as enum
-
-// TODO: cast to underlying type
-// pub trait ToRepr {
-//     type Output;
-//     fn to_repr(&self) -> Self::Output;
-// }
-
-// TODO: should we use u8 or stick with u32?
-// TODO: do we not need to use enum_primitive?
+//! * TODO: use enum_primitive_derive or can we forget them all?
 
 use enum_primitive::*;
 use fna3d_sys as sys;
 
 enum_from_primitive! {
+    /// `PresentationParameter` component
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum PresentInterval {
@@ -65,6 +18,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
+    /// `PresentationParameter` component
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum DisplayOrientation {
@@ -76,6 +30,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
+    /// `PresentationParameter` component
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum RenderTargetUsage {
@@ -86,7 +41,7 @@ enum_from_primitive! {
 }
 
 bitflags::bitflags! {
-    /// Specifies the buffers for clearing when calling `Device::clear`
+    /// `Device::clear` argument that specifies the buffers for clearing
     pub struct ClearOptions: u32 {
         /// Color buffer
         const TARGET = sys::FNA3D_ClearOptions_FNA3D_CLEAROPTIONS_TARGET;
@@ -122,7 +77,7 @@ enum_from_primitive! {
 enum_from_primitive! {
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
-    /// Size for index in `IndexBuffer` or `DynamicIndexBuffer`
+    /// (Dynamic) index buffer attribute
     pub enum IndexElementSize {
         /// `i16` will be used as index type
         Bits16 = sys::FNA3D_IndexElementSize_FNA3D_INDEXELEMENTSIZE_16BIT,
@@ -200,6 +155,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
+    /// Texture data component
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum CubeMapFace {
@@ -215,7 +171,9 @@ enum_from_primitive! {
 enum_from_primitive! {
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
-    /// Hint for optimizing memory placement of graphics buffers
+    /// Vertex/index buffer component
+    ///
+    /// Hint for optimizing memory placement of graphics buffers.
     pub enum BufferUsage {
         None = sys::FNA3D_BufferUsage_FNA3D_BUFFERUSAGE_NONE,
         WriteOnly = sys::FNA3D_BufferUsage_FNA3D_BUFFERUSAGE_WRITEONLY,
@@ -239,7 +197,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
-    /// Blend mode. Component of `BlendState`
+    /// `BlendState` component that specifies blend mode
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum Blend {
@@ -282,7 +240,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
-    /// Function for color blending. Component of `BlendState`
+    /// `BlendState` component that specifies function for color blending
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum BlendFunction {
@@ -302,7 +260,7 @@ enum_from_primitive! {
 enum_from_primitive! {
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
-    /// Specifies color channels for render target blending operations
+    /// `BlendState` component that specifies color channels for render target blending operations
     pub enum ColorWriteChannels {
         None = sys::FNA3D_ColorWriteChannels_FNA3D_COLORWRITECHANNELS_NONE,
         Red = sys::FNA3D_ColorWriteChannels_FNA3D_COLORWRITECHANNELS_RED,
@@ -314,6 +272,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
+    /// `DepthStencilState` component
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum StencilOperation {
@@ -329,6 +288,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
+    /// `DepthStencilState` component
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum CompareFunction {
@@ -344,6 +304,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
+    /// `RasterizrerState` component
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum CullMode {
@@ -354,6 +315,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
+    /// `RasterizerState` component
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum FillMode {
@@ -365,8 +327,9 @@ enum_from_primitive! {
 enum_from_primitive! {
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
-    /// Modes for addressing texels (texture pixels) using texture coordinates that are outside of
-    /// the range of `0.0` to `1.0`.
+    /// `SamplerState` component that specifies texture coordinates addressing method
+    ///
+    /// Applied for texture coordinates that are outside of range [0.0, 1.0]
     pub enum TextureAddressMode {
         /// Texels outside range will form the tile at every integer junction.
         Wrap = sys::FNA3D_TextureAddressMode_FNA3D_TEXTUREADDRESSMODE_WRAP,
@@ -379,7 +342,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
-    /// Filtering types for texture fileter
+    /// `SamplerState` component that specifies filtering types
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum TextureFilter {
@@ -396,7 +359,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
-    /// Data type of an element of a vertex data
+    /// `VertexElement` component that specifies its type
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum VertexElementFormat {
@@ -435,7 +398,7 @@ impl VertexElementFormat {
 }
 
 enum_from_primitive! {
-    /// Data usage of an element of a vertex data. Typed with `VertexElementFormat`
+    /// `VertexElement` component that specifies its usage
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum VertexElementUsage {

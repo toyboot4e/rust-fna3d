@@ -1,11 +1,11 @@
 //! Explains how to make a C wrapper
 //!
-//! Bundling C binary is out of scope of this document.
+//! Note that bundling C binary (DLL) is out of scope of this document.
 //!
-//! # Guide to making a wrapper for C
+//! # Guide to making a wrapper for a C library
 //!
-//! The follows explain what Rust-FNA3D take care to wrap Rust-FNA3D-sys, which is Rust FFI
-//! bindings to FNA3D generated with `bindgen`.
+//! The follows explain what Rust-FNA3D takes care to wrap Rust-FNA3D-sys, which is Rust FFI
+//! bindings to FNA3D generated with [`bindgen`](https://github.com/rust-lang/rust-bindgen).
 //!
 //! ## References
 //!
@@ -19,7 +19,8 @@
 //! ### 1-1 enums, bit flags and booleans
 //!
 //! Since C is loosly typed, `bindgen` translates `enum` s as `u32` and `bool` s as `u8`. But they
-//! should be accessed via `SomeEnumType` or `bool`. So we wrap `bindgen` functions with ours.
+//! should be accessed via `SomeEnumType` or `bool` in Rust. So we wrap `bindgen` functions with
+//! ours.
 //!
 //! I'm using these crates:
 //!
@@ -40,8 +41,8 @@
 //!
 //! ### 1-3. `*c_void`
 //!
-//! It is used to represent e.g. a function pointer. There's a [corresponding page] in Rust
-//! nomicon.
+//! It is used to represent e.g. a function pointer or a pointer to an unknown type. There's a
+//! [corresponding page] in Rust nomicon.
 //!
 //! [corresponding page]: https://doc.rust-lang.org/nomicon/ffi.html#representing-opaque-structs
 //!
@@ -49,18 +50,20 @@
 //!
 //! They are `Copy` be default and it's unfortunate if the C `struct` is big. Also, as I mentioned
 //! in `1-2`, some types of fields are loosely typed. So I wrapped C structs with another (which may
-//! not be `Copy`) and provided with accessor methods of each field.
+//! not be `Copy`), hid fields and provided with accessor methods for them.
 //!
 //! This is a lot of work and ridiculous. Maybe macros could be used (though I didn't...)
 //!
-//! You may not need wrap C structs in such a way, especially when they are used in internals and
-//! hidden under rusty APIs in high level crates.
+//! You may not need to wrap C structs in such a way, especially when they are used in internals
+//! and hidden under rusty APIs in high level crates.
 //!
 //! ## 2. Wrapping constants
 //!
 //! Let's get into examples.
 //!
 //! ### 2-1. Wrapping constants to an enum
+//!
+//! NOTE: this is in case where we don't use the `rustified-enum` option of `bindgen`.
 //!
 //! Consider the constants as an example:
 //!
@@ -86,18 +89,14 @@
 //! ```
 //!
 //! [enum_primitive](https://crates.io/crates/enum_primitive) crate was used to implement
-//! `IndexElementSize::from_u32` automatically. TODO: is this way up to date?s
+//! `IndexElementSize::from_u32` automatically.
 //!
-//! References:
+//! * TODO: use derive macro for it. or can I use `num` crate?
+//! * [bindgen #1096: Improve codegen for C style enums](https://github.com/rust-lang/rust-bindgen/issues/1096)
 //!
-//! > * [Wrapping Unsafe C Libraries in Rust - Dwelo Research and Development - Medium](https://medium.com/dwelo-r-d/wrapping-unsafe-c-libraries-in-rust-d75aeb283c65)
-//! > * [bindgen #1096: Improve codegen for C style enums](https://github.com/rust-lang/rust-bindgen/issues/1096)
+//! ### 2-2. Wrapping bitflags
 //!
-//! ### 2-2. Wrapping bit flags
-//!
-//! NOTE: this is in case where we don't use the `rustified-enum` option of `bindgen`.
-//!
-//! Consider the constants as an example:
+//! Consider the bitflag constants as an example:
 //!
 //! ```
 //! pub const FNA3D_ClearOptions_FNA3D_CLEAROPTIONS_TARGET: FNA3D_ClearOptions = 1;
@@ -141,7 +140,10 @@
 //! }
 //! ```
 //!
-//! Some fields are not strictly typed. Also, while it is a big `struct`, it implements `Copy`.
+//! Issues:
+//!
+//! * Some fields are not strictly typed.
+//! * It is a big `struct` but it implements `Copy`.
 //!
 //! So let's make a wrapper of it. We'll start with this:
 //!
@@ -154,7 +156,8 @@
 //! }
 //! ```
 //!
-//! Unfortunately, fields of `FNA3D_DepthStencilState` are now hidden.
+//! Note that we hid the fields of the `struct`. This is an unfortunate cost to use such C structs
+//! actually.
 //!
 //! ### 3-2. Raw access
 //!
@@ -162,18 +165,20 @@
 //!
 //! ```ignore
 //! impl DepthStencilState {
-//!     pub fn raw(&mut self) -> sys::FNA3D_DepthStencilState {
+//!     pub fn raw(&mut self) -> &mut sys::FNA3D_DepthStencilState {
 //!         &mut self.raw
 //!     }
 //! }
 //! ```
 //!
-//! It's just for type conversions and we'll make accessors to get or modify the fields.
+//! It's just for type conversions and not intended to provide with direct access to the fields.
+//! We'll make accessors to get or set them.
 //!
 //! ### 3-2. Accessors
 //!
 //! * [x] use snake case
 //! * [x] wrap enums, bit flags and booleans
+//! * [x] prefer `u32` to `i32` in some cases (e.g. indices)
 //!
 //! ```ignore
 //! impl DepthStencilState {
@@ -197,9 +202,6 @@
 //! }
 //! ```
 //!
-//! * [ ] wrap function pointers?
-//! * [ ] take care to ownership?
-//!
 //! ### 3-3. Trait implementations
 //!
 //! * [x] `Debug`, `Clone`
@@ -207,17 +209,13 @@
 //!
 //! ### 3-4. Mutability
 //!
-//! `T*` defined in C is translated to `*mut T` by `bindgen`. `*mut T` can only be create from
-//! `&mut T`, not from `&T`. However, you may want not to take mutability because it's not mutated
-//! in the C source code.
+//! `*T` type can be created from any of `&T`, `&[T]` and `&mut [T]`. You mave have to cast twice.
 //!
-//! So how can we avoid to take mutability?
+//! TODO: Examples
 //!
-//! 1. Make a clone of the value and then take a mutable reference of it
-//! 2. Modify the output of bindgen to take `*const T`
+//! ## Adding lifetimes
 //!
-//! The method `2.` is preferrable.
+//! TODO
 //!
-//! ### 3-5. Other changes
-//!
-//! `*mut void` and `int` -> `&[u8]`
+//! * FNA3D_Device
+//! * texture

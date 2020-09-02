@@ -1,20 +1,4 @@
 //! Wrapper of `FNA3D_Device`
-//!
-//! # Things considered
-//!
-//! ## Rustic API
-//!
-//! bool and enum. avoiding raw pointers.
-//!
-//! ## XNA compatibility
-//!
-//! The following functions have odd arguments for XNA compatibilities and re-exported in a better
-//! fashion:
-//!
-//! * `FNA3D_DrawIndexedPrimitives`
-//! * `FNA3D_SetVertexBufferData`
-//!
-//! Details are commented.
 
 use std::{
     // this should be `std::ffi::c_void` but `bindgen` uses:
@@ -58,9 +42,13 @@ impl<'a, T> AsMutPtr<T> for Option<&'a mut T> {
 // --------------------------------------------------------------------------------
 // Device
 
-/// The central state
+/// The graphics device
 ///
-/// * [Init/Quit](#init-quit)
+/// # Functionalities
+///
+/// * [Init/Quit](#initquit)
+/// * [Presentation](#presentation)
+/// * [Drawing](#drawing)
 /// * [Mutable render states](#mutable-render-states)
 /// * [Immutable render states](#immutable-render-states)
 /// * [Render targets](#render-targets)
@@ -71,13 +59,36 @@ impl<'a, T> AsMutPtr<T> for Option<&'a mut T> {
 /// * [Effects](#effects)
 /// * [Feature queries](#feature-queries)
 ///
-/// ## Drop
+/// # Dispose
 ///
 /// - `Buffer`
 /// - `Renderbuffer`
 /// - `Effect`
 /// - `Query`
 /// - `Texture`
+///
+/// # Initialization
+///
+/// It's required to set viewport/rasterizer/blend state. **If this is skipped, we can't draw
+/// anything** (we only can clear the screen):
+///
+/// * `FNA3D_SetViewport`
+/// * `FNA3D_ApplyRasterizerState`
+/// * `FNA3D_SetBlendState`
+///
+/// # Rendering cycle
+///
+/// For each frame:
+///
+/// * `FNA3D_Clear`
+/// * for each draw call:
+///     * reset shader uniform
+///     * `FNA3D_ApplyEffect`
+///     * `FNA3D_SetVertexData`
+///     * `FNA3D_VerifySamplerState`
+///     * `FNA3D_ApplyVertexBufferBindings`
+///     * `FNA3D_DrawIndexedPrimitives`
+/// * `FNA3D_SwapBuffers`
 pub struct Device {
     raw: *mut sys::FNA3D_Device,
 }
@@ -121,7 +132,11 @@ impl Device {
             sys::FNA3D_DestroyDevice(self.raw);
         }
     }
+}
 
+/// Presentation
+/// ---
+impl Device {
     /// Presents the backbuffer to the window.
     ///
     /// * `src`: The region of the buffer to present (or None).
@@ -143,9 +158,12 @@ impl Device {
     }
 }
 
-// TODO: note about GPU and compare draw functions
-/// Draw
+/// Drawing
 /// ---
+///
+/// A "draw call" is actually a call of a drawing function, which is often
+/// `FNA3D_DrawIndexedPrimitives` in FNA3D. Vertex data and sampler state (which contains textures)
+/// are set with other methods.
 impl Device {
     /// Clears the active draw buffers of any previous contents.
     ///
@@ -171,7 +189,7 @@ impl Device {
 
     /// Draws data from vertex/index buffers
     ///
-    /// Use `verify_sampler_state` to set texture.
+    /// This is good for reducing duplicate vertices.
     ///
     /// * `type_`:
     ///   The primitive topology of the vertex data.
@@ -247,10 +265,11 @@ impl Device {
         }
     }
 
-    // TODO: note about immediate mode and performance
     /// Draws data from vertex buffers.
     ///
-    /// * `prim`:
+    /// This may require duplicate vertices so prefer `draw_indexed_primitives` basically.
+    ///
+    /// * `type_`:
     ///   The primitive topology of the vertex data.
     /// * `vertexStart`:
     ///   The starting offset to read from the vertex buffer.
@@ -277,6 +296,8 @@ impl Device {
 
 /// Mutable render states
 /// ---
+///
+/// * TODO: what does mutable here mean
 impl Device {
     /// Sets the view dimensions for rendering, relative to the active render target.
     /// It is required to call this at least once after calling `set_render_targets`, as
@@ -358,6 +379,8 @@ impl Device {
 
 /// Immutable render states
 /// ---
+///
+/// * TODO: what does immutable mean. fixed length?
 impl Device {
     /// Applies a blending state to use for future draw calls. This only needs to be
     /// called when the state actually changes. Redundant calls may negatively affect

@@ -1,21 +1,9 @@
 use fna3d_sys as sys;
 use std::ffi::c_void;
 
+/// FNA3D version
 pub fn linked_version() -> u32 {
     unsafe { sys::FNA3D_LinkedVersion() }
-}
-
-pub fn hook_log_functions_default() {
-    unsafe {
-        // info, warn, error respectively
-        sys::FNA3D_HookLogFunctions(Some(log), Some(log), Some(log));
-    }
-    // ::std::option::Option<unsafe extern "C" fn(msg: *const ::std::os::raw::c_char)>;
-    unsafe extern "C" fn log(msg: *const ::std::os::raw::c_char) {
-        let slice = ::std::ffi::CStr::from_ptr(msg);
-        let string = slice.to_string_lossy().into_owned();
-        println!("{}", string);
-    }
 }
 
 /// [SDL_WindowFlags](https://wiki.libsdl.org/SDL_WindowFlags), which is used for

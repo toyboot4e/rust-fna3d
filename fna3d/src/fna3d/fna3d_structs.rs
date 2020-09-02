@@ -2,14 +2,14 @@
 //!
 //! Those types don't have methods
 //!
-//! * TODO: wrap masks with newtype struct?
+//! * TODO: wrap "masks" with newtype struct?
 //! * TODO: remove `as u32` and maybe use `to_repr()`
 //! * TODO: wrap structs
 //! * TODO: impl more traits
-
-// We _could_ use macors to define field accessors. Probablly the
-// [paste](https://github.com/dtolnay/paste) is usefule for that. However, I prefered explicit
-// definitions this time.
+//!
+//! We _could_ use macors to define field accessors. Probablly the
+//! [paste](https://github.com/dtolnay/paste) is usefule for that. However, I prefered explicit
+//! definitions this time.
 
 use enum_primitive::*;
 
@@ -43,9 +43,7 @@ pub type Query = sys::FNA3D_Query;
 /// Disposed with a corresponding function in `Device`
 pub type Texture = sys::FNA3D_Texture;
 
-/// Slice of vertex buffer
-///
-/// Vertex buffer is a "typed" `*Buffer` with `VertexDeclaration` by user
+/// Vertex `*Buffer` dynamically "typed" with `VertexDeclaration`
 pub type VertexBufferBinding = sys::FNA3D_VertexBufferBinding;
 pub type RenderTargetBinding = sys::FNA3D_RenderTargetBinding;
 
@@ -56,8 +54,14 @@ pub type RenderTargetBinding = sys::FNA3D_RenderTargetBinding;
 
 // TODO: maybe wrap those types
 
+/// The view bounds for render-target surface
 pub type Viewport = sys::FNA3D_Viewport;
 
+/// An RGBA color
+///
+/// 24 bit color with alpha value Each value is represented with 8 bits. Another way to represent a
+///  color is using normalized floating values. Actually, `Color` is casted to `Vec4` in
+/// `Device::clear`.
 #[derive(Debug, Clone, Copy)]
 pub struct Color {
     raw: sys::FNA3D_Color,
@@ -70,10 +74,10 @@ impl Color {
 
     pub fn as_vec4(&self) -> sys::FNA3D_Vec4 {
         sys::FNA3D_Vec4 {
-            x: self.raw.r as f32 / 255 as f32,
-            y: self.raw.g as f32 / 255 as f32,
-            z: self.raw.b as f32 / 255 as f32,
-            w: self.raw.a as f32 / 255 as f32,
+            x: self.raw.r as f32 / 255.0,
+            y: self.raw.g as f32 / 255.0,
+            z: self.raw.b as f32 / 255.0,
+            w: self.raw.a as f32 / 255.0,
         }
     }
 
@@ -102,6 +106,7 @@ impl Color {
 }
 
 pub type Rect = sys::FNA3D_Rect;
+/// Normalized coordinates
 pub type Vec4 = sys::FNA3D_Vec4;
 pub type PresentationParameters = sys::FNA3D_PresentationParameters;
 
@@ -113,63 +118,17 @@ pub type PresentationParameters = sys::FNA3D_PresentationParameters;
 // ----------------------------------------
 // VertexDeclaration
 
-/// Declares memory layout of a vertex data
+/// `VertexBufferBinding` component that declares memory layout of a vertex data
 ///
-/// Users can use custom vertex data using a corresponding declaration.
+/// Users can use custom vertex data with declaration.
 ///
 /// Composed of `VertexElement`s
 pub type VertexDeclaration = sys::FNA3D_VertexDeclaration;
 
-#[derive(Debug, Clone)]
-pub struct VertexDeclarationUtils {}
-
-impl VertexDeclarationUtils {
-    pub fn from_elems(elems: &'static [sys::FNA3D_VertexElement]) -> sys::FNA3D_VertexDeclaration {
-        sys::FNA3D_VertexDeclaration {
-            vertexStride: Self::elem_stride(elems) as i32,
-            elementCount: elems.len() as u32 as i32,
-            elements: elems.as_ptr() as *mut _,
-        }
-    }
-
-    /// Length of the vertex data i.e. the biggest (offset + size) element
-    fn elem_stride(elems: &[sys::FNA3D_VertexElement]) -> u32 {
-        elems
-            .iter()
-            .map(|e| e.offset as u32 + Self::size(e.vertexElementFormat))
-            .max()
-            .unwrap()
-    }
-
-    #[inline]
-    fn size(format_raw: u32) -> u32 {
-        enums::VertexElementFormat::from_u32(format_raw)
-            .unwrap()
-            .size() as u32
-    }
-}
-
-/// An element of vertex data / component of `VertexDeclaration`
+/// `VertexDeclaration` component that specifies an element of vertex data
 ///
 /// Needs to be related with `VertexElementFormat` and `VertexElementUsage`
 pub type VertexElement = sys::FNA3D_VertexElement;
-pub struct VertexElementUtils {}
-
-impl VertexElementUtils {
-    pub fn new(
-        offset: i32,
-        format: enums::VertexElementFormat,
-        usage: enums::VertexElementUsage,
-        usage_index: i32,
-    ) -> sys::FNA3D_VertexElement {
-        sys::FNA3D_VertexElement {
-            offset,
-            vertexElementFormat: format as sys::FNA3D_VertexElementFormat,
-            vertexElementUsage: usage as sys::FNA3D_VertexElementUsage,
-            usageIndex: usage_index,
-        }
-    }
-}
 
 // --------------------------------------------------------------------------------
 // States
@@ -177,6 +136,7 @@ impl VertexElementUtils {
 // ----------------------------------------
 // RasterizerState
 
+/// Pipeline
 #[derive(Debug, Clone)]
 pub struct RasterizerState {
     raw: sys::FNA3D_RasterizerState,
@@ -190,8 +150,8 @@ impl Default for RasterizerState {
                 // FIXME: should I use None?
                 cullMode: enums::CullMode::CullCounterClockwiseFace as u32,
                 // cullMode: enums::CullMode::None as u32,
-                depthBias: 0 as f32,
-                slopeScaleDepthBias: 0 as f32,
+                depthBias: 0.0,
+                slopeScaleDepthBias: 0.0,
                 scissorTestEnable: false as u8,
                 multiSampleAntiAlias: true as u8,
             },
@@ -199,7 +159,6 @@ impl Default for RasterizerState {
     }
 }
 
-/// Constructors
 impl RasterizerState {
     pub fn raw(&self) -> &sys::FNA3D_RasterizerState {
         &self.raw
@@ -270,6 +229,8 @@ impl RasterizerState {
 // ----------------------------------------
 // SamplerState
 
+/// Specifies texture sampling method
+///
 /// Wrap, mirror, etc.
 #[derive(Debug, Clone)]
 pub struct SamplerState {
@@ -285,7 +246,7 @@ impl Default for SamplerState {
                 addressU: enums::TextureAddressMode::Wrap as u32,
                 addressV: enums::TextureAddressMode::Wrap as u32,
                 addressW: enums::TextureAddressMode::Wrap as u32,
-                mipMapLevelOfDetailBias: 0 as f32,
+                mipMapLevelOfDetailBias: 0.0,
                 maxAnisotropy: 4,
                 maxMipLevel: 0,
             },
@@ -451,13 +412,6 @@ impl Default for BlendState {
                 colorWriteEnable1: enums::ColorWriteChannels::All as u32,
                 colorWriteEnable2: enums::ColorWriteChannels::All as u32,
                 colorWriteEnable3: enums::ColorWriteChannels::All as u32,
-                //
-                // blendFactor: Color {
-                //     r: 255,
-                //     g: 255,
-                //     b: 255,
-                //     a: 255,
-                // },
                 blendFactor: Color::rgba(0xff, 0xff, 0xff, 0xff).raw(),
                 // TODO: what does it mean??
                 multiSampleMask: -1,
@@ -527,7 +481,10 @@ impl BlendState {
     pub fn raw_mut(&mut self) -> &mut sys::FNA3D_BlendState {
         &mut self.raw
     }
+}
 
+/// Accessors
+impl BlendState {
     // ----------------------------------------
     // Color blending
 
@@ -621,7 +578,7 @@ impl BlendState {
 // ----------------------------------------
 // DepthStencilState
 
-/// Depthstencil state
+/// Pipeline
 #[derive(Debug, Clone)]
 pub struct DepthStencilState {
     raw: sys::FNA3D_DepthStencilState,
