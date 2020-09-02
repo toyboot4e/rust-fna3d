@@ -103,7 +103,7 @@ impl Drop for Device {
 }
 
 impl Device {
-    pub fn raw(&self) -> *mut sys::FNA3D_Device {
+    pub fn raw_mut_ptr(&self) -> *mut sys::FNA3D_Device {
         self.raw
     }
 }
@@ -390,7 +390,7 @@ impl Device {
     ///   The new parameters to use for color blending.
     pub fn set_blend_state(&mut self, blend_state: &BlendState) {
         unsafe {
-            sys::FNA3D_SetBlendState(self.raw, blend_state.raw() as *const _ as *mut _);
+            sys::FNA3D_SetBlendState(self.raw, blend_state.raw_ref() as *const _ as *mut _);
         }
     }
 
@@ -404,7 +404,7 @@ impl Device {
         unsafe {
             sys::FNA3D_SetDepthStencilState(
                 self.raw,
-                depth_stencil_state.raw() as *const _ as *mut _,
+                depth_stencil_state.raw_ref() as *const _ as *mut _,
             );
         }
     }
@@ -417,7 +417,7 @@ impl Device {
     /// * `rasterizer_state`: The new parameters to use for rasterization work.
     pub fn apply_rasterizer_state(&mut self, rst: &RasterizerState) {
         unsafe {
-            sys::FNA3D_ApplyRasterizerState(self.raw, rst.raw() as *const _ as *mut _);
+            sys::FNA3D_ApplyRasterizerState(self.raw, rst.raw_ref() as *const _ as *mut _);
         }
     }
 

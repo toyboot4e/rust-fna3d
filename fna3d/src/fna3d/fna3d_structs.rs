@@ -160,7 +160,7 @@ impl Default for RasterizerState {
 }
 
 impl RasterizerState {
-    pub fn raw(&self) -> &sys::FNA3D_RasterizerState {
+    pub fn raw_ref(&self) -> &sys::FNA3D_RasterizerState {
         &self.raw
     }
 
@@ -474,7 +474,7 @@ impl BlendState {
 }
 
 impl BlendState {
-    pub fn raw(&self) -> &sys::FNA3D_BlendState {
+    pub fn raw_ref(&self) -> &sys::FNA3D_BlendState {
         &self.raw
     }
 
@@ -611,7 +611,7 @@ impl Default for DepthStencilState {
 
 /// Wrap enums and booleans
 impl DepthStencilState {
-    pub fn raw(&self) -> &sys::FNA3D_DepthStencilState {
+    pub fn raw_ref(&self) -> &sys::FNA3D_DepthStencilState {
         &self.raw
     }
 
