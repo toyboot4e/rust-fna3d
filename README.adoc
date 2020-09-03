@@ -7,7 +7,7 @@
 
 == Getting started?
 
-It onlt works on macOS for now.
+It only works on macOS for now.
 
 === Setting up dependency to FNA3D
 
@@ -31,7 +31,7 @@ Wrapper of https://github.com/FNA-XNA/FNA3D[FNA3D] in Rust
 
 == Overview
 
-It's intended be used to make an FNA-like framework.
+It's for making a higher-level framework on it!
 
 === What is FNA3D?
 
@@ -45,7 +45,7 @@ Note that Rust-FNA3D does NOT consider `Drop` and lifetimes, and they are delega
 
 == References
 
-=== Framework using FNA3D
+=== Framework using Rust-FNA3D
 
 I'm making one.
 

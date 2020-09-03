@@ -38,7 +38,7 @@ pub type Effect = sys::FNA3D_Effect;
 /// Disposed with a corresponding function in `Device`
 pub type Query = sys::FNA3D_Query;
 
-/// GPU texture
+/// 2D or 3D texture data stored in GPU memory
 ///
 /// Disposed with a corresponding function in `Device`
 pub type Texture = sys::FNA3D_Texture;

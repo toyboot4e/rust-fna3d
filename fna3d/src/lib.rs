@@ -1,26 +1,30 @@
-//! Wrapper of [FNA3D](https://github.com/FNA-XNA/FNA3D)
+//! Wrapper of [FNA3D]. It's for making a higher-level framework on it!
 //!
-//! Most functionalities are re-exported as [`Device`] methods. First call
-//! [`prepare_window_attributes`] then prepare your [`Device`].
+//! ## Usage
 //!
-//! # About
+//! First call [`prepare_window_attributes`] then prepare your [`Device`].
 //!
-//! FNA3D is the 3D graphics library for [FNA](https://fna-xna.github.io/) written in C99.
-//! `fna3d-sys` is Rust FFI to FNA3D and `fna3d` is a wrapper around `fna3d-sys`.
+//! Most functionalities are re-exported as [`Device`] methods.
 //!
-//! ## Meta
+//! ## What is FNA3D?
 //!
-//! There's a [module](./_meta/index.html) that explains how I made this wrapper.
+//! [XNA] is a famous 2D framework. [FNA] is a reimplementation of [XNA]. [FNA3D] is the 3D
+//! graphics library for [FNA] written in C99.
+//!
+//! `fna3d-sys` is Rust FFI to [FNA3D] generated with [bindgen]. `fna3d` is a wrapper around
+//! `fna3d-sys`.
 //!
 //! ## TODOs
 //!
-//! * Provide with hierachy of modules
+//! * Provide with a hierachy of modules.. or not
+//! * Explain what does exactly what in docstrings
 //!
+//! [XNA]: https://en.wikipedia.org/wiki/Microsoft_XNA
+//! [FNA]: https://fna-xna.github.io
+//! [FNA3D]: https://github.com/FNA-XNA/FNA3D
+//! [bindgen]: https://github.com/rust-lang/rust-bindgen
 //! [`prepare_window_attributes`]: ./fn.prepare_window_attributes.html
 //! [`Device`]: ./struct.Device.html
-
-pub use bitflags;
-pub use enum_primitive;
 
 // Rust FFI bindings to FNA3D. Probablly you don't have to touch it directly.
 pub use fna3d_sys as sys;
@@ -38,7 +42,7 @@ pub mod img;
 // mojoshader.h (exprted as `mojo`)
 pub mod mojo;
 
-pub mod _meta;
+pub mod _meta_;
 
 pub mod utils {
     //! Helpers to get started with Rust-FNA3D

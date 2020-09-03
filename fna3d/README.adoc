@@ -8,10 +8,4 @@ Wrapper of fna3d-sys
 
 == Overview
 
-`fna3d-sys` generates Rust FFI to FNA3D using https://github.com/rust-lang/rust-bindgen[bindgen]. `fna3d` wraps them in Rust code to makes it handy.
-
-Most functions are wrapped as methods of `Device`.
-
-== Policy
-
-* For `i32` type parameters, use `u32` then cast them to `i32` without considering safety (use of 32th bit)
+`fna3d-sys` generates Rust FFI to FNA3D using https://github.com/rust-lang/rust-bindgen[bindgen]. `fna3d` wraps them in handy Rust code.

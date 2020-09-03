@@ -1,7 +1,7 @@
 //! MojoShader types and some helpers
 //!
 //! Types are re-exported from MojoShader headers beucause `FNA3D.h` does not provide concrete
-//! definition
+//! definition.
 //!
 //! * TODO: wrap shader and provide with uniform accessors
 
@@ -11,13 +11,14 @@ pub type Effect = sys::mojo::MOJOSHADER_effect;
 pub type EffectTechnique = sys::mojo::MOJOSHADER_effectTechnique;
 pub type EffectStateChanges = sys::mojo::MOJOSHADER_effectStateChanges;
 
+/// FIXME: does it work well in any viewport size
 pub const ORTHOGRAPIHCS_MATRIX: [f32; 16] = [
-    0.0015625,
+    0.0015625, // 2.0 / viewport.w
     0.0,
     0.0,
     -1.0,
     0.0,
-    -0.00277777785,
+    -0.00277777785, // -2.0 / viewport.h
     0.0,
     1.0,
     0.0,

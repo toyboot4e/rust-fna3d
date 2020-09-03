@@ -1,4 +1,4 @@
-//! Explains how to make a C wrapper
+//! Explains how to make a C wrapper.. not Rust-FNA3D itself
 //!
 //! Note that bundling C binary (DLL) is out of scope of this document.
 //!

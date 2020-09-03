@@ -636,7 +636,7 @@ impl Device {
 /// Textures
 /// ---
 impl Device {
-    /// Creates a 2D texture to be applied to verify_sampler.
+    /// Creates a 2D texture to be applied to `verify_sampler`
     ///
     /// * `fmt`:
     ///   The pixel format of the texture data.
@@ -1533,7 +1533,7 @@ impl Device {
         unsafe { sys::FNA3D_SupportsNoOverwrite(self.raw) != 0 }
     }
 
-    /// Returns the number of sampler slots supported by the renderer.
+    /// Returns the number of sampler slots supported by the renderer (texture, vertex_texture)
     pub fn get_max_texture_slots(
         &self,
         // FIXME: this..
