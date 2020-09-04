@@ -329,7 +329,7 @@ impl Device {
     ///
     /// * `blend_factor`:
     ///   Filled with color being used as the device blend factor.
-    pub fn get_blend_factor(&mut self, mut blend_factor: Color) {
+    pub fn get_blend_factor(&mut self, blend_factor: Color) {
         unsafe {
             sys::FNA3D_GetBlendFactor(self.raw, &mut blend_factor.raw() as *mut _);
         }
@@ -338,7 +338,7 @@ impl Device {
     /// Sets the blending factor used for future draw calls.
     ///
     /// * `blend_factor`: The color to use as the device blend factor.
-    pub fn set_blend_factor(&mut self, mut blend_factor: Color) {
+    pub fn set_blend_factor(&mut self, blend_factor: Color) {
         unsafe {
             sys::FNA3D_SetBlendFactor(self.raw, &mut blend_factor.raw() as *mut _);
         }

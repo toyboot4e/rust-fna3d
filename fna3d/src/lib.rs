@@ -8,16 +8,11 @@
 //!
 //! ## What is FNA3D?
 //!
-//! [XNA] is a famous 2D framework. [FNA] is a reimplementation of [XNA]. [FNA3D] is the 3D
+//! [XNA] is a famous game framework. [FNA] is a reimplementation of [XNA]. [FNA3D] is the 3D
 //! graphics library for [FNA] written in C99.
 //!
 //! `fna3d-sys` is Rust FFI to [FNA3D] generated with [bindgen]. `fna3d` is a wrapper around
 //! `fna3d-sys`.
-//!
-//! ## TODOs
-//!
-//! * Provide with a hierachy of modules.. or not
-//! * Explain what does exactly what in docstrings
 //!
 //! [XNA]: https://en.wikipedia.org/wiki/Microsoft_XNA
 //! [FNA]: https://fna-xna.github.io
@@ -26,7 +21,6 @@
 //! [`prepare_window_attributes`]: ./fn.prepare_window_attributes.html
 //! [`Device`]: ./struct.Device.html
 
-// Rust FFI bindings to FNA3D. Probablly you don't have to touch it directly.
 pub use fna3d_sys as sys;
 
 // FNA3D.h (re-exported to the root)
@@ -46,8 +40,8 @@ pub mod _meta_;
 
 pub mod utils {
     //! Helpers to get started with Rust-FNA3D
-    //!
-    //! * TODO: remove this module
+
+    pub use enum_primitive::FromPrimitive;
 
     use fna3d_sys as sys;
     use std::os::raw::c_void;

@@ -1,61 +1,40 @@
-//! Explains how to make a C wrapper.. not Rust-FNA3D itself
+//! Notes, not Rust-FNA3D itself
 //!
-//! Note that bundling C binary (DLL) is out of scope of this document.
+//! # Tips for using `fna3d`
 //!
-//! # Guide to making a wrapper for a C library
+//! If you're new to graphics:
+//!
+//! * You may want to know about rendering pipeline to use FNA3D. That can be learned by reading
+//!   some tutorial on a specific low-level graphics API. One example is [learnopengl.com];
+//!   it's a good read and although OpenGL is an old API, it still maps well to FNA3D or other
+//!   APIs.
+//!
+//! [learnopengl.com]: https://learnopengl.com/
+//!
+//! * You may want to structure multiple structs in FNA3D into one. For example, FNA3D doesn't have
+//!   resource binding struct or pipeline object as [Sokol] does. [`miniquad`], which is inspired
+//!   by Sokol, can also be a good learning resource.
+//!
+//! [Sokol]: https://github.com/floooh/sokol/blob/master/sokol_gfx.h
+//! [`miniquad`]: https://docs.rs/miniquad/
+//!
+//! # Guide to making a wrapper of a C library
 //!
 //! The follows explain what Rust-FNA3D takes care to wrap Rust-FNA3D-sys, which is Rust FFI
 //! bindings to FNA3D generated with [`bindgen`](https://github.com/rust-lang/rust-bindgen).
+//!
+//! Note that bundling C binary (DLL) is out of scope of this document.
 //!
 //! ## References
 //!
 //! * [FFI - The Rustonomicon](https://doc.rust-lang.org/nomicon/ffi.html#foreign-function-interface)
 //! * [The (unofficial) Rust FFI Guide](https://michael-f-bryan.github.io/rust-ffi-guide/)
 //!
-//! ## 1. Output of `bindgen`
+//! ## 1. `build.rs`
 //!
-//! We need to wrap the output of `bindgen` using rusty types to provide with a cozy interface.
+//! Let's setup our build script and automate compling & bundling C libraries.
 //!
-//! ### 1-1 enums, bit flags and booleans
-//!
-//! Since C is loosly typed, `bindgen` translates `enum` s as `u32` and `bool` s as `u8`. But they
-//! should be accessed via `SomeEnumType` or `bool` in Rust. So we wrap `bindgen` functions with
-//! ours.
-//!
-//! I'm using these crates:
-//!
-//! * `enum_primitive`: to generate `enum` s from primitive values
-//! * `bitflags`: for making bit flags
-//!
-//! ### 1-2 Zero-sized structs
-//!
-//! They are used to represent a pointer type. Example:
-//!
-//! ```
-//! #[repr(C)]
-//! #[derive(Debug, Copy, Clone)]
-//! pub struct FNA3D_Device {
-//!     _unused: [u8; 0],
-//! }
-//! ```
-//!
-//! ### 1-3. `*c_void`
-//!
-//! It is used to represent e.g. a function pointer or a pointer to an unknown type. There's a
-//! [corresponding page] in Rust nomicon.
-//!
-//! [corresponding page]: https://doc.rust-lang.org/nomicon/ffi.html#representing-opaque-structs
-//!
-//! ### 1-4. structs
-//!
-//! They are `Copy` be default and it's unfortunate if the C `struct` is big. Also, as I mentioned
-//! in `1-2`, some types of fields are loosely typed. So I wrapped C structs with another (which may
-//! not be `Copy`), hid fields and provided with accessor methods for them.
-//!
-//! This is a lot of work and ridiculous. Maybe macros could be used (though I didn't...)
-//!
-//! You may not need to wrap C structs in such a way, especially when they are used in internals
-//! and hidden under rusty APIs in high level crates.
+//! Here I only consider the case where we use `cmake`. WIP
 //!
 //! ## 2. Wrapping constants
 //!
@@ -63,7 +42,7 @@
 //!
 //! ### 2-1. Wrapping constants to an enum
 //!
-//! NOTE: this is in case where we don't use the `rustified-enum` option of `bindgen`.
+//! NOTE: this is the case where we don't use the `rustified-enum` option of `bindgen`.
 //!
 //! Consider the constants as an example:
 //!
@@ -86,6 +65,13 @@
 //!         Bits32 = sys::FNA3D_IndexElementSize_FNA3D_INDEXELEMENTSIZE_32BIT,
 //!     }
 //! }
+//! ```
+//!
+//! Now `IndexElementSize` can be created from u32:
+//!
+//! ```no_run
+//! use fna3d::{IndexElementSize, utils::FromPrimitive};
+//! assert_eq!(IndexElementSize::from_u32(0), Some(IndexElementSize::Bits16));
 //! ```
 //!
 //! [enum_primitive](https://crates.io/crates/enum_primitive) crate was used to implement

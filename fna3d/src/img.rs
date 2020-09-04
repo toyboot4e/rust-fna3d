@@ -12,9 +12,9 @@
 //!
 //! # Example (presudo code)
 //!
-//! ```
-//! pub struct MyTexure2D {
-//!     raw: fna3d::Texture2D,
+//! ```no_run
+//! pub struct MyTexture2D {
+//!     raw: fna3d::Texture,
 //!     w: u32,
 //!     h: u32,
 //! }
@@ -29,7 +29,7 @@
 //!             return None;
 //!         }
 //!
-//!         let texture = { /* load texture 2D */ }l
+//!         let texture: MyTexture2D = unimplemented!();
 //!
 //!         fna3d::img::free(pixels_ptr as *mut _);
 //!

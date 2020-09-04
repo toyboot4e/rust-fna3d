@@ -41,7 +41,7 @@ enum_from_primitive! {
 }
 
 bitflags::bitflags! {
-    /// `Device::clear` argument that specifies the buffers for clearing
+    /// `Device::clear` argument, which specifies the buffers for clearing
     pub struct ClearOptions: u32 {
         /// Color buffer
         const TARGET = sys::FNA3D_ClearOptions_FNA3D_CLEAROPTIONS_TARGET;
@@ -195,7 +195,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
-    /// `BlendState` component that specifies blend mode
+    /// `BlendState` component, which specifies blend mode
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum Blend {
@@ -238,7 +238,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
-    /// `BlendState` component that specifies function for color blending
+    /// `BlendState` component, whivh specifies function for color blending
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum BlendFunction {
@@ -258,7 +258,7 @@ enum_from_primitive! {
 enum_from_primitive! {
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
-    /// `BlendState` component that specifies color channels for render target blending operations
+    /// `BlendState` component, which specifies color channels for render target blending operations
     pub enum ColorWriteChannels {
         None = sys::FNA3D_ColorWriteChannels_FNA3D_COLORWRITECHANNELS_NONE,
         Red = sys::FNA3D_ColorWriteChannels_FNA3D_COLORWRITECHANNELS_RED,
@@ -325,7 +325,7 @@ enum_from_primitive! {
 enum_from_primitive! {
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
-    /// `SamplerState` component that specifies texture coordinates addressing method
+    /// `SamplerState` component, which specifies texture coordinates addressing method
     ///
     /// Applied for texture coordinates that are outside of range [0.0, 1.0]
     pub enum TextureAddressMode {
@@ -340,7 +340,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
-    /// `SamplerState` component that specifies filtering types
+    /// `SamplerState` component, which specifies filtering types
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum TextureFilter {
@@ -357,7 +357,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
-    /// `VertexElement` component that specifies the data type
+    /// `VertexElement` component, which specifies the data type
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum VertexElementFormat {
@@ -396,7 +396,7 @@ impl VertexElementFormat {
 }
 
 enum_from_primitive! {
-    /// `VertexElement` component that specifies its usage
+    /// `VertexElement` component, which specifies its usage
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum VertexElementUsage {
