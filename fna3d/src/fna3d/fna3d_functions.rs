@@ -6,8 +6,11 @@ pub fn linked_version() -> u32 {
     unsafe { sys::FNA3D_LinkedVersion() }
 }
 
-/// [SDL_WindowFlags](https://wiki.libsdl.org/SDL_WindowFlags), which is used for
-/// [SDL_CreateWindow](https://wiki.libsdl.org/SDL_CreateWindow)
+/// [Newtype] of untyped [SDL_WindowFlags], which is used for [SDL_CreateWindow]
+///
+/// [Newtype]: https://doc.rust-lang.org/stable/rust-by-example/generics/new_types.html
+/// [SDL_WindowFlags]: https://wiki.libsdl.org/SDL_WindowFlags
+/// [SDL_CreateWindow]: https://wiki.libsdl.org/SDL_CreateWindow
 pub struct SdlWindowFlags(pub u32);
 
 // Init/Quit

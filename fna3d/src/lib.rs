@@ -87,4 +87,18 @@ pub mod utils {
             // renderTargetUsage: enums::RenderTargetUsage::PlatformContents as u32,
         }
     }
+
+    bitflags::bitflags! {
+        /// TODO: use this type in API
+        pub struct ColorMask: u32 {
+            const NONE = 1;
+            const R = 1 << 0;
+            const G = 1 << 1;
+            const B = 1 << 2;
+            const A = 1 << 3;
+            const RGB = 0x7; // R | G | B
+            const RGBA = 0xF; // R | G | B | A
+            // const FORCE_U32 = 0x7FFFFFF;
+        }
+    }
 }

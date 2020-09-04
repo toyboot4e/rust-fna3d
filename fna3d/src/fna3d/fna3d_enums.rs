@@ -171,9 +171,7 @@ enum_from_primitive! {
 enum_from_primitive! {
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
-    /// Vertex/index buffer component
-    ///
-    /// Hint for optimizing memory placement of graphics buffers.
+    /// Vertex/index buffer component, which hints optimization of memory placement
     pub enum BufferUsage {
         None = sys::FNA3D_BufferUsage_FNA3D_BUFFERUSAGE_NONE,
         WriteOnly = sys::FNA3D_BufferUsage_FNA3D_BUFFERUSAGE_WRITEONLY,
@@ -359,7 +357,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
-    /// `VertexElement` component that specifies its type
+    /// `VertexElement` component that specifies the data type
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum VertexElementFormat {

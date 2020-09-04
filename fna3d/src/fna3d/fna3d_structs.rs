@@ -80,7 +80,10 @@ impl Color {
             w: self.raw.a as f32 / 255.0,
         }
     }
+}
 
+/// Constructors
+impl Color {
     pub fn rgba(r: u8, g: u8, b: u8, a: u8) -> Self {
         Self {
             raw: sys::FNA3D_Color {

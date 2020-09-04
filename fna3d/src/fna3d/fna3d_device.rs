@@ -765,7 +765,6 @@ impl Device {
     pub fn set_texture_data_2d(
         &mut self,
         texture: *mut Texture,
-        fmt: enums::SurfaceFormat,
         x: u32,
         y: u32,
         w: u32,
