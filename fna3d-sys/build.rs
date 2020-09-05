@@ -5,59 +5,59 @@
 //! * [The `bindgen` User Guide](https://rust-lang.github.io/rust-bindgen/)
 //! * [Build Scripts - The Cargo Book](https://doc.rust-lang.org/cargo/reference/build-scripts.html#case-study-building-some-native-code)
 
+use cmake::Config;
 use std::{
-    env,
+    env, fs,
     path::{Path, PathBuf},
 };
 
-type Result<T> = ::std::result::Result<T, Box<dyn ::std::error::Error>>;
+// type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
-fn main() -> Result<()> {
-    // link `libFNA3D.dylib` from absolute path (TODO: bundle FNA on release build)
-    self::setup_lib_paths();
-
-    println!("cargo:rustc-link-lib=dylib=FNA3D");
+fn main() {
+    run_cmake();
 
     self::gen_bindings("fna3d_wrapper.h", "fna3d_bindings.rs");
     self::gen_bindings("mojoshader_wrapper.h", "mojoshader_bindings.rs");
-
-    Ok(())
 }
 
-/// Absolute path string to the directory where `libFNA3D.dylib` is
-fn fna3d_abs_path() -> String {
+fn run_cmake() {
     let root = env::var("CARGO_MANIFEST_DIR").unwrap();
-    format!("{}/FNA3D/build", root)
-}
+    let root = PathBuf::from(root);
 
-/// Somehow this is required on macOS
-///
-/// If this function is skipped, such an error occurs:
-///
-/// ```
-/// ld: Library not loaded: @rpath/libFNA3D.0.dylib
-///   Referenced from: /Users/toy/dev/rs/rust-fna3d/target/debug/deps/fna3d_sys-5727a581b25bfeea
-///   Reason: image not found
-/// ```
-fn setup_lib_paths() {
-    let fna = self::fna3d_abs_path();
-    println!("cargo:rustc-env=LD_LIBRARY_PATH={}", fna);
-    println!("cargo:rustc-env=LIBRARY_PATH={}", fna);
-    // we don't need this?
-    println!("cargo:rustc-env=DYLD_LIBRARY_PATH={}", fna);
+    {
+        let path = root.join("FNA3D/MojoShader");
+        // env::set_current_dir(path).unwrap();
+        let out = Config::new(path)
+            .cflag("-DMOJOSHADER_EFFECT_SUPPORT")
+            .build();
 
-    // println!("cargo:rustc-link-search=native={}", fna);
+        // let name = out.file_stem().unwrap().to_str().unwrap();
+        let name = out.display();
+        println!("cargo:rustc-link-search=native={}", name);
+        println!("cargo:rustc-link-lib=static=mojoshader");
+    }
+
+    {
+        let path = root.join("FNA3D");
+        // env::set_current_dir(path).unwrap();
+        let out = Config::new(path)
+            .cflag("-DMOJOSHADER_EFFECT_SUPPORT")
+            .build();
+
+        // let name = out.file_stem().unwrap().to_str().unwrap();
+        let name = out.display();
+        println!("cargo:rustc-link-search=native={}", name);
+        println!("cargo:rustc-link-lib=dylib=FNA3D");
+    }
 }
 
 /// Generates bindings using a wrapper header file
-fn gen_bindings(wrapper: impl AsRef<Path>, dest_file_name: impl AsRef<Path>) {
-    let wrapper = wrapper.as_ref();
-    let dest = {
-        // You may want to know about `OUT_DIR`:
-        // https://doc.rust-lang.org/cargo/reference/environment-variables.html#environment-variables-cargo-sets-for-build-scripts
-        let root = PathBuf::from(env::var("OUT_DIR").unwrap());
-        root.join(dest_file_name)
-    };
+fn gen_bindings(wrapper_path: impl AsRef<Path>, dest_file_name: impl AsRef<Path>) {
+    let wrapper = wrapper_path.as_ref();
+    let dest_file_name = dest_file_name.as_ref();
+
+    let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
+    let dest = out_dir.join(&dest_file_name);
 
     println!("cargo:rerun-if-changed={}", wrapper.display());
     let bindings = bindgen::Builder::default()
@@ -68,9 +68,14 @@ fn gen_bindings(wrapper: impl AsRef<Path>, dest_file_name: impl AsRef<Path>) {
         // included header files changed.
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
         .generate()
-        .expect("Unable to generate bindings");
+        .unwrap_or_else(|_| {
+            panic!(
+                "Unable to generate bindings for {}",
+                dest_file_name.display()
+            )
+        });
 
     bindings
         .write_to_file(&dest)
-        .expect("Couldn't write bindings!");
+        .unwrap_or_else(|_| panic!("Couldn't write bindings for {}", dest_file_name.display()));
 }
