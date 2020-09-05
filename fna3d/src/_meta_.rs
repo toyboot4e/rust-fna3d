@@ -188,20 +188,18 @@
 //! }
 //! ```
 //!
+//! * [x] casting to `*mut T`
+//!
+//! We don't need mutability to get type `*mut T`:
+//!
+//! * `*mut T` can be casted from `*const T` (or directly from `&mut T` or `&mut [T]`)
+//! * `*const T` can be casted from `&T` or `&[T]`
+//!
+//! So `value as *const _ as *mut _` is sufficient.
+//!
+//! In reverse, `value: *mut T` can be casted to `&mut T` as this: `&mut *(value as *mut T)`.
+//!
 //! ### 3-3. Trait implementations
 //!
 //! * [x] `Debug`, `Clone`
 //! * [x] `Default`
-//!
-//! ### 3-4. Mutability
-//!
-//! `*T` type can be created from any of `&T`, `&[T]` and `&mut [T]`. You mave have to cast twice.
-//!
-//! TODO: Examples
-//!
-//! ## Adding lifetimes
-//!
-//! TODO
-//!
-//! * FNA3D_Device
-//! * texture

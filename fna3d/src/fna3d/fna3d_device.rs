@@ -6,22 +6,13 @@ use std::{
     ptr,
 };
 
-use fna3d_sys as sys;
-
 use crate::{
     fna3d::{fna3d_enums as enums, fna3d_structs::*},
     mojo,
 };
 use enum_primitive::*;
 
-// TODO: refine API
-
-// TODO: i32 vs u32 (vs usize) for indices or width/height
-// TODO: option vs raw pointer
-// TODO: actually some `&mut` are semantically `&self`
-// TODO: memory managenemt and lifetimes
-// TODO: method to convert each enum to u32 (maybe use `to_repr`)
-// TODO: do we need buf_offsets_in_bytes? (maybe slice it before calling corresponding functions)
+use fna3d_sys::*;
 
 // --------------------------------------------------------------------------------
 // Helpers
@@ -61,49 +52,49 @@ impl<'a, T> AsMutPtr<T> for Option<&'a mut T> {
 ///
 /// # Dispose
 ///
-/// - `Buffer`
-/// - `Renderbuffer`
-/// - `Effect`
-/// - `Query`
-/// - `Texture`
+/// - [`Buffer`]
+/// - [`Renderbuffer`]
+/// - [`Effect`]
+/// - [`Query`]
+/// - [`Texture`]
 ///
 /// # Initialization
 ///
 /// It's required to set viewport/rasterizer/blend state. **If this is skipped, we can't draw
 /// anything** (we only can clear the screen):
 ///
-/// * `FNA3D_SetViewport`
-/// * `FNA3D_ApplyRasterizerState`
-/// * `FNA3D_SetBlendState`
+/// * [`FNA3D_SetViewport`]
+/// * [`FNA3D_ApplyRasterizerState`]
+/// * [`FNA3D_SetBlendState`]
 ///
 /// # Rendering cycle
 ///
 /// For each frame:
 ///
-/// * `FNA3D_Clear`
+/// * [`FNA3D_Clear`]
 /// * for each draw call:
 ///     * reset shader uniform
-///     * `FNA3D_ApplyEffect`
-///     * `FNA3D_SetVertexData`
-///     * `FNA3D_VerifySamplerState`
-///     * `FNA3D_ApplyVertexBufferBindings`
-///     * `FNA3D_DrawIndexedPrimitives`
-/// * `FNA3D_SwapBuffers`
+///     * [`FNA3D_ApplyEffect`]
+///     * [`FNA3D_SetVertexData`]
+///     * [`FNA3D_VerifySamplerState`]
+///     * [`FNA3D_ApplyVertexBufferBindings`]
+///     * [`FNA3D_DrawIndexedPrimitives`]
+/// * [`FNA3D_SwapBuffers`]
 pub struct Device {
-    raw: *mut sys::FNA3D_Device,
+    raw: *mut FNA3D_Device,
 }
 
 // TODO: proper drop
 impl Drop for Device {
     fn drop(&mut self) {
         unsafe {
-            sys::FNA3D_DestroyDevice(self.raw);
+            FNA3D_DestroyDevice(self.raw);
         };
     }
 }
 
 impl Device {
-    pub fn raw_mut_ptr(&self) -> *mut sys::FNA3D_Device {
+    pub fn raw_mut_ptr(&self) -> *mut FNA3D_Device {
         self.raw
     }
 }
@@ -123,13 +114,13 @@ impl Device {
     /// the thread that it was created on!
     pub fn from_params(mut params: PresentationParameters, do_debug: bool) -> Self {
         Self {
-            raw: unsafe { sys::FNA3D_CreateDevice(&mut params, do_debug as u8) },
+            raw: unsafe { FNA3D_CreateDevice(&mut params, do_debug as u8) },
         }
     }
 
     pub fn destroy(self) {
         unsafe {
-            sys::FNA3D_DestroyDevice(self.raw);
+            FNA3D_DestroyDevice(self.raw);
         }
     }
 }
@@ -139,21 +130,22 @@ impl Device {
 impl Device {
     /// Presents the backbuffer to the window.
     ///
-    /// * `src`: The region of the buffer to present (or None).
-    /// * `dest`: The region of the window to update (or None).
-    /// * `override_window_handle`: The OS window handle (not really "overridden").
+    /// * `src`:
+    ///   The region of the buffer to present (or None).
+    /// * `dest`:
+    ///   The region of the window to update (or None).
+    /// * `override_window_handle`:
+    ///   The OS window handle (not really "overridden").
     pub fn swap_buffers(
         &mut self,
-        // TODO: different function name for (None, None)?
         mut src: Option<Rect>,
         mut dest: Option<Rect>,
-        // TODO: wrap it
         override_window_handle: *mut c_void,
     ) {
         let src = src.as_mut().as_mut_ptr();
         let dest = dest.as_mut().as_mut_ptr();
         unsafe {
-            sys::FNA3D_SwapBuffers(self.raw, src, dest, override_window_handle);
+            FNA3D_SwapBuffers(self.raw, src, dest, override_window_handle);
         }
     }
 }
@@ -162,8 +154,8 @@ impl Device {
 /// ---
 ///
 /// A "draw call" is actually a call of a drawing function, which is often
-/// `FNA3D_DrawIndexedPrimitives` in FNA3D. Vertex data and sampler state (which contains textures)
-/// are set with other methods.
+/// [`FNA3D_DrawIndexedPrimitives`] in FNA3D. Vertex data and sampler state (which contains
+/// textures) are set with other methods.
 impl Device {
     /// Clears the active draw buffers of any previous contents.
     ///
@@ -177,7 +169,7 @@ impl Device {
     ///   The new value of the cleared stencil buffer.
     pub fn clear(&mut self, options: enums::ClearOptions, color: Color, depth: f32, stencil: i32) {
         unsafe {
-            sys::FNA3D_Clear(
+            FNA3D_Clear(
                 self.raw,
                 options.bits(),
                 &mut color.as_vec4() as *mut _,
@@ -215,9 +207,9 @@ impl Device {
         index_elem_size: enums::IndexElementSize,
     ) {
         unsafe {
-            sys::FNA3D_DrawIndexedPrimitives(
+            FNA3D_DrawIndexedPrimitives(
                 self.raw,
-                type_ as sys::FNA3D_PrimitiveType,
+                type_ as FNA3D_PrimitiveType,
                 start_vertex as i32,
                 // min_vertex_index,
                 -1, // this is just for XNA compatibility and is ignored
@@ -226,7 +218,7 @@ impl Device {
                 start_index as i32,
                 n_primitives as i32,
                 indices,
-                index_elem_size as sys::FNA3D_IndexElementSize,
+                index_elem_size as FNA3D_IndexElementSize,
             );
         }
     }
@@ -250,9 +242,9 @@ impl Device {
         index_elem_size: enums::IndexElementSize,
     ) {
         unsafe {
-            sys::FNA3D_DrawInstancedPrimitives(
+            FNA3D_DrawInstancedPrimitives(
                 self.raw,
-                type_ as sys::FNA3D_PrimitiveType,
+                type_ as FNA3D_PrimitiveType,
                 base_vertex,
                 min_vertex_index,
                 num_vertices,
@@ -260,7 +252,7 @@ impl Device {
                 prim_count,
                 instance_count,
                 indices,
-                index_elem_size as sys::FNA3D_IndexElementSize,
+                index_elem_size as FNA3D_IndexElementSize,
             );
         }
     }
@@ -284,9 +276,9 @@ impl Device {
         let vertex_start = vertex_start as i32;
         let prim_count = prim_count as i32;
         unsafe {
-            sys::FNA3D_DrawPrimitives(
+            FNA3D_DrawPrimitives(
                 self.raw,
-                type_ as sys::FNA3D_PrimitiveType,
+                type_ as FNA3D_PrimitiveType,
                 vertex_start,
                 prim_count,
             );
@@ -308,7 +300,7 @@ impl Device {
     ///   The new view dimensions for future draw calls.
     pub fn set_viewport(&mut self, viewport: &Viewport) {
         unsafe {
-            sys::FNA3D_SetViewport(self.raw, viewport as *const _ as *mut _);
+            FNA3D_SetViewport(self.raw, viewport as *const _ as *mut _);
         }
     }
 
@@ -321,7 +313,7 @@ impl Device {
     ///   The new scissor box for future draw calls.
     pub fn set_scissor_rect(&mut self, scissor: &Rect) {
         unsafe {
-            sys::FNA3D_SetScissorRect(self.raw, scissor as *const _ as *mut _);
+            FNA3D_SetScissorRect(self.raw, scissor as *const _ as *mut _);
         }
     }
 
@@ -331,7 +323,7 @@ impl Device {
     ///   Filled with color being used as the device blend factor.
     pub fn get_blend_factor(&mut self, blend_factor: Color) {
         unsafe {
-            sys::FNA3D_GetBlendFactor(self.raw, &mut blend_factor.raw() as *mut _);
+            FNA3D_GetBlendFactor(self.raw, &mut blend_factor.raw() as *mut _);
         }
     }
 
@@ -340,7 +332,7 @@ impl Device {
     /// * `blend_factor`: The color to use as the device blend factor.
     pub fn set_blend_factor(&mut self, blend_factor: Color) {
         unsafe {
-            sys::FNA3D_SetBlendFactor(self.raw, &mut blend_factor.raw() as *mut _);
+            FNA3D_SetBlendFactor(self.raw, &mut blend_factor.raw() as *mut _);
         }
     }
 
@@ -348,7 +340,7 @@ impl Device {
     ///
     /// Returns the coverage mask used to determine sample locations.
     pub fn get_multi_sample_mask(&self) -> i32 {
-        unsafe { sys::FNA3D_GetMultiSampleMask(self.raw) }
+        unsafe { FNA3D_GetMultiSampleMask(self.raw) }
     }
 
     /// Sets the reference value used for certain types of stencil testing.
@@ -356,7 +348,7 @@ impl Device {
     /// * `ref`: The new stencil reference value.
     pub fn set_multi_sample_mask(&mut self, mask: i32) {
         unsafe {
-            sys::FNA3D_SetMultiSampleMask(self.raw, mask);
+            FNA3D_SetMultiSampleMask(self.raw, mask);
         }
     }
 
@@ -364,7 +356,7 @@ impl Device {
     ///
     /// Returns the stencil reference value.
     pub fn get_reference_stencil(&self) -> i32 {
-        unsafe { sys::FNA3D_GetReferenceStencil(self.raw) }
+        unsafe { FNA3D_GetReferenceStencil(self.raw) }
     }
 
     /// Sets the reference value used for certain types of stencil testing.
@@ -372,7 +364,7 @@ impl Device {
     /// * `ref`: The new stencil reference value.
     pub fn set_reference_stencil(&mut self, ref_: i32) {
         unsafe {
-            sys::FNA3D_SetReferenceStencil(self.raw, ref_);
+            FNA3D_SetReferenceStencil(self.raw, ref_);
         }
     }
 }
@@ -390,7 +382,7 @@ impl Device {
     ///   The new parameters to use for color blending.
     pub fn set_blend_state(&mut self, blend_state: &BlendState) {
         unsafe {
-            sys::FNA3D_SetBlendState(self.raw, blend_state.raw_ref() as *const _ as *mut _);
+            FNA3D_SetBlendState(self.raw, blend_state.raw_ref() as *const _ as *mut _);
         }
     }
 
@@ -402,7 +394,7 @@ impl Device {
     ///   The new parameters to use for depth/stencil work.
     pub fn set_depth_stencil_state(&mut self, depth_stencil_state: &DepthStencilState) {
         unsafe {
-            sys::FNA3D_SetDepthStencilState(
+            FNA3D_SetDepthStencilState(
                 self.raw,
                 depth_stencil_state.raw_ref() as *const _ as *mut _,
             );
@@ -417,7 +409,7 @@ impl Device {
     /// * `rasterizer_state`: The new parameters to use for rasterization work.
     pub fn apply_rasterizer_state(&mut self, rst: &RasterizerState) {
         unsafe {
-            sys::FNA3D_ApplyRasterizerState(self.raw, rst.raw_ref() as *const _ as *mut _);
+            FNA3D_ApplyRasterizerState(self.raw, rst.raw_ref() as *const _ as *mut _);
         }
     }
 
@@ -433,11 +425,11 @@ impl Device {
     ///   The new parameters to use for this slot's texture sampling.
     pub fn verify_sampler(&mut self, index: i32, texture: *mut Texture, sampler: &SamplerState) {
         unsafe {
-            sys::FNA3D_VerifySampler(
+            FNA3D_VerifySampler(
                 self.raw,
                 index,
                 texture,
-                sampler as *const _ as *const sys::FNA3D_SamplerState as *mut _,
+                sampler as *const _ as *const FNA3D_SamplerState as *mut _,
             );
         }
     }
@@ -459,11 +451,11 @@ impl Device {
         sampler: &SamplerState,
     ) {
         unsafe {
-            sys::FNA3D_VerifyVertexSampler(
+            FNA3D_VerifyVertexSampler(
                 self.raw,
                 index,
                 texture,
-                sampler as *const _ as *mut sys::FNA3D_SamplerState,
+                sampler as *const _ as *mut FNA3D_SamplerState,
             );
         }
     }
@@ -494,7 +486,7 @@ impl Device {
         base_vertex: i32,
     ) {
         unsafe {
-            sys::FNA3D_ApplyVertexBufferBindings(
+            FNA3D_ApplyVertexBufferBindings(
                 self.raw,
                 bindings.as_ptr() as *mut _,
                 bindings.len() as i32,
@@ -531,12 +523,12 @@ impl Device {
         preserve_depth_stencil_contents: bool,
     ) {
         unsafe {
-            sys::FNA3D_SetRenderTargets(
+            FNA3D_SetRenderTargets(
                 self.raw,
                 render_targets.as_mut_ptr(),
                 num_render_targets as i32,
                 depth_stencil_buffer.as_mut_ptr(),
-                depth_format as sys::FNA3D_DepthFormat,
+                depth_format as FNA3D_DepthFormat,
                 preserve_depth_stencil_contents as u8,
             );
         }
@@ -548,7 +540,7 @@ impl Device {
     /// * `target`: The render target to resolve once rendering is complete.
     pub fn resolve_target(&mut self, target: &mut RenderTargetBinding) {
         unsafe {
-            sys::FNA3D_ResolveTarget(self.raw, target);
+            FNA3D_ResolveTarget(self.raw, target);
         }
     }
 
@@ -558,7 +550,7 @@ impl Device {
     /// * `params`: The new settings for the backbuffer.
     pub fn reset_backbuffer(&mut self, params: &mut PresentationParameters) {
         unsafe {
-            sys::FNA3D_ResetBackbuffer(self.raw, params as *mut _);
+            FNA3D_ResetBackbuffer(self.raw, params as *mut _);
         }
     }
 
@@ -589,7 +581,7 @@ impl Device {
         data_len: i32,
     ) {
         unsafe {
-            sys::FNA3D_ReadBackbuffer(self.raw, x, y, w, h, data, data_len);
+            FNA3D_ReadBackbuffer(self.raw, x, y, w, h, data, data_len);
         }
     }
 
@@ -602,7 +594,7 @@ impl Device {
     pub fn get_backbuffer_size(&mut self) -> (i32, i32) {
         let (mut w, mut h) = (0, 0);
         unsafe {
-            sys::FNA3D_GetBackbufferSize(self.raw, &mut w, &mut h);
+            FNA3D_GetBackbufferSize(self.raw, &mut w, &mut h);
         }
         (w, h)
     }
@@ -611,7 +603,7 @@ impl Device {
     ///
     /// Returns the backbuffer's pixel format.
     pub fn get_backbuffer_surface_format(&self) -> enums::SurfaceFormat {
-        let prim = unsafe { sys::FNA3D_GetBackbufferSurfaceFormat(self.raw) };
+        let prim = unsafe { FNA3D_GetBackbufferSurfaceFormat(self.raw) };
         // FIXME: is it ok to unwrap??
         enums::SurfaceFormat::from_u32(prim).unwrap()
     }
@@ -620,7 +612,7 @@ impl Device {
     ///
     /// Returns the backbuffer's depth/stencil format.
     pub fn get_backbuffer_depth_format(&self) -> enums::DepthFormat {
-        let prim = unsafe { sys::FNA3D_GetBackbufferDepthFormat(self.raw) };
+        let prim = unsafe { FNA3D_GetBackbufferDepthFormat(self.raw) };
         // FIXME: is it ok to unwrap??
         enums::DepthFormat::from_u32(prim).unwrap()
     }
@@ -629,7 +621,7 @@ impl Device {
     ///
     /// Returns the backbuffer's multisample sample count.
     pub fn get_backbuffer_multi_sample_count(&self) -> i32 {
-        unsafe { sys::FNA3D_GetBackbufferMultiSampleCount(self.raw) }
+        unsafe { FNA3D_GetBackbufferMultiSampleCount(self.raw) }
     }
 }
 
@@ -660,7 +652,7 @@ impl Device {
         is_render_target: bool,
     ) -> *mut Texture {
         unsafe {
-            sys::FNA3D_CreateTexture2D(
+            FNA3D_CreateTexture2D(
                 self.raw,
                 fmt as u32,
                 w as i32,
@@ -695,9 +687,7 @@ impl Device {
         level_count: i32,
         // TODO: maybe make a wrapper
     ) -> *mut Texture {
-        unsafe {
-            sys::FNA3D_CreateTexture3D(self.raw, fmt as u32, width, height, depth, level_count)
-        }
+        unsafe { FNA3D_CreateTexture3D(self.raw, fmt as u32, width, height, depth, level_count) }
     }
 
     /// Creates a texture cube to be applied to `verify_sampler`.
@@ -722,7 +712,7 @@ impl Device {
         // TODO: maybe make a wrapper
     ) -> *mut Texture {
         unsafe {
-            sys::FNA3D_CreateTextureCube(
+            FNA3D_CreateTextureCube(
                 self.raw,
                 fmt as u32,
                 size,
@@ -740,7 +730,7 @@ impl Device {
     /// * `texture`: The FNA3D_Texture to be destroyed.
     pub fn add_dispose_texture(&mut self, texture: &mut Texture) {
         unsafe {
-            sys::FNA3D_AddDisposeTexture(self.raw, texture);
+            FNA3D_AddDisposeTexture(self.raw, texture);
         }
     }
 
@@ -774,7 +764,7 @@ impl Device {
         data_len: u32,
     ) {
         unsafe {
-            sys::FNA3D_SetTextureData2D(
+            FNA3D_SetTextureData2D(
                 self.raw,
                 texture,
                 x as i32,
@@ -824,7 +814,7 @@ impl Device {
         data_len: i32,
     ) {
         unsafe {
-            sys::FNA3D_SetTextureData3D(self.raw, texture, x, y, z, w, h, d, level, data, data_len);
+            FNA3D_SetTextureData3D(self.raw, texture, x, y, z, w, h, d, level, data, data_len);
         }
     }
 
@@ -863,7 +853,7 @@ impl Device {
         data_len: i32,
     ) {
         unsafe {
-            sys::FNA3D_SetTextureDataCube(
+            FNA3D_SetTextureDataCube(
                 self.raw,
                 texture,
                 x,
@@ -911,7 +901,7 @@ impl Device {
         data_len: i32,
     ) {
         unsafe {
-            sys::FNA3D_SetTextureDataYUV(
+            FNA3D_SetTextureDataYUV(
                 self.raw, y, u, v, y_width, y_height, uv_width, uv_height, data, data_len,
             );
         }
@@ -948,7 +938,7 @@ impl Device {
         data: &[u8],
     ) {
         unsafe {
-            sys::FNA3D_GetTextureData2D(
+            FNA3D_GetTextureData2D(
                 self.raw,
                 texture,
                 x,
@@ -990,7 +980,7 @@ impl Device {
         data_len: i32,
     ) {
         unsafe {
-            sys::FNA3D_GetTextureData3D(self.raw, texture, x, y, z, w, h, d, level, data, data_len);
+            FNA3D_GetTextureData3D(self.raw, texture, x, y, z, w, h, d, level, data, data_len);
         }
     }
 
@@ -1022,7 +1012,7 @@ impl Device {
         data_len: i32,
     ) {
         unsafe {
-            sys::FNA3D_GetTextureDataCube(
+            FNA3D_GetTextureDataCube(
                 self.raw,
                 texture,
                 x,
@@ -1059,7 +1049,7 @@ impl Device {
         texture: *mut Texture,
     ) -> *mut Renderbuffer {
         unsafe {
-            sys::FNA3D_GenColorRenderbuffer(
+            FNA3D_GenColorRenderbuffer(
                 self.raw,
                 width as i32,
                 height as i32,
@@ -1086,7 +1076,7 @@ impl Device {
         multi_sample_count: i32,
     ) -> *mut Renderbuffer {
         unsafe {
-            sys::FNA3D_GenDepthStencilRenderbuffer(
+            FNA3D_GenDepthStencilRenderbuffer(
                 self.raw,
                 width as i32,
                 height as i32,
@@ -1104,7 +1094,7 @@ impl Device {
     /// * `renderbuffer`: The FNA3D_Renderbuffer to be destroyed.
     pub fn add_dispose_renderbuffer(&mut self, renderbuffer: &mut Renderbuffer) {
         unsafe {
-            sys::FNA3D_AddDisposeRenderbuffer(self.raw, renderbuffer);
+            FNA3D_AddDisposeRenderbuffer(self.raw, renderbuffer);
         }
     }
 }
@@ -1130,7 +1120,7 @@ impl Device {
         size_in_bytes: u32,
     ) -> *mut Buffer {
         unsafe {
-            sys::FNA3D_GenVertexBuffer(
+            FNA3D_GenVertexBuffer(
                 self.raw,
                 is_dynamic as u8,
                 usage as u32,
@@ -1147,7 +1137,7 @@ impl Device {
     /// * `buffer`: The FNA3D_Buffer to be destroyed.
     pub fn add_dispose_vertex_buffer(&mut self, buffer: *mut Buffer) {
         unsafe {
-            sys::FNA3D_AddDisposeVertexBuffer(self.raw, buffer);
+            FNA3D_AddDisposeVertexBuffer(self.raw, buffer);
         }
     }
 
@@ -1174,7 +1164,7 @@ impl Device {
         let data_len_in_bytes = data.len() * std::mem::size_of::<T>();
         unsafe {
             // Note that it has odd API for XNA compatibility
-            sys::FNA3D_SetVertexBufferData(
+            FNA3D_SetVertexBufferData(
                 self.raw,
                 buf,
                 buf_offset_in_bytes as i32,
@@ -1207,7 +1197,7 @@ impl Device {
         // vertex_stride: i32,
     ) {
         unsafe {
-            sys::FNA3D_GetVertexBufferData(
+            FNA3D_GetVertexBufferData(
                 self.raw,
                 buffer,
                 buf_offset_in_bytes,
@@ -1243,7 +1233,7 @@ impl Device {
         size_in_bytes: u32,
     ) -> *mut Buffer {
         unsafe {
-            sys::FNA3D_GenIndexBuffer(
+            FNA3D_GenIndexBuffer(
                 self.raw,
                 is_dynamic as u8,
                 usage as u32,
@@ -1260,7 +1250,7 @@ impl Device {
     /// * `buffer`: The FNA3D_Buffer to be destroyed.
     pub fn add_dispose_index_buffer(&mut self, buf: *mut Buffer) {
         unsafe {
-            sys::FNA3D_AddDisposeIndexBuffer(self.raw, buf);
+            FNA3D_AddDisposeIndexBuffer(self.raw, buf);
         }
     }
 
@@ -1285,7 +1275,7 @@ impl Device {
     ) {
         let data_len_in_bytes = data.len() * std::mem::size_of::<T>();
         unsafe {
-            sys::FNA3D_SetIndexBufferData(
+            FNA3D_SetIndexBufferData(
                 self.raw,
                 buf,
                 buf_offset_in_bytes as i32,
@@ -1316,7 +1306,7 @@ impl Device {
     ) {
         let len_in_bytes = data.len() * std::mem::size_of::<T>();
         unsafe {
-            sys::FNA3D_GetIndexBufferData(
+            FNA3D_GetIndexBufferData(
                 self.raw,
                 buf,
                 buf_offset_in_bytes,
@@ -1346,7 +1336,7 @@ impl Device {
         let mut effect = std::ptr::null_mut();
         let mut data = std::ptr::null_mut();
         unsafe {
-            sys::FNA3D_CreateEffect(
+            FNA3D_CreateEffect(
                 self.raw,
                 effect_code,
                 effect_code_length,
@@ -1369,7 +1359,7 @@ impl Device {
         let mut effect = std::ptr::null_mut();
         let mut data = std::ptr::null_mut();
         unsafe {
-            sys::FNA3D_CloneEffect(self.raw, clone_source, &mut effect, &mut data);
+            FNA3D_CloneEffect(self.raw, clone_source, &mut effect, &mut data);
         }
         (effect, data as *mut _)
     }
@@ -1382,7 +1372,7 @@ impl Device {
     /// * `effect`: The FNA3D_Effect to be destroyed.
     pub fn add_dispose_effect(&mut self, effect: *mut Effect) {
         unsafe {
-            sys::FNA3D_AddDisposeEffect(self.raw, effect);
+            FNA3D_AddDisposeEffect(self.raw, effect);
         }
     }
 
@@ -1396,7 +1386,7 @@ impl Device {
         technique: *mut mojo::EffectTechnique,
     ) {
         unsafe {
-            sys::FNA3D_SetEffectTechnique(self.raw, effect, technique as *mut _);
+            FNA3D_SetEffectTechnique(self.raw, effect, technique as *mut _);
         }
     }
 
@@ -1418,7 +1408,7 @@ impl Device {
         state_changes: &mojo::EffectStateChanges,
     ) {
         unsafe {
-            sys::FNA3D_ApplyEffect(self.raw, effect, pass, state_changes as *const _ as *mut _);
+            FNA3D_ApplyEffect(self.raw, effect, pass, state_changes as *const _ as *mut _);
         }
     }
 
@@ -1437,7 +1427,7 @@ impl Device {
         state_changes: *mut mojo::EffectStateChanges,
     ) {
         unsafe {
-            sys::FNA3D_BeginPassRestore(self.raw, effect, state_changes as *mut _);
+            FNA3D_BeginPassRestore(self.raw, effect, state_changes as *mut _);
         }
     }
 
@@ -1447,7 +1437,7 @@ impl Device {
     /// * `effect`: The Effect that was applied at BeginPassRestore.
     pub fn end_pass_restore(&mut self, effect: *mut Effect) {
         unsafe {
-            sys::FNA3D_EndPassRestore(self.raw, effect);
+            FNA3D_EndPassRestore(self.raw, effect);
         }
     }
 
@@ -1455,7 +1445,7 @@ impl Device {
     ///
     /// Returns an FNA3D_Query object.
     pub fn create_query(&mut self) -> *mut Query {
-        unsafe { sys::FNA3D_CreateQuery(self.raw) }
+        unsafe { FNA3D_CreateQuery(self.raw) }
     }
 
     /// Sends a query object to be destroyed by the renderer. Note that we call it
@@ -1466,7 +1456,7 @@ impl Device {
     /// * `query`: The FNA3D_Query to be destroyed.
     pub fn add_dispose_query(&mut self, query: *mut Query) {
         unsafe {
-            sys::FNA3D_AddDisposeQuery(self.raw, query);
+            FNA3D_AddDisposeQuery(self.raw, query);
         }
     }
 
@@ -1475,7 +1465,7 @@ impl Device {
     /// * `query`: The FNA3D_Query to start.
     pub fn query_begin(&mut self, query: *mut Query) {
         unsafe {
-            sys::FNA3D_QueryBegin(self.raw, query);
+            FNA3D_QueryBegin(self.raw, query);
         }
     }
 
@@ -1486,7 +1476,7 @@ impl Device {
     /// * `query`: The FNA3D_Query to stop.
     pub fn query_end(&mut self, query: *mut Query) {
         unsafe {
-            sys::FNA3D_QueryEnd(self.raw, query);
+            FNA3D_QueryEnd(self.raw, query);
         }
     }
 
@@ -1496,7 +1486,7 @@ impl Device {
     ///
     /// Returns 1 when complete, 0 when still in execution.
     pub fn query_complete(&mut self, query: *mut Query) -> bool {
-        unsafe { sys::FNA3D_QueryComplete(self.raw, query) != 0 }
+        unsafe { FNA3D_QueryComplete(self.raw, query) != 0 }
     }
 
     /// Query the pixels counted between the begin/end markers set for the object.
@@ -1505,7 +1495,7 @@ impl Device {
     ///
     /// Returns the pixels written during the begin/end period.
     pub fn query_pixel_count(&mut self, query: *mut Query) -> i32 {
-        unsafe { sys::FNA3D_QueryPixelCount(self.raw, query) }
+        unsafe { FNA3D_QueryPixelCount(self.raw, query) }
     }
 }
 
@@ -1514,22 +1504,22 @@ impl Device {
 impl Device {
     /// Returns 1 if the renderer natively supports DXT1 texture data.
     pub fn supports_dxt1(&self) -> bool {
-        unsafe { sys::FNA3D_SupportsDXT1(self.raw) != 0 }
+        unsafe { FNA3D_SupportsDXT1(self.raw) != 0 }
     }
 
     /// Returns 1 if the renderer natively supports S3TC texture data.
     pub fn supports_s3_tc(&self) -> bool {
-        unsafe { sys::FNA3D_SupportsS3TC(self.raw) != 0 }
+        unsafe { FNA3D_SupportsS3TC(self.raw) != 0 }
     }
 
     /// Returns 1 if the renderer natively supports hardware instancing.
     pub fn supports_hardware_instancing(&self) -> bool {
-        unsafe { sys::FNA3D_SupportsHardwareInstancing(self.raw) != 0 }
+        unsafe { FNA3D_SupportsHardwareInstancing(self.raw) != 0 }
     }
 
     ///  Returns 1 if the renderer natively supports asynchronous buffer writing.
     pub fn supports_no_overwrite(&self) -> bool {
-        unsafe { sys::FNA3D_SupportsNoOverwrite(self.raw) != 0 }
+        unsafe { FNA3D_SupportsNoOverwrite(self.raw) != 0 }
     }
 
     /// Returns the number of sampler slots supported by the renderer (texture, vertex_texture)
@@ -1539,7 +1529,7 @@ impl Device {
     ) -> (usize, usize) {
         let (mut textures, mut vertex_textures): (i32, i32) = (0, 0);
         unsafe {
-            sys::FNA3D_GetMaxTextureSlots(
+            FNA3D_GetMaxTextureSlots(
                 self.raw,
                 &mut textures as *mut _,
                 &mut vertex_textures as *mut _,
@@ -1564,7 +1554,7 @@ impl Device {
         fmt: enums::SurfaceFormat,
         multi_sample_count: i32,
     ) -> i32 {
-        unsafe { sys::FNA3D_GetMaxMultiSampleCount(self.raw, fmt as u32, multi_sample_count) }
+        unsafe { FNA3D_GetMaxMultiSampleCount(self.raw, fmt as u32, multi_sample_count) }
     }
 }
 
@@ -1578,7 +1568,7 @@ impl Device {
     // FIXME: C string wrapper?? I have to read Rust nomicon
     pub fn set_string_marker(&mut self, text: *const ::std::os::raw::c_char) {
         unsafe {
-            sys::FNA3D_SetStringMarker(self.raw, text);
+            FNA3D_SetStringMarker(self.raw, text);
         }
     }
 }

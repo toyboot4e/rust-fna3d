@@ -18,24 +18,23 @@
 //! [FNA]: https://fna-xna.github.io
 //! [FNA3D]: https://github.com/FNA-XNA/FNA3D
 //! [bindgen]: https://github.com/rust-lang/rust-bindgen
-//! [`prepare_window_attributes`]: ./fn.prepare_window_attributes.html
-//! [`Device`]: ./struct.Device.html
 
 pub use fna3d_sys as sys;
 
-// FNA3D.h (re-exported to the root)
+// FNA3D.h
 mod fna3d;
 pub use crate::fna3d::fna3d_device::*;
 pub use crate::fna3d::fna3d_enums::*;
 pub use crate::fna3d::fna3d_functions::*;
 pub use crate::fna3d::fna3d_structs::*;
 
-// FNA3D_Image.h (exported as `img`)
+// FNA3D_Image.h
 pub mod img;
 
-// mojoshader.h (exprted as `mojo`)
+// mojoshader.h (and some more)
 pub mod mojo;
 
+// notes
 pub mod _meta_;
 
 pub mod utils {
@@ -48,13 +47,15 @@ pub mod utils {
 
     use crate::fna3d::fna3d_enums as enums;
 
+    /// Hooks default log functions to FNA3D
+    ///
     /// FIXME: is it really working?
     pub fn hook_log_functions_default() {
         unsafe {
-            // info, warn, error respectively
+            // info, warn and error, respectively
             sys::FNA3D_HookLogFunctions(Some(log), Some(log), Some(log));
         }
-        // ::std::option::Option<unsafe extern "C" fn(msg: *const ::std::os::raw::c_char)>;
+
         unsafe extern "C" fn log(msg: *const ::std::os::raw::c_char) {
             let slice = ::std::ffi::CStr::from_ptr(msg);
             let string = slice.to_string_lossy().into_owned();
@@ -62,7 +63,7 @@ pub mod utils {
         }
     }
 
-    /// `handle` is actually `SDL_Window*` in Rust-SDL2-sys
+    /// Argument `handle: *mut c_void` is actually `*SDL_Window`
     pub fn default_params_from_window_handle(
         window_handle: *mut c_void,
     ) -> sys::FNA3D_PresentationParameters {
@@ -71,7 +72,7 @@ pub mod utils {
             backBufferHeight: 720,
             backBufferFormat: enums::SurfaceFormat::Color as u32,
             multiSampleCount: 0,
-            // this is actually `SDL_Window*`
+            // this is actually `SDL_Window*` (though it's `*mut c_void`)
             deviceWindowHandle: window_handle,
             isFullScreen: false as u8,
             depthStencilFormat: enums::DepthFormat::D24S8 as u32,

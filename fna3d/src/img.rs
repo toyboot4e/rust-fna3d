@@ -58,7 +58,6 @@ pub type EofFunc = sys::FNA3D_Image_EOFFunc;
 ///
 /// The return type is not [`Vec`] because it frees its content when dropping.
 ///
-/// [`free`]: crate::img::free
 /// [`Vec`]: std::vec::Vec
 pub fn from_path(
     path: impl AsRef<Path>,
@@ -78,7 +77,6 @@ pub fn from_path(
 ///
 /// The return type is not [`Vec`] because it frees its content when dropping.
 ///
-/// [`free`]: crate::img::free
 /// [`Vec`]: std::vec::Vec
 pub fn from_reader<R: Read + Seek>(
     reader: R,

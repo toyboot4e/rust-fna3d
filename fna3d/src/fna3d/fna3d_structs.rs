@@ -1,53 +1,56 @@
 //! Structure types in FNA3D other than `Device`
 //!
-//! Those types don't have methods
+//! We _could_ use macors to define field accessors. Probablly is usefule for that. However, I
+//! prefered explicit definitions this time.
 //!
 //! * TODO: wrap "masks" with newtype struct?
 //! * TODO: remove `as u32` and maybe use `to_repr()`
-//! * TODO: wrap structs
-//! * TODO: impl more traits
+//! * TODO: wrap more structs
+//! * TODO: derive more traits
 //!
-//! We _could_ use macors to define field accessors. Probablly the
-//! [paste](https://github.com/dtolnay/paste) is usefule for that. However, I prefered explicit
-//! definitions this time.
+//! [paste]: https://github.com/dtolnay/paste
 
 use enum_primitive::*;
 
 use crate::fna3d::fna3d_enums as enums;
 use fna3d_sys as sys;
 
+// for documentation (types in scope are automatically linked with [`TypeName`])
+#[allow(unused_imports)]
+use crate::fna3d::fna3d_device::Device;
+#[allow(unused_imports)]
+use crate::fna3d::fna3d_enums::*;
+
 // --------------------------------------------------------------------------------
 // Disposed types
 //
 // Those types have corresponding disposing functions in `Device`
 
-/// `IndexBuffer` or `VertexBuffer` in FNA.
+/// Index or vertex buffer
 ///
-/// It is not strictly typed and more information have to be supplied with `BufferUsage`,
-/// `VertexDeclaration` and `IndexElementSize`.
+/// It is not strictly typed and more information have to be supplied with [`BufferUsage`],
+/// [`VertexDeclaration`] and [`IndexElementSize`].
 ///
-/// Disposed with a corresponding function in `Device`
+/// Disposed with a corresponding function in [`Device`]
 pub type Buffer = sys::FNA3D_Buffer;
 
-/// Disposed with a corresponding function in `Device`
+/// Disposed with a corresponding function in [`Device`]
 pub type Renderbuffer = sys::FNA3D_Renderbuffer;
 
-/// Disposed with a corresponding function in `Device`
+/// Disposed with a corresponding function in [`Device`]
 pub type Effect = sys::FNA3D_Effect;
 
-/// Disposed with a corresponding function in `Device`
+/// Disposed with a corresponding function in [`Device`]
 pub type Query = sys::FNA3D_Query;
 
 /// 2D or 3D texture data stored in GPU memory
 ///
-/// Disposed with a corresponding function in `Device`
+/// Disposed with a corresponding function in [`Device`](crate::Device).
 pub type Texture = sys::FNA3D_Texture;
 
-/// Vertex `*Buffer` dynamically "typed" with `VertexDeclaration`
+/// Vertex [`*Buffer`](Buffer) dynamically "typed" with [`VertexDeclaration`]
 pub type VertexBufferBinding = sys::FNA3D_VertexBufferBinding;
 pub type RenderTargetBinding = sys::FNA3D_RenderTargetBinding;
-
-// and mojoshader types and sys::FNA3D_Device
 
 // --------------------------------------------------------------------------------
 // Type aliases
@@ -60,8 +63,8 @@ pub type Viewport = sys::FNA3D_Viewport;
 /// An RGBA color
 ///
 /// 24 bit color with alpha value Each value is represented with 8 bits. Another way to represent a
-///  color is using normalized floating values. Actually, `Color` is casted to `Vec4` in
-/// `Device::clear`.
+///  color is using normalized floating values. Actually, `Color` is casted to [`Vec4`] in
+/// [`Device::clear`](crate::Device::clear).
 #[derive(Debug, Clone, Copy)]
 pub struct Color {
     raw: sys::FNA3D_Color,
@@ -121,16 +124,19 @@ pub type PresentationParameters = sys::FNA3D_PresentationParameters;
 // ----------------------------------------
 // VertexDeclaration
 
-/// `VertexBufferBinding` component that declares memory layout of a vertex data
+/// [`VertexBufferBinding`] component that declares memory layout of a vertex data
 ///
 /// Users can use custom vertex data with declaration.
 ///
-/// Composed of `VertexElement`s
+/// Composed of [`VertexElement`]s
 pub type VertexDeclaration = sys::FNA3D_VertexDeclaration;
 
-/// `VertexDeclaration` component that specifies an element of vertex data
+/// [`VertexDeclaration`] component that specifies an element of vertex data
 ///
-/// Needs to be related with `VertexElementFormat` and `VertexElementUsage`
+/// Needs to be related with [`VertexElementFormat`] and [`VertexElementUsage`]
+///
+/// [`VertexElementFormat`]: crate::VertexElement
+/// [`VertexElementUsage`]: crate::VertexElementUsage
 pub type VertexElement = sys::FNA3D_VertexElement;
 
 // --------------------------------------------------------------------------------

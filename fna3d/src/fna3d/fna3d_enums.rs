@@ -1,12 +1,18 @@
 //! Wrappers of enum variants defined as constants by `bindgen`
 //!
-//! * TODO: use enum_primitive_derive or can we forget them all?
+//! * TODO: use enum_primitive_derive .. or can we forget them all?
 
 use enum_primitive::*;
 use fna3d_sys as sys;
 
+// for documentation (types in scope are automatically linked with [`TypeName`])
+#[allow(unused_imports)]
+use crate::fna3d::fna3d_device::Device;
+#[allow(unused_imports)]
+use crate::fna3d::fna3d_structs::*;
+
 enum_from_primitive! {
-    /// `PresentationParameter` component
+    /// [`PresentationParameters`] component
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum PresentInterval {
@@ -18,7 +24,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
-    /// `PresentationParameter` component
+    /// [`PresentationParameters`] component
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum DisplayOrientation {
@@ -30,7 +36,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
-    /// `PresentationParameter` component
+    /// [`PresentationParameters`] component
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum RenderTargetUsage {
@@ -41,7 +47,9 @@ enum_from_primitive! {
 }
 
 bitflags::bitflags! {
-    /// `Device::clear` argument, which specifies the buffers for clearing
+    /// [`Device::clear`] argument, which specifies the buffers for clearing
+    ///
+    /// [`Device::clear`]: crate::Device::clear
     pub struct ClearOptions: u32 {
         /// Color buffer
         const TARGET = sys::FNA3D_ClearOptions_FNA3D_CLEAROPTIONS_TARGET;
@@ -53,9 +61,9 @@ bitflags::bitflags! {
 }
 
 enum_from_primitive! {
+    /// How vertex data is ordered
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
-    /// How vertex data is ordered
     pub enum PrimitiveType {
         /// Renders the specified vertices as a sequence of isolated triangles. Each group of three
         /// vertices defines a separate triangle. Back-face culling is affected by the current
@@ -87,10 +95,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
-    /// Surface pixel data format (memory layout)
-    ///
-    /// In FNA, "surface" is pixel data of a 2D image. `SurfaceFormat` specifies each pixel's data
-    /// format (memory layout).
+    /// Surface pixel data format; memory layout of each pixel in a 2D image
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum SurfaceFormat {
@@ -195,7 +200,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
-    /// `BlendState` component, which specifies blend mode
+    /// [`BlendState`] component, which specifies blend mode
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum Blend {
@@ -238,7 +243,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
-    /// `BlendState` component, whivh specifies function for color blending
+    /// [`BlendState`] component, whivh specifies function for color blending
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum BlendFunction {
@@ -258,7 +263,7 @@ enum_from_primitive! {
 enum_from_primitive! {
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
-    /// `BlendState` component, which specifies color channels for render target blending operations
+    /// [`BlendState`] component, which specifies color channels for render target blending operations
     pub enum ColorWriteChannels {
         None = sys::FNA3D_ColorWriteChannels_FNA3D_COLORWRITECHANNELS_NONE,
         Red = sys::FNA3D_ColorWriteChannels_FNA3D_COLORWRITECHANNELS_RED,
@@ -270,7 +275,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
-    /// `DepthStencilState` component
+    /// [`DepthStencilState`] component
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum StencilOperation {
@@ -286,7 +291,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
-    /// `DepthStencilState` component
+    /// [`DepthStencilState`] component
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum CompareFunction {
@@ -302,7 +307,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
-    /// `RasterizrerState` component
+    /// [`RasterizerState `] component
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum CullMode {
@@ -313,7 +318,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
-    /// `RasterizerState` component
+    /// [`RasterizerState`] component
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum FillMode {
@@ -325,7 +330,7 @@ enum_from_primitive! {
 enum_from_primitive! {
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
-    /// `SamplerState` component, which specifies texture coordinates addressing method
+    /// [`SamplerState`] component, which specifies texture coordinates addressing method
     ///
     /// Applied for texture coordinates that are outside of range [0.0, 1.0]
     pub enum TextureAddressMode {
@@ -340,7 +345,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
-    /// `SamplerState` component, which specifies filtering types
+    /// [`SamplerState`] component, which specifies filtering types
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum TextureFilter {
@@ -357,7 +362,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
-    /// `VertexElement` component, which specifies the data type
+    /// [`VertexElement`] component, which specifies the data type
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum VertexElementFormat {
@@ -396,7 +401,7 @@ impl VertexElementFormat {
 }
 
 enum_from_primitive! {
-    /// `VertexElement` component, which specifies its usage
+    /// [`VertexElement`] component, which specifies its usage
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum VertexElementUsage {
