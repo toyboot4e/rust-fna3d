@@ -1,21 +1,26 @@
-//! Build script that generates Rust FFI bindings to FNA3D using `bindgen`
+//! Build script
 //!
 //! # Resources
 //!
-//! * [The `bindgen` User Guide](https://rust-lang.github.io/rust-bindgen/)
-//! * [Build Scripts - The Cargo Book](https://doc.rust-lang.org/cargo/reference/build-scripts.html#case-study-building-some-native-code)
+//! * Build Scripts - The Cargo Book
+//! https://doc.rust-lang.org/cargo/reference/build-scripts.html#case-study-building-some-native-code
+//!
+//! * The `bindgen` User Guide
+//! https://rust-lang.github.io/rust-bindgen/
 
 use cmake::Config;
 use std::{
-    env, fs,
+    env,
     path::{Path, PathBuf},
 };
 
 // type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 fn main() {
+    // compile MojoShader and FNA3D
     run_cmake();
 
+    // make bindings to them
     self::gen_bindings("fna3d_wrapper.h", "fna3d_bindings.rs");
     self::gen_bindings("mojoshader_wrapper.h", "mojoshader_bindings.rs");
 }
@@ -47,6 +52,7 @@ fn run_cmake() {
         // let name = out.file_stem().unwrap().to_str().unwrap();
         let name = out.display();
         println!("cargo:rustc-link-search=native={}", name);
+        // FIXME: why is this dylib?
         println!("cargo:rustc-link-lib=dylib=FNA3D");
     }
 }

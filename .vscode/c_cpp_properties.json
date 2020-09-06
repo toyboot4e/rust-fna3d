@@ -4,9 +4,9 @@
             "name": "Mac",
             "includePath": [
                 "/usr/local/include/SDL2",
-                "${workspaceFolder}/crates/fna3d-sys/FNA3D/src",
-                "${workspaceFolder}/crates/fna3d-sys/FNA3D/include",
-                "${workspaceFolder}/crates/fna3d-sys/FNA3D/MojoShader"
+                "${workspaceFolder}/fna3d-sys/FNA3D/src",
+                "${workspaceFolder}/fna3d-sys/FNA3D/include",
+                "${workspaceFolder}/fna3d-sys/FNA3D/MojoShader"
             ],
             "macFrameworkPath": [
                 "/System/Library/Frameworks",

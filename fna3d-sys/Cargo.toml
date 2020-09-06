@@ -2,13 +2,18 @@
 name = "fna3d-sys"
 version = "0.1.0"
 authors = ["toyboot4e <toyboot4e@gmail.com>"]
+description = "Rust FFI bindings to FNA3D"
+repository = "https://github.com/toyboot4e/rust-fna3d/fna3d-sys"
+keywords = ["graphics", "library", "gamedev"]
 edition = "2018"
+license = "MIT"
+categories = ["game-engines"]
+
 # https://doc.rust-lang.org/cargo/reference/build-scripts.html#the-links-manifest-key
 links = "fna3d"
 
 [lib]
 name = "fna3d_sys"
-path = "src/lib.rs"
 
 [build-dependencies]
 bindgen = "0.54.0"

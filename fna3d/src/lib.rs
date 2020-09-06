@@ -1,5 +1,7 @@
 //! Wrapper of [FNA3D]. It's for making a higher-level framework on it!
 //!
+//! If you'd like to try a higher-level framework on top of Rust-FNA3D, take [ANF] as an example.
+//!
 //! ## Usage
 //!
 //! First call [`prepare_window_attributes`] then prepare your [`Device`].
@@ -14,9 +16,12 @@
 //! `fna3d-sys` is Rust FFI to [FNA3D] generated with [bindgen]. `fna3d` is a wrapper around
 //! `fna3d-sys`.
 //!
+//! ## Note
+//!
 //! [XNA]: https://en.wikipedia.org/wiki/Microsoft_XNA
 //! [FNA]: https://fna-xna.github.io
 //! [FNA3D]: https://github.com/FNA-XNA/FNA3D
+//! [ANF]: https://github.com/toyboot4e/anf
 //! [bindgen]: https://github.com/rust-lang/rust-bindgen
 
 pub use fna3d_sys as sys;

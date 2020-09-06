@@ -162,9 +162,9 @@
 //!
 //! ### 3-2. Accessors
 //!
-//! * [x] use snake case
-//! * [x] wrap enums, bit flags and booleans
-//! * [x] prefer `u32` to `i32` in some cases (e.g. indices)
+//! * use snake case
+//! * wrap enums, bit flags and booleans
+//! * prefer `u32` to `i32` in some cases (e.g. indices)
 //!
 //! ```ignore
 //! impl DepthStencilState {
@@ -188,7 +188,7 @@
 //! }
 //! ```
 //!
-//! * [x] casting to `*mut T`
+//! * casting to `*mut T`
 //!
 //! We don't need mutability to get type `*mut T`:
 //!
@@ -201,5 +201,5 @@
 //!
 //! ### 3-3. Trait implementations
 //!
-//! * [x] `Debug`, `Clone`
-//! * [x] `Default`
+//! * `Debug`, `Clone`
+//! * `Default`
