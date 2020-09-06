@@ -23,8 +23,6 @@
 //! The follows explain what Rust-FNA3D takes care to wrap Rust-FNA3D-sys, which is Rust FFI
 //! bindings to FNA3D generated with [`bindgen`](https://github.com/rust-lang/rust-bindgen).
 //!
-//! Note that bundling C binary (DLL) is out of scope of this document.
-//!
 //! ## References
 //!
 //! * [FFI - The Rustonomicon](https://doc.rust-lang.org/nomicon/ffi.html#foreign-function-interface)
@@ -34,7 +32,9 @@
 //!
 //! Let's setup our build script and automate compling & bundling C libraries.
 //!
-//! Here I only consider the case where we use `cmake`. WIP
+//! Here I only consider the case where we use `cmake`.
+//!
+//! WIP
 //!
 //! ## 2. Wrapping constants
 //!

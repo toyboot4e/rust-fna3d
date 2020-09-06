@@ -48,9 +48,12 @@ impl<'a, T> AsMutPtr<T> for Option<&'a mut T> {
 /// * [Vertex buffers](#vertex-buffers)
 /// * [Index buffers](#index-buffers)
 /// * [Effects](#effects)
+/// * [Queries](#queris)
 /// * [Feature queries](#feature-queries)
 ///
 /// # Dispose
+///
+/// These types have to be disposed with corresponding methods in [`Device`]:
 ///
 /// - [`Buffer`]
 /// - [`Renderbuffer`]
@@ -67,16 +70,17 @@ impl<'a, T> AsMutPtr<T> for Option<&'a mut T> {
 /// * [`FNA3D_ApplyRasterizerState`]
 /// * [`FNA3D_SetBlendState`]
 ///
+/// We also have to setup our shader used in the renderling pipeline. See [`crate::mojo`] for example.
+///
 /// # Rendering cycle
 ///
 /// For each frame:
 ///
 /// * [`FNA3D_Clear`]
 /// * for each draw call:
-///     * reset shader uniform
 ///     * [`FNA3D_ApplyEffect`]
-///     * [`FNA3D_SetVertexData`]
-///     * [`FNA3D_VerifySamplerState`]
+///     * [`FNA3D_SetVertexBufferData`]
+///     * [`FNA3D_VerifySampler`]
 ///     * [`FNA3D_ApplyVertexBufferBindings`]
 ///     * [`FNA3D_DrawIndexedPrimitives`]
 /// * [`FNA3D_SwapBuffers`]
@@ -90,12 +94,6 @@ impl Drop for Device {
         unsafe {
             FNA3D_DestroyDevice(self.raw);
         };
-    }
-}
-
-impl Device {
-    pub fn raw_mut_ptr(&self) -> *mut FNA3D_Device {
-        self.raw
     }
 }
 
@@ -154,7 +152,7 @@ impl Device {
 /// ---
 ///
 /// A "draw call" is actually a call of a drawing function, which is often
-/// [`FNA3D_DrawIndexedPrimitives`] in FNA3D. Vertex data and sampler state (which contains
+/// [`FNA3D_DrawIndexedPrimitives`] in FNA3D. Vertex/index data and sampler state (which contains
 /// textures) are set with other methods.
 impl Device {
     /// Clears the active draw buffers of any previous contents.
@@ -499,6 +497,8 @@ impl Device {
 
 /// Render targets
 /// ---
+///
+/// * back buffer = frame buffer = screen
 impl Device {
     /// Sets the color/depth/stencil buffers to write future draw calls to.
     ///
@@ -1101,6 +1101,9 @@ impl Device {
 
 /// Vertex buffers
 /// ---
+///
+/// `*mut Buffer` is GPU buffer and we need to upload (send, copy) from CPU memory. This is done
+/// via `FNA3D_SetVertexBufferData` or `FNA3D_SetIndexBufferData` in FNA.
 impl Device {
     /// Creates a vertex buffer to be used by Draw*Primitives.
     ///
@@ -1214,6 +1217,9 @@ impl Device {
 
 /// Index buffers
 /// ---
+///
+/// `*mut Buffer` is GPU buffer and we need to upload (send, copy) from CPU memory. This is done
+/// via `FNA3D_SetVertexBufferData` or `FNA3D_SetIndexBufferData` in FNA.
 impl Device {
     /// Creates an index buffer to be used by Draw*Primitives.
     ///
@@ -1319,10 +1325,13 @@ impl Device {
 
 /// Effects
 /// ---
+///
+/// See [`crate::mojo`] module for more information and some helpers.
 impl Device {
     /// Parses and compiles a Direct3D 9 Effects Framework binary.
     ///
-    /// Returns `(effect, effect_data)`
+    /// Returns `(effect, effect_data)`. You have to detect errors by looking into `error_count`
+    /// field of the second return value.
     ///
     /// * `effect_code`:
     ///   The D3D9 Effect binary blob.
@@ -1440,7 +1449,11 @@ impl Device {
             FNA3D_EndPassRestore(self.raw, effect);
         }
     }
+}
 
+/// Queries
+/// ---
+impl Device {
     /// Creates an object used to run occlusion queries.
     ///
     /// Returns an FNA3D_Query object.
@@ -1502,22 +1515,22 @@ impl Device {
 /// Feature queries
 /// ---
 impl Device {
-    /// Returns 1 if the renderer natively supports DXT1 texture data.
+    /// True if the renderer natively supports DXT1 texture data.
     pub fn supports_dxt1(&self) -> bool {
         unsafe { FNA3D_SupportsDXT1(self.raw) != 0 }
     }
 
-    /// Returns 1 if the renderer natively supports S3TC texture data.
+    /// True if the renderer natively supports S3TC texture data.
     pub fn supports_s3_tc(&self) -> bool {
         unsafe { FNA3D_SupportsS3TC(self.raw) != 0 }
     }
 
-    /// Returns 1 if the renderer natively supports hardware instancing.
+    /// True if the renderer natively supports hardware instancing.
     pub fn supports_hardware_instancing(&self) -> bool {
         unsafe { FNA3D_SupportsHardwareInstancing(self.raw) != 0 }
     }
 
-    ///  Returns 1 if the renderer natively supports asynchronous buffer writing.
+    /// True if the renderer natively supports asynchronous buffer writing.
     pub fn supports_no_overwrite(&self) -> bool {
         unsafe { FNA3D_SupportsNoOverwrite(self.raw) != 0 }
     }

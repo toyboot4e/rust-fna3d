@@ -1,12 +1,10 @@
 # Rust-FNA3D
 
-Wrapper of [FNA3D](https://github.com/FNA-XNA/FNA3D). It's for making a higher framework on it!
+Wrapper of [FNA3D](https://github.com/FNA-XNA/FNA3D), the graphics library for [FNA](https://fna-xna.github.io/)
 
 ## About
 
-Please refer to [API documentation](https://docs.rs/rust-fna3d).
-
-As an example, [ANF](https://github.com/toyboot4e/anf) is a higher-level 2D framework built on top of Rust-FNA3D.
+Please refer to the [API documentation](https://docs.rs/rust-fna3d). It's for making a higher-level framework on it; take [ANF](https://github.com/toyboot4e/anf) as an example.
 
 ### Getting started
 
@@ -20,12 +18,14 @@ Add when you build your project, FNA3D will automatically be built and bundled t
 
 ### Tips
 
-* Use nightly version of `cargo doc` to build the document. It's for th e[Infra Rustdoc Links](https://rust-lang.github.io/rfcs/1946-intra-rustdoc-links.html) feature. Crates.io also uses it by default.
+Use nightly version of `cargo doc` to build the document. It's for the [Infra Rustdoc Links](https://rust-lang.github.io/rfcs/1946-intra-rustdoc-links.html) feature. Crates.io also uses it by default.
 
 ## State of this wrapper
 
 Almost ready. Remaining tasks:
 
+* [ ] Do not run `cmake` every time we run our project
+* [ ] Publish it on crates.io and make sure it works fine
 * [ ] Add more wrapper types rather than re-exporting raw types
 * [ ] Add more methods to wrapper types
 * [ ] `derive` more types

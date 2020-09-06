@@ -1,14 +1,17 @@
-//! Rust FFI bindings to FNA3D generated with [bindgen](https://github.com/rust-lang/rust-bindgen)
+//! Rust FFI bindings to FNA3D generated with [bindgen]
 //!
-//! The `sys` name came from the [naming convension](https://doc.rust-lang.org/cargo/reference/build-scripts.html#-sys-packages).
-//! Note that the package name is `fna3d-sys` while the library name is `fna3d_sys`.
+//! The `sys` name came from the [naming convension] -- though FNA3D is not a system library. Note
+//! that the package name is `fna3d-sys` while the library name is `fna3d_sys`.
 //!
 //! # The build script (`build.rs`)
 //!
-//! Internally, `build.rs` uses `bindgen` to generate forengin function interface in `ffi`.
-//! Those bindings gemerated are autimatically included. If you want to see the generated file,
-//! you can find it in `target`, or you can install the `bindgen` command line tool via `cargo` and
-//! run it over a wrapping header file.
+//! Internally, `build.rs` uses `bindgen` to generate foreign function interface (FFI). Those
+//! bindings gemerated are autimatically included via `include!` macro. If you want to see the
+//! contents of generated files, you can find it in `target`, or you can can run `bindgen` command,
+//! which can be installed with `cargo`, over header files.
+//!
+//! [bindgen]:  https://github.com/rust-lang/rust-bindgen
+//! [naming convension]: https://doc.rust-lang.org/cargo/reference/build-scripts.html#-sys-packages
 
 // Supress casing errors
 #![allow(non_upper_case_globals)]

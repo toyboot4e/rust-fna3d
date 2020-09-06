@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["toyboot4e <toyboot4e@gmail.com>"]
 description = "Wrapper of FNA3D"
 repository = "https://github.com/toyboot4e/rust-fna3d/fna3d"
+readme = "README.md"
 keywords = ["graphics", "library", "gamedev"]
 edition = "2018"
 license = "MIT"

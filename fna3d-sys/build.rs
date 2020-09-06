@@ -17,12 +17,14 @@ use std::{
 // type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 fn main() {
+    // FIXME: run cmake only when FNA3D is changed
     // compile MojoShader and FNA3D
     run_cmake();
 
     // make bindings to them
     self::gen_bindings("fna3d_wrapper.h", "fna3d_bindings.rs");
     self::gen_bindings("mojoshader_wrapper.h", "mojoshader_bindings.rs");
+    // these files are "included" in src/lib.rs
 }
 
 fn run_cmake() {
@@ -52,7 +54,7 @@ fn run_cmake() {
         // let name = out.file_stem().unwrap().to_str().unwrap();
         let name = out.display();
         println!("cargo:rustc-link-search=native={}", name);
-        // FIXME: why is this dylib?
+        // FIXME: why is this OK??
         println!("cargo:rustc-link-lib=dylib=FNA3D");
     }
 }

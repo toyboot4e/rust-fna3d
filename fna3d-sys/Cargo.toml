@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["toyboot4e <toyboot4e@gmail.com>"]
 description = "Rust FFI bindings to FNA3D"
 repository = "https://github.com/toyboot4e/rust-fna3d/fna3d-sys"
+readme = "README.md"
 keywords = ["graphics", "library", "gamedev"]
 edition = "2018"
 license = "MIT"
@@ -20,6 +21,7 @@ bindgen = "0.54.0"
 cmake = "0.1"
 
 [dependencies]
+enum-primitive-derive = "0.2.1"
 
 [dev-dependencies]
 cmake = "0.1.44"

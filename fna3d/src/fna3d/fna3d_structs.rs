@@ -31,7 +31,9 @@ use crate::fna3d::fna3d_enums::*;
 /// It is not strictly typed and more information have to be supplied with [`BufferUsage`],
 /// [`VertexDeclaration`] and [`IndexElementSize`].
 ///
-/// Disposed with a corresponding function in [`Device`]
+/// # Dispose
+///
+/// This type has to be disposed with a corresponding function in [`Device`]
 pub type Buffer = sys::FNA3D_Buffer;
 
 /// Disposed with a corresponding function in [`Device`]
@@ -45,7 +47,9 @@ pub type Query = sys::FNA3D_Query;
 
 /// 2D or 3D texture data stored in GPU memory
 ///
-/// Disposed with a corresponding function in [`Device`](crate::Device).
+/// # Dispose
+///
+/// This type has to be disposed with a corresponding function in [`Device`]
 pub type Texture = sys::FNA3D_Texture;
 
 /// Vertex [`*Buffer`](Buffer) dynamically "typed" with [`VertexDeclaration`]
@@ -75,8 +79,8 @@ impl Color {
         self.raw
     }
 
-    pub fn as_vec4(&self) -> sys::FNA3D_Vec4 {
-        sys::FNA3D_Vec4 {
+    pub fn as_vec4(&self) -> Vec4 {
+        Vec4 {
             x: self.raw.r as f32 / 255.0,
             y: self.raw.g as f32 / 255.0,
             z: self.raw.b as f32 / 255.0,
@@ -87,6 +91,32 @@ impl Color {
 
 /// Constructors
 impl Color {
+    /// Normalized [`Vec4`] -> [`Color`]
+    pub fn from_vec4(v: Vec4) -> Self {
+        fn clamp(v: f32, min: f32, max: f32) -> f32 {
+            if v <= min {
+                min
+            } else if v >= max {
+                max
+            } else {
+                v
+            }
+        }
+
+        Self {
+            raw: sys::FNA3D_Color {
+                r: clamp(v.x * 255.0, 0.0, 255.0) as u8,
+                g: clamp(v.y * 255.0, 0.0, 255.0) as u8,
+                b: clamp(v.z * 255.0, 0.0, 255.0) as u8,
+                a: clamp(v.w * 255.0, 0.0, 255.0) as u8,
+            },
+        }
+    }
+
+    pub fn rgb(r: u8, g: u8, b: u8) -> Self {
+        Self::rgba(r, g, b, 255)
+    }
+
     pub fn rgba(r: u8, g: u8, b: u8, a: u8) -> Self {
         Self {
             raw: sys::FNA3D_Color {
@@ -98,8 +128,16 @@ impl Color {
         }
     }
 
-    pub fn rgb(r: u8, g: u8, b: u8) -> Self {
-        Self::rgba(r, g, b, 255)
+    /// Returns premultiplied alpha
+    pub fn from_non_premultiplied(r: u8, g: u8, b: u8, a: u8) -> Self {
+        Self::rgba((r * a) / 255, (g * a) / 255, (b * a) / 255, a)
+    }
+}
+
+/// Predefined colors
+impl Color {
+    pub fn transparent() -> Self {
+        Self::rgba(0, 0, 0, 0)
     }
 
     pub fn white() -> Self {
@@ -108,6 +146,10 @@ impl Color {
 
     pub fn cornflower_blue() -> Self {
         Self::rgb(100, 149, 237)
+    }
+
+    pub fn alice_blue() -> Self {
+        Self::rgba(240, 248, 255, 255)
     }
 }
 

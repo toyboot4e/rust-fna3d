@@ -1,27 +1,36 @@
-//! Wrapper of [FNA3D]. It's for making a higher-level framework on it!
+//! Wrapper of [FNA3D], the graphics library for [FNA]
 //!
-//! If you'd like to try a higher-level framework on top of Rust-FNA3D, take [ANF] as an example.
+//! It's for making a higher-level framework on it! Take [ANF] as an example.
 //!
 //! ## Usage
 //!
 //! First call [`prepare_window_attributes`] then prepare your [`Device`].
 //!
-//! Most functionalities are re-exported as [`Device`] methods.
+//! ## What is `fna3d`?
 //!
-//! ## What is FNA3D?
+//! `fna3d` is a wrapper around `fna3d-sys`, which is Rust FFI to [FNA3D] generated with [bindgen].
 //!
-//! [XNA] is a famous game framework. [FNA] is a reimplementation of [XNA]. [FNA3D] is the 3D
-//! graphics library for [FNA] written in C99.
+//!  [FNA3D] is the 3D graphics library for [FNA] written in C99., the gprahics li
+//! [FNA] is a reimplementation of [XNA]. [XNA] is a famous game framework.
 //!
-//! `fna3d-sys` is Rust FFI to [FNA3D] generated with [bindgen]. `fna3d` is a wrapper around
-//! `fna3d-sys`.
+//! ## What does Rust-FNA3D do?
 //!
-//! ## Note
+//! Rust-FNA3D is basically a better version of `bindgen` output:
 //!
-//! [XNA]: https://en.wikipedia.org/wiki/Microsoft_XNA
-//! [FNA]: https://fna-xna.github.io
-//! [FNA3D]: https://github.com/FNA-XNA/FNA3D
+//! * It re-exports most functionalities as [`Device`] methods.
+//! * It wraps the API with rusty types: slices, enums and booleans
+//! * It wrap some legacy API with more meaningful one
+//!
+//! And **Rust-FNA3D does not have any additional layers** or it doesn't care lifetimes or error
+//! handlings. However, there are some additional helpers in [`mojo`] and [`utils`] modules so that
+//! we can get started easily.
+//!
+//! Although `fna3d` is a thin wrapper, you can directly use [`fna3d_sys`] without `fna3d`.
+//!
 //! [ANF]: https://github.com/toyboot4e/anf
+//! [FNA3D]: https://github.com/FNA-XNA/FNA3D
+//! [FNA]: https://fna-xna.github.io
+//! [XNA]: https://en.wikipedia.org/wiki/Microsoft_XNA
 //! [bindgen]: https://github.com/rust-lang/rust-bindgen
 
 pub use fna3d_sys as sys;
@@ -43,7 +52,7 @@ pub mod mojo;
 pub mod _meta_;
 
 pub mod utils {
-    //! Helpers to get started with Rust-FNA3D
+    //! Helpers
 
     pub use enum_primitive::FromPrimitive;
 
@@ -68,7 +77,7 @@ pub mod utils {
         }
     }
 
-    /// Argument `handle: *mut c_void` is actually `*SDL_Window`
+    /// The argument `handle: *mut c_void` is often `*SDL_Window`
     pub fn default_params_from_window_handle(
         window_handle: *mut c_void,
     ) -> sys::FNA3D_PresentationParameters {
