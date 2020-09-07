@@ -8,30 +8,29 @@
 //!
 //! ## What is `fna3d`?
 //!
-//! `fna3d` is a wrapper around `fna3d-sys`, which is Rust FFI to [FNA3D] generated with [bindgen].
+//! `fna3d` is a wrapper around [`fna3d-sys`], which is Rust FFI to [FNA3D] generated with
+//! [bindgen].
 //!
-//!  [FNA3D] is the 3D graphics library for [FNA] written in C99., the gprahics li
-//! [FNA] is a reimplementation of [XNA]. [XNA] is a famous game framework.
+//!  [FNA3D] is the 3D graphics library for [FNA] written in C99. [FNA] is a reimplementation of
+//! [XNA]. [XNA] is a famous game framework.
 //!
 //! ## What does Rust-FNA3D do?
 //!
-//! Rust-FNA3D is basically a better version of `bindgen` output:
+//! The biggest difference from the original FNA3D API is that [`Device`] strongly enforces the
+//! ownership rule. Other changes are for improving the output `bindgen` with a thin layer:
 //!
 //! * It re-exports most functionalities as [`Device`] methods.
 //! * It wraps the API with rusty types: slices, enums and booleans
 //! * It wrap some legacy API with more meaningful one
 //!
-//! And **Rust-FNA3D does not have any additional layers** or it doesn't care lifetimes or error
-//! handlings. However, there are some additional helpers in [`mojo`] and [`utils`] modules so that
-//! we can get started easily.
-//!
-//! Although `fna3d` is a thin wrapper, you can directly use [`fna3d_sys`] without `fna3d`.
+//! Details are noted in the[document]
 //!
 //! [ANF]: https://github.com/toyboot4e/anf
 //! [FNA3D]: https://github.com/FNA-XNA/FNA3D
 //! [FNA]: https://fna-xna.github.io
 //! [XNA]: https://en.wikipedia.org/wiki/Microsoft_XNA
 //! [bindgen]: https://github.com/rust-lang/rust-bindgen
+//! [document]: https://github.com/toyboot4e/rust-fna3d/docs/wrapping_c.md
 
 pub use fna3d_sys as sys;
 
@@ -47,9 +46,6 @@ pub mod img;
 
 // mojoshader.h (and some more)
 pub mod mojo;
-
-// notes
-pub mod _meta_;
 
 pub mod utils {
     //! Helpers

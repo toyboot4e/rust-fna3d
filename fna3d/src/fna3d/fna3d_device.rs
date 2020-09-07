@@ -84,16 +84,33 @@ impl<'a, T> AsMutPtr<T> for Option<&'a mut T> {
 ///     * [`FNA3D_ApplyVertexBufferBindings`]
 ///     * [`FNA3D_DrawIndexedPrimitives`]
 /// * [`FNA3D_SwapBuffers`]
+///
+/// # Drop
+///
+/// `Device` destories the FNA3D device when it goes out of scope.
+///
+/// ## Ownership
+///
+/// `Device` methods take `&mut` and it strongly enforces the ownership rule.
 pub struct Device {
     raw: *mut FNA3D_Device,
 }
 
-// TODO: proper drop
 impl Drop for Device {
     fn drop(&mut self) {
         unsafe {
             FNA3D_DestroyDevice(self.raw);
         };
+    }
+}
+
+impl Device {
+    pub fn raw(&self) -> *mut FNA3D_Device {
+        self.raw
+    }
+
+    pub fn from_raw(raw: *mut FNA3D_Device) -> Self {
+        Self { raw }
     }
 }
 
@@ -116,11 +133,11 @@ impl Device {
         }
     }
 
-    pub fn destroy(self) {
-        unsafe {
-            FNA3D_DestroyDevice(self.raw);
-        }
-    }
+    // pub fn destroy(self) {
+    //     unsafe {
+    //         FNA3D_DestroyDevice(self.raw);
+    //     }
+    // }
 }
 
 /// Presentation
