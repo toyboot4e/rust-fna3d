@@ -47,7 +47,7 @@ enum_from_primitive! {
 }
 
 bitflags::bitflags! {
-    /// [`Device::clear`] argument, which specifies the buffers for clearing
+    /// [`Device::clear`] parameter, which specifies the buffers for clearing
     ///
     /// [`Device::clear`]: crate::Device::clear
     pub struct ClearOptions: u32 {

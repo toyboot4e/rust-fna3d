@@ -128,7 +128,7 @@ Before making interfaces, we may want to provide a way to access the inner conte
 
 ```rust
 impl DepthStencilState {
-    pub fn raw(&mut self) -> &mut sys::FNA3D_DepthStencilState {
+    pub fn raw_mut(&mut self) -> &mut sys::FNA3D_DepthStencilState {
         &mut self.raw
     }
 }
@@ -138,9 +138,8 @@ It's just for type conversions and not intended to provide with direct access to
 
 ### 3-2. Accessors
 
-* use snake case
-* wrap enums, bit flags and booleans
-* prefer `u32` to `i32` in some cases (e.g. indices)
+1. [x] use snake case
+2. [x] wrap enums, bit flags and booleans
 
 ```rust
 impl DepthStencilState {
@@ -164,18 +163,21 @@ impl DepthStencilState {
 }
 ```
 
-* casting to `*mut T`
+3. [x] prefer `u32` to `i32` in some cases (e.g. indices) and cast it to `i32` using `as`
+4. [x] casting types to `*mut T`
 
 We don't need mutability to get type `*mut T`:
 
-* `*mut T` can be casted from `*const T` (or directly from `&mut T` or `&mut [T]`)
-* `*const T` can be casted from `&T` or `&[T]`
+* `*mut T` can be created from `*const T` (or directly from `&mut T` or `&mut [T]`)
+* `*const T` can be created from `&T` or `&[T]`
 
-So `value as *const _ as *mut _` is sufficient.
+So `value as *const _ as *mut _` is sufficient in most cases.
 
 In reverse, `value: *mut T` can be casted to `&mut T` as this: `&mut *(value as *mut T)`.
 
 ### 3-3. Trait implementations
 
 * `Debug`, `Clone`
+* `Copy` if it's cheap
 * `Default`
+* `Hash`, `Eq`, `PartialEq` .. needed?

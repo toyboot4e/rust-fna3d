@@ -42,6 +42,7 @@ pub type EffectStateChanges = sys::mojo::MOJOSHADER_effectStateChanges;
 use std::path::Path;
 use std::{fs, io};
 
+#[derive(Debug)]
 pub enum LoadShaderError {
     Io(io::Error),
     EffectError(String),
@@ -50,16 +51,16 @@ pub enum LoadShaderError {
 pub type Result<T> = std::result::Result<T, LoadShaderError>;
 
 /// Helper for loading shader. Set projection matrix after loading
-pub fn load_shader_path(
+pub fn load_shader_from_file(
     device: &mut crate::Device,
     shader_path: impl AsRef<Path>,
 ) -> Result<(*mut crate::Effect, *mut crate::mojo::Effect)> {
     let data = fs::read(shader_path).map_err(|e| LoadShaderError::Io(e))?;
-    self::load_shader_bytes(device, &data)
+    self::load_shader_from_bytes(device, &data)
 }
 
 /// Helper for loading shader. Set projection matrix after loading
-pub fn load_shader_bytes(
+pub fn load_shader_from_bytes(
     device: &mut crate::Device,
     bytes: &[u8],
 ) -> Result<(*mut crate::Effect, *mut crate::mojo::Effect)> {

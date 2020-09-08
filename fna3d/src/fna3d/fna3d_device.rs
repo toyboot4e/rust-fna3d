@@ -37,6 +37,8 @@ impl<'a, T> AsMutPtr<T> for Option<&'a mut T> {
 ///
 /// # Functionalities
 ///
+/// See sidebar as method list.
+///
 /// * [Init/Quit](#initquit)
 /// * [Presentation](#presentation)
 /// * [Drawing](#drawing)
@@ -91,7 +93,7 @@ impl<'a, T> AsMutPtr<T> for Option<&'a mut T> {
 ///
 /// ## Ownership
 ///
-/// `Device` methods take `&mut` and it strongly enforces the ownership rule.
+/// `Device` methods take `&mut` and it strongly enforces the rule of ownership.
 pub struct Device {
     raw: *mut FNA3D_Device,
 }
@@ -214,8 +216,6 @@ impl Device {
         &mut self,
         type_: enums::PrimitiveType,
         start_vertex: u32,
-        // min_vertex_index: i32,
-        // num_vertices: i32,
         start_index: u32,
         n_primitives: u32,
         indices: *mut Buffer,
@@ -479,9 +479,6 @@ impl Device {
     /// should be the very last thing you call before making a draw call, as this
     /// does all the final prep work for the shader program before it's ready to use.
     ///
-    /// Make sure you call [`apply_effect`] before calling this function (or you'll know as the
-    /// program crashes)
-    ///
     /// * `bindings`:
     ///   The vertex buffers and their attribute data.
     /// * `is_bindings_updated`:
@@ -498,7 +495,7 @@ impl Device {
         &mut self,
         bindings: &[VertexBufferBinding],
         is_bindings_updated: bool,
-        base_vertex: i32,
+        base_vertex: u32,
     ) {
         unsafe {
             FNA3D_ApplyVertexBufferBindings(
@@ -1178,7 +1175,7 @@ impl Device {
         &mut self,
         buf: *mut Buffer,
         buf_offset_in_bytes: u32,
-        data: &mut [T], // FIXME: is it immutable?
+        data: &[T],
         opts: enums::SetDataOptions,
     ) {
         let data_len_in_bytes = data.len() * std::mem::size_of::<T>();
@@ -1188,7 +1185,7 @@ impl Device {
                 self.raw,
                 buf,
                 buf_offset_in_bytes as i32,
-                data as *mut _ as *mut _,
+                data as *const _ as *mut _,
                 data_len_in_bytes as i32,
                 1, // see `FNA3D.h` for details (XNA compatibility thing)
                 1, // see `FNA3D.h` for details (XNA compatibility thing)

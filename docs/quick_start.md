@@ -2,20 +2,21 @@
 
 ## Adding Rust-FNA3D as dependency
 
-See [crates.io](https://crates.io/crates/rust-fna3d) and add the `rust-fna3d` crates as your dependency in Cargo.toml:
-
-```toml
-[dependency]
-rust-fna3d = "<put the latest version here>"
-```
-
-You don't have to edit your `Cargo.toml` manually. If you have [cargo-edit](https://github.com/killercup/cargo-edit) installed, you only need to:
+If you have [cargo-edit](https://github.com/killercup/cargo-edit) installed, run `cargo add` to add dependency to Rust-FNA3D:
 
 ```sh
 $ cargo add rust-fna3d
 ```
 
-Or if you want, you can take the git repo:
+Or see [crates.io](https://crates.io/crates/rust-fna3d) and add the `rust-fna3d` crate as your dependency:
+
+```toml
+# Cargo.toml
+[dependency]
+rust-fna3d = "<put the latest version here>"
+```
+
+You can also take the git repo:
 
 ```toml
 [dependency]
@@ -23,7 +24,7 @@ rust-fna3d = { git = "https://github.com/toyboot4e/rust-fna3d" }
 # rust-fna3d = { git = "https://github.com/toyboot4e/rust-fna3d", rev = "<commit hash>" }
 ```
 
-When you build your project, FNA3D will automatically be built and bundled to your output. Now you can use the [fna3d](https://docs.rs/rust-fna3d) module!
+After adding the dependency, when you build your project, FNA3D will automatically be built and bundled to your output. Now you can use the [fna3d](https://docs.rs/rust-fna3d) module!
 
 ## More examples
 

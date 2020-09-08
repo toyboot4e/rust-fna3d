@@ -2,7 +2,7 @@
 
 ## Cargo
 
-Use nightly version of `cargo doc` to build the document. It's for the [Infra Rustdoc Links](https://rust-lang.github.io/rfcs/1946-intra-rustdoc-links.html) feature. Crates.io also uses it by default.
+Crates.io also uses the nightly version of `cargo doc`. If you like the [Infra Rustdoc Links](https://rust-lang.github.io/rfcs/1946-intra-rustdoc-links.html) feature, use nightly `cargo doc` in local, too!.
 
 ## Graphics
 

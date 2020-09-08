@@ -16,22 +16,23 @@
 //!
 //! ## What does Rust-FNA3D do?
 //!
-//! The biggest difference from the original FNA3D API is that [`Device`] strongly enforces the
-//! ownership rule. Other changes are for improving the output `bindgen` with a thin layer:
+//! The biggest difference from the original FNA3D API is that [`Device`] enforces the rule of
+//! ownership. Other changes are for improving the output `bindgen` with a thin layer:
 //!
 //! * It re-exports most functionalities as [`Device`] methods.
 //! * It wraps the API with rusty types: slices, enums and booleans
 //! * It wrap some legacy API with more meaningful one
 //!
-//! Details are noted in the[document]
+//! Details are noted in this [file]
 //!
 //! [ANF]: https://github.com/toyboot4e/anf
 //! [FNA3D]: https://github.com/FNA-XNA/FNA3D
 //! [FNA]: https://fna-xna.github.io
 //! [XNA]: https://en.wikipedia.org/wiki/Microsoft_XNA
 //! [bindgen]: https://github.com/rust-lang/rust-bindgen
-//! [document]: https://github.com/toyboot4e/rust-fna3d/docs/wrapping_c.md
+//! [file]: https://github.com/toyboot4e/rust-fna3d/docs/wrapping_c.md
 
+pub use bitflags;
 pub use fna3d_sys as sys;
 
 // FNA3D.h

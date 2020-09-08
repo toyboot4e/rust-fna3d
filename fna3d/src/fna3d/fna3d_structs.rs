@@ -52,7 +52,7 @@ pub type Query = sys::FNA3D_Query;
 /// This type has to be disposed with a corresponding function in [`Device`]
 pub type Texture = sys::FNA3D_Texture;
 
-/// Vertex [`*Buffer`](Buffer) dynamically "typed" with [`VertexDeclaration`]
+/// [`Device:apply_vertexbuffer_bindings`] parameter, which describes Vertex attributes
 pub type VertexBufferBinding = sys::FNA3D_VertexBufferBinding;
 pub type RenderTargetBinding = sys::FNA3D_RenderTargetBinding;
 
