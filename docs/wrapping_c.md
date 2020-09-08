@@ -20,13 +20,13 @@ WIP
 
 Let's get into examples.
 
-### 2-1. Wrapping constants to an enum
+### 2-1. Wrapping constants with an enum
 
-NOTE: this is the case where we don't use the `rustified-enum` option of `bindgen`.
+NOTE: this is the case where we we use [`bindgen::Builder`](https://docs.rs/bindgen/newest/bindgen/struct.Builder.html) with default settings. The documentation tells how to change the output.
 
 Consider the constants as an example:
 
-```
+```rust
 pub const FNA3D_IndexElementSize_FNA3D_INDEXELEMENTSIZE_16BIT: FNA3D_IndexElementSize = 0;
 pub const FNA3D_IndexElementSize_FNA3D_INDEXELEMENTSIZE_32BIT: FNA3D_IndexElementSize = 1;
 pub type FNA3D_IndexElementSize = u32;
@@ -34,7 +34,7 @@ pub type FNA3D_IndexElementSize = u32;
 
 We want to wram them with an `enum`:
 
-```
+```rust
 use enum_primitive::*;
 use fna3d_sys as sys;
 enum_from_primitive! {
@@ -47,14 +47,14 @@ enum_from_primitive! {
 }
 ```
 
+We used [enum_primitive](https://crates.io/crates/enum_primitive) crate to implement `num_traits::FromPrimitive`. TODO: [enum_primitive_derive](https://docs.rs/enum-primitive-derive/newest/enum_primitive_derive/) or [num_derive](https://docs.rs/num-derive/newest/num_derive/)
+
 Now `IndexElementSize` can be created from u32:
 
-```no_run
+```rust
 use fna3d::{IndexElementSize, utils::FromPrimitive};
 assert_eq!(IndexElementSize::from_u32(0), Some(IndexElementSize::Bits16));
 ```
-
-[enum_primitive](https://crates.io/crates/enum_primitive) crate was used to implement `IndexElementSize::from_u32` automatically.
 
 * TODO: use derive macro for it. or can I use `num` crate?
 * [bindgen #1096: Improve codegen for C style enums](https://github.com/rust-lang/rust-bindgen/issues/1096)
@@ -63,7 +63,7 @@ assert_eq!(IndexElementSize::from_u32(0), Some(IndexElementSize::Bits16));
 
 Consider the bitflag constants as an example:
 
-```
+```rust
 pub const FNA3D_ClearOptions_FNA3D_CLEAROPTIONS_TARGET: FNA3D_ClearOptions = 1;
 pub const FNA3D_ClearOptions_FNA3D_CLEAROPTIONS_DEPTHBUFFER: FNA3D_ClearOptions = 2;
 pub const FNA3D_ClearOptions_FNA3D_CLEAROPTIONS_STENCIL: FNA3D_ClearOptions = 4;
@@ -72,7 +72,7 @@ pub type FNA3D_ClearOptions = u32;
 
 We want to wrap them into a bitflags struct:
 
-```
+```rust
 use fna3d_sys as sys;
 bitflags::bitflags! {
     struct Flags: u32 {
@@ -91,7 +91,7 @@ bitflags::bitflags! {
 
 Consider the `struct` as an example:
 
-```ignore
+```rust
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct FNA3D_DepthStencilState {
@@ -111,7 +111,7 @@ Issues:
 
 So let's make a wrapper of it. We'll start with this:
 
-```
+```rust
 use fna3d_sys as sys;
 
 #[derive(Debug, Clone)]
@@ -126,7 +126,7 @@ Note that we hid the fields of the `struct`. This is an unfortunate cost to use 
 
 Before making interfaces, we may want to provide a way to access the inner content:
 
-```ignore
+```rust
 impl DepthStencilState {
     pub fn raw(&mut self) -> &mut sys::FNA3D_DepthStencilState {
         &mut self.raw
@@ -142,7 +142,7 @@ It's just for type conversions and not intended to provide with direct access to
 * wrap enums, bit flags and booleans
 * prefer `u32` to `i32` in some cases (e.g. indices)
 
-```ignore
+```rust
 impl DepthStencilState {
     // Use `bool` to wrap `u8`
     pub fn is_depth_buffer_enabled(&self) -> bool {

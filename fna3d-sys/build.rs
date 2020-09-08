@@ -1,12 +1,32 @@
-//! Build script
+//! Build script that is run before building the crate
+//!
+//! WARN: This script is for macOS only for now and requires some  to manual patching
+//! `CMakeList.txt` files.
+//!
+//! # What does this script do?
+//!
+//! 1. TODO: pull FNA3D is there's not
+//! 2. TODO: apply patches to FNA3D
+//! 3. run `cmake` and build MojoShader and FNA3D (only when they're not built yet)
+//!     * TODO: (consider Linux and Windows build: file names and library types?)
+//! 4. link to the output libraries
+//! 5. make bindings to the C libraries
+//!
+//! TODO: Vulkan headers?
 //!
 //! # Resources
+//!
+//! * Using C libraries in Rust: make a sys crate
+//! https://kornel.ski/rust-sys-crate
 //!
 //! * Build Scripts - The Cargo Book
 //! https://doc.rust-lang.org/cargo/reference/build-scripts.html#case-study-building-some-native-code
 //!
 //! * The `bindgen` User Guide
 //! https://rust-lang.github.io/rust-bindgen/
+//!
+//! * `build.rs` in Rust-SDL2
+//! https://github.com/Rust-SDL2/rust-sdl2/blob/master/sdl2-sys/build.rs
 
 use cmake::Config;
 use std::{
@@ -27,36 +47,33 @@ fn main() {
     // these files are "included" in src/lib.rs
 }
 
+/// Runs `cmake` (only when it's necessary) and links the output libraries
 fn run_cmake() {
     let root = env::var("CARGO_MANIFEST_DIR").unwrap();
     let root = PathBuf::from(root);
+    let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
 
-    {
+    // MojoShader
+    let out_file_path = out_dir.join("libmojoshader.a");
+    if !out_file_path.is_file() {
         let path = root.join("FNA3D/MojoShader");
-        // env::set_current_dir(path).unwrap();
-        let out = Config::new(path)
+        let _out = Config::new(path)
             .cflag("-DMOJOSHADER_EFFECT_SUPPORT")
             .build();
-
-        // let name = out.file_stem().unwrap().to_str().unwrap();
-        let name = out.display();
-        println!("cargo:rustc-link-search=native={}", name);
-        println!("cargo:rustc-link-lib=static=mojoshader");
     }
+    println!("cargo:rustc-link-search=native={}", out_dir.display());
+    println!("cargo:rustc-link-lib=static=mojoshader");
 
-    {
+    // FNA3D
+    let out_file_path = out_dir.join("libFNA3D.dylib");
+    if !out_file_path.is_file() {
         let path = root.join("FNA3D");
-        // env::set_current_dir(path).unwrap();
-        let out = Config::new(path)
+        let _out = Config::new(path)
             .cflag("-DMOJOSHADER_EFFECT_SUPPORT")
             .build();
-
-        // let name = out.file_stem().unwrap().to_str().unwrap();
-        let name = out.display();
-        println!("cargo:rustc-link-search=native={}", name);
-        // FIXME: why is this OK??
-        println!("cargo:rustc-link-lib=dylib=FNA3D");
     }
+    println!("cargo:rustc-link-search=native={}", out_dir.display());
+    println!("cargo:rustc-link-lib=dylib=FNA3D");
 }
 
 /// Generates bindings using a wrapper header file
@@ -70,7 +87,7 @@ fn gen_bindings(wrapper_path: impl AsRef<Path>, dest_file_name: impl AsRef<Path>
     println!("cargo:rerun-if-changed={}", wrapper.display());
     let bindings = bindgen::Builder::default()
         .header(format!("{}", wrapper.display()))
-        // SUPPORT MOJOSHADER EFFECT
+        // SUPPORT MOJOSHADER EFFECT (only needed when building MojoShader)
         .clang_arg("-DMOJOSHADER_EFFECT_SUPPORT")
         // Tell cargo to invalidate the built crate whenever any of the
         // included header files changed.

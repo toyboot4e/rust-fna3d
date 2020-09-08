@@ -9,7 +9,13 @@ See [crates.io](https://crates.io/crates/rust-fna3d) and add the `rust-fna3d` cr
 rust-fna3d = "<put the latest version here>"
 ```
 
-If you want, you can take the git repo:
+You don't have to edit your `Cargo.toml` manually. If you have [cargo-edit](https://github.com/killercup/cargo-edit) installed, you only need to:
+
+```sh
+$ cargo add rust-fna3d
+```
+
+Or if you want, you can take the git repo:
 
 ```toml
 [dependency]

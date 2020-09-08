@@ -1,0 +1,16 @@
+diff --git CMakeLists.txt CMakeLists.txt
+index c105dfe..822b42e 100644
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -176,3 +176,5 @@ else()
+ 		target_link_libraries(FNA3D PUBLIC ${SDL2_LIBRARIES})
+ 	endif()
+ endif()
++
++install (TARGETS FNA3D DESTINATION .)
+diff --git MojoShader MojoShader
+--- MojoShader
++++ MojoShader
+@@ -1 +1 @@
+-Subproject commit a11f5a477206c2815f5891f97527dd9bf70cbcfd
++Subproject commit a11f5a477206c2815f5891f97527dd9bf70cbcfd-dirty
