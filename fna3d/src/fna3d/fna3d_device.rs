@@ -248,12 +248,12 @@ impl Device {
     pub fn draw_instanced_primitives(
         &mut self,
         type_: enums::PrimitiveType,
-        base_vertex: i32,
-        min_vertex_index: i32,
-        num_vertices: i32,
-        start_index: i32,
-        prim_count: i32,
-        instance_count: i32,
+        base_vertex: u32,
+        min_vertex_index: u32,
+        num_vertices: u32,
+        start_index: u32,
+        prim_count: u32,
+        instance_count: u32,
         indices: *mut Buffer,
         index_elem_size: enums::IndexElementSize,
     ) {
@@ -261,12 +261,12 @@ impl Device {
             FNA3D_DrawInstancedPrimitives(
                 self.raw,
                 type_ as FNA3D_PrimitiveType,
-                base_vertex,
-                min_vertex_index,
-                num_vertices,
-                start_index,
-                prim_count,
-                instance_count,
+                base_vertex as i32,
+                min_vertex_index as i32,
+                num_vertices as i32,
+                start_index as i32,
+                prim_count as i32,
+                instance_count as i32,
                 indices,
                 index_elem_size as FNA3D_IndexElementSize,
             );
@@ -439,11 +439,11 @@ impl Device {
     ///   The texture bound to this sampler.
     /// * `sampler`:
     ///   The new parameters to use for this slot's texture sampling.
-    pub fn verify_sampler(&mut self, index: i32, texture: *mut Texture, sampler: &SamplerState) {
+    pub fn verify_sampler(&mut self, index: u32, texture: *mut Texture, sampler: &SamplerState) {
         unsafe {
             FNA3D_VerifySampler(
                 self.raw,
-                index,
+                index as i32,
                 texture,
                 sampler as *const _ as *const FNA3D_SamplerState as *mut _,
             );
@@ -462,14 +462,14 @@ impl Device {
     ///   The new parameters to use for this slot's texture sampling.
     pub fn verify_vertex_sampler(
         &mut self,
-        index: i32,
+        index: u32,
         texture: *mut Texture,
         sampler: &SamplerState,
     ) {
         unsafe {
             FNA3D_VerifyVertexSampler(
                 self.raw,
-                index,
+                index as i32,
                 texture,
                 sampler as *const _ as *mut FNA3D_SamplerState,
             );
@@ -587,16 +587,23 @@ impl Device {
     ///   The size of the backbuffer data in bytes.
     pub fn read_backbuffer(
         &mut self,
-        x: i32,
-        y: i32,
-        w: i32,
-        h: i32,
+        x: u32,
+        y: u32,
+        w: u32,
+        h: u32,
         // TODO: what is data??
-        data: *mut c_void,
-        data_len: i32,
+        data: &mut [u8],
     ) {
         unsafe {
-            FNA3D_ReadBackbuffer(self.raw, x, y, w, h, data, data_len);
+            FNA3D_ReadBackbuffer(
+                self.raw,
+                x as i32,
+                y as i32,
+                w as i32,
+                h as i32,
+                data as *const _ as *mut _,
+                data.len() as i32,
+            );
         }
     }
 
@@ -696,13 +703,22 @@ impl Device {
     pub fn create_texture_3d(
         &mut self,
         fmt: enums::SurfaceFormat,
-        width: i32,
-        height: i32,
-        depth: i32,
-        level_count: i32,
+        width: u32,
+        height: u32,
+        depth: u32,
+        level_count: u32,
         // TODO: maybe make a wrapper
     ) -> *mut Texture {
-        unsafe { FNA3D_CreateTexture3D(self.raw, fmt as u32, width, height, depth, level_count) }
+        unsafe {
+            FNA3D_CreateTexture3D(
+                self.raw,
+                fmt as u32,
+                width as i32,
+                height as i32,
+                depth as i32,
+                level_count as i32,
+            )
+        }
     }
 
     /// Creates a texture cube to be applied to `verify_sampler`.
@@ -817,18 +833,30 @@ impl Device {
     pub fn set_texture_data_3d(
         &mut self,
         texture: &mut Texture,
-        x: i32,
-        y: i32,
-        z: i32,
-        w: i32,
-        h: i32,
-        d: i32,
-        level: i32,
+        x: u32,
+        y: u32,
+        z: u32,
+        w: u32,
+        h: u32,
+        d: u32,
+        level: u32,
         data: *mut c_void,
         data_len: i32,
     ) {
         unsafe {
-            FNA3D_SetTextureData3D(self.raw, texture, x, y, z, w, h, d, level, data, data_len);
+            FNA3D_SetTextureData3D(
+                self.raw,
+                texture,
+                x as i32,
+                y as i32,
+                z as i32,
+                w as i32,
+                h as i32,
+                d as i32,
+                level as i32,
+                data,
+                data_len,
+            );
         }
     }
 
@@ -899,24 +927,30 @@ impl Device {
     /// * `uv_height`:
     ///   The height of the U/V planes.
     /// * `data`:
-    ///   A pointer to the raw YUV image data.
-    /// * `data_len`:
-    ///   The size of the image data in bytes.
+    ///   A sluce of the raw YUV image data.
     pub fn set_texture_data_yuv(
         &mut self,
         y: &mut Texture,
         u: &mut Texture,
         v: &mut Texture,
-        y_width: i32,
-        y_height: i32,
-        uv_width: i32,
-        uv_height: i32,
-        data: *mut ::std::os::raw::c_void,
-        data_len: i32,
+        y_width: u32,
+        y_height: u32,
+        uv_width: u32,
+        uv_height: u32,
+        data: &[u8],
     ) {
         unsafe {
             FNA3D_SetTextureDataYUV(
-                self.raw, y, u, v, y_width, y_height, uv_width, uv_height, data, data_len,
+                self.raw,
+                y,
+                u,
+                v,
+                y_width as i32,
+                y_height as i32,
+                uv_width as i32,
+                uv_height as i32,
+                data as *const _ as *mut _,
+                data.len() as i32,
             );
         }
     }
@@ -944,22 +978,22 @@ impl Device {
     pub fn get_texture_data_2d(
         &mut self,
         texture: &mut Texture,
-        x: i32,
-        y: i32,
-        w: i32,
-        h: i32,
-        level: i32,
-        data: &[u8],
+        x: u32,
+        y: u32,
+        w: u32,
+        h: u32,
+        level: u32,
+        data: &mut [u8],
     ) {
         unsafe {
             FNA3D_GetTextureData2D(
                 self.raw,
                 texture,
-                x,
-                y,
-                w,
-                h,
-                level,
+                x as i32,
+                y as i32,
+                w as i32,
+                h as i32,
+                level as i32,
                 data as *const _ as *mut _,
                 data.len() as i32,
             );
@@ -978,23 +1012,33 @@ impl Device {
     /// * `h`:		The height of the subregion being read.
     /// * `d`:		The depth of the subregion being read.
     /// * `level`:	The mipmap level being read.
-    /// * `data`:	The pointer being filled with the image data.
-    /// * `data_len`:	The size of the image data in bytes.
+    /// * `data`:	The slice being filled with the image data.
     pub fn get_texture_data_3d(
         &mut self,
         texture: &mut Texture,
-        x: i32,
-        y: i32,
-        z: i32,
-        w: i32,
-        h: i32,
-        d: i32,
-        level: i32,
-        data: *mut c_void,
-        data_len: i32,
+        x: u32,
+        y: u32,
+        z: u32,
+        w: u32,
+        h: u32,
+        d: u32,
+        level: u32,
+        data: &mut [u8],
     ) {
         unsafe {
-            FNA3D_GetTextureData3D(self.raw, texture, x, y, z, w, h, d, level, data, data_len);
+            FNA3D_GetTextureData3D(
+                self.raw,
+                texture,
+                x as i32,
+                y as i32,
+                z as i32,
+                w as i32,
+                h as i32,
+                d as i32,
+                level as i32,
+                data as *const _ as *mut _,
+                data.len() as i32,
+            );
         }
     }
 
@@ -1011,32 +1055,30 @@ impl Device {
     /// * `h`:		The height of the subregion being read.
     /// * `cubeMapFace`:	The face of the cube being read.
     /// * `level`:	The mipmap level being read.
-    /// * `data`:	The pointer being filled with the image data.
-    /// * `dataLength`:	The size of the image data in bytes.
+    /// * `data`:	The slice being filled with the image data.
     pub fn get_texture_data_cube(
         &mut self,
         texture: *mut Texture,
-        x: i32,
-        y: i32,
-        w: i32,
-        h: i32,
+        x: u32,
+        y: u32,
+        w: u32,
+        h: u32,
         cube_map_face: enums::CubeMapFace,
-        level: i32,
-        data: *mut c_void,
-        data_len: i32,
+        level: u32,
+        data: &mut [u8],
     ) {
         unsafe {
             FNA3D_GetTextureDataCube(
                 self.raw,
                 texture,
-                x,
-                y,
-                w,
-                h,
+                x as i32,
+                y as i32,
+                w as i32,
+                h as i32,
                 cube_map_face as u32,
-                level,
-                data,
-                data_len,
+                level as i32,
+                data as *const _ as *mut _,
+                data.len() as i32,
             );
         }
     }
@@ -1059,7 +1101,7 @@ impl Device {
         width: u32,
         height: u32,
         fmt: enums::SurfaceFormat,
-        multi_sample_count: i32,
+        multi_sample_count: u32,
         texture: *mut Texture,
     ) -> *mut Renderbuffer {
         unsafe {
@@ -1068,7 +1110,7 @@ impl Device {
                 width as i32,
                 height as i32,
                 fmt as u32,
-                multi_sample_count,
+                multi_sample_count as i32,
                 texture,
             )
         }
@@ -1208,7 +1250,7 @@ impl Device {
     pub fn get_vertex_buffer_data(
         &mut self,
         buffer: *mut Buffer,
-        buf_offset_in_bytes: i32,
+        buf_offset_in_bytes: u32,
         data: *mut ::std::os::raw::c_void,
         // element_count: i32,
         elem_size_in_bytes: u32,
@@ -1218,7 +1260,7 @@ impl Device {
             FNA3D_GetVertexBufferData(
                 self.raw,
                 buffer,
-                buf_offset_in_bytes,
+                buf_offset_in_bytes as i32,
                 data,
                 // element_count,
                 1,
@@ -1551,10 +1593,7 @@ impl Device {
     }
 
     /// Returns the number of sampler slots supported by the renderer (texture, vertex_texture)
-    pub fn get_max_texture_slots(
-        &self,
-        // FIXME: this..
-    ) -> (usize, usize) {
+    pub fn get_max_texture_slots(&self) -> (u32, u32) {
         let (mut textures, mut vertex_textures): (i32, i32) = (0, 0);
         unsafe {
             FNA3D_GetMaxTextureSlots(
@@ -1563,10 +1602,7 @@ impl Device {
                 &mut vertex_textures as *mut _,
             );
         }
-        (
-            usize::from_i32(textures).unwrap(),
-            usize::from_i32(vertex_textures).unwrap(),
-        )
+        (textures as u32, vertex_textures as u32)
     }
 
     /// Returns the highest multisample count supported for anti-aliasing.
@@ -1580,9 +1616,9 @@ impl Device {
     pub fn get_max_multi_sample_count(
         &mut self,
         fmt: enums::SurfaceFormat,
-        multi_sample_count: i32,
+        multi_sample_count: u32,
     ) -> i32 {
-        unsafe { FNA3D_GetMaxMultiSampleCount(self.raw, fmt as u32, multi_sample_count) }
+        unsafe { FNA3D_GetMaxMultiSampleCount(self.raw, fmt as u32, multi_sample_count as i32) }
     }
 }
 
