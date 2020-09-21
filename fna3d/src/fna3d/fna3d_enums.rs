@@ -99,26 +99,47 @@ enum_from_primitive! {
     #[derive(Debug, Copy, Clone, PartialEq)]
     #[repr(u32)]
     pub enum SurfaceFormat {
+        /// Unsigned 32-bit ARGB pixel format for store 8 bits per channel
         Color = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_COLOR,
+        /// Unsigned 16-bit BGR pixel format for store 5 bits for blue, 6 bits for green, and 5 bits for red
         Bgr565 = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_BGR565,
+        /// Unsigned 16-bit BGRA pixel format where 5 bits reserved for each color and last bit is reserved for alpha
         Bgra5551 = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_BGRA5551,
+        /// Unsigned 16-bit BGRA pixel format for store 4 bits per channel
         Bgra4444 = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_BGRA4444,
+        /// DXT1. Texture format with compression. Surface dimensions must be a multiple 4
         Dxt1 = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_DXT1,
+        /// DXT3. Texture format with compression. Surface dimensions must be a multiple 4
         Dxt3 = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_DXT3,
+        /// DXT5. Texture format with compression. Surface dimensions must be a multiple 4
         Dxt5 = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_DXT5,
+        /// Signed 16-bit bump-map format for store 8 bits for <c>u</c> and <c>v</c> data.
         NormalizedByte2 = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_NORMALIZEDBYTE2,
+        /// Signed 16-bit bump-map format for store 8 bits per channel
         NormalizedByte4 = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_NORMALIZEDBYTE4,
+        /// Unsigned 32-bit RGBA pixel format for store 10 bits for each color and 2 bits for alpha
         Rgba1010102 = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_RGBA1010102,
+        /// Unsigned 32-bit RG pixel format using 16 bits per channel
         Rg32 = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_RG32,
+        /// Unsigned 64-bit RGBA pixel format using 16 bits per channel
         Rgba64 = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_RGBA64,
+        /// Unsigned A 8-bit format for store 8 bits to alpha channel
         Alpha8 = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_ALPHA8,
+        /// IEEE 32-bit R float format for store 32 bits to red channel
         Single = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_SINGLE,
+        /// IEEE 64-bit RG float format for store 32 bits per channel
         Vector2 = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_VECTOR2,
+        /// IEEE 128-bit RGBA float format for store 32 bits per channel
         Vector4 = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_VECTOR4,
+        /// Float 16-bit R format for store 16 bits to red channel
         HalfSingle = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_HALFSINGLE,
+        /// Float 32-bit RG format for store 16 bits per channel
         HalfVector2 = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_HALFVECTOR2,
+        /// Float 64-bit ARGB format for store 16 bits per channel
         HalfVector4 = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_HALFVECTOR4,
+        /// Float pixel format for high dynamic range data
         HdrBlendable = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_HDRBLENDABLE,
+        /// Unsigned 32-bit ABGR pixel format for store 8 bits per channel (XNA3)
         ColorBgraExt = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_COLORBGRA_EXT,
     }
 }
