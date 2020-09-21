@@ -1,18 +1,22 @@
-//! Build script that is run before building the crate
+//! Build script of `fna3d-sys`
 //!
-//! WARN: This script is for macOS only for now and requires some  to manual patching
-//! `CMakeList.txt` files.
+//! FIXME: seems like this script does not work without `main.rs`
 //!
-//! # What does this script do?
+//! * WARN: This script is for macOS only for now
+//! * WARN: This script requires some manual patching `CMakeList.txt` files
 //!
-//! 1. TODO: pull FNA3D is there's not
+//! # What it does
+//!
+//! 1. TODO: pull FNA3D recursively if there's not
 //! 2. TODO: apply patches to FNA3D
 //! 3. run `cmake` and build MojoShader and FNA3D (only when they're not built yet)
 //!     * TODO: (consider Linux and Windows build: file names and library types?)
 //! 4. link to the output libraries
-//! 5. make bindings to the C libraries
+//! 5. make bindings (FFI) to the C libraries
 //!
-//! TODO: Vulkan headers?
+//! * TODO: Vulkan headers?
+//! * TODO: enalbe release build and stand-alone app?
+//! * FIXME: @rpath? (run executable without cargo after outputting)
 //!
 //! # Resources
 //!
@@ -37,7 +41,6 @@ use std::{
 // type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 fn main() {
-    // FIXME: run cmake only when FNA3D is changed
     // compile MojoShader and FNA3D
     run_cmake();
 

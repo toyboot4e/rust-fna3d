@@ -60,6 +60,9 @@ pub fn load_shader_from_file(
 }
 
 /// Helper for loading shader. Set projection matrix after loading
+///
+/// If ok, returns (effect_handle, effect_data_access). The latter is automatically disposed after
+/// calling [`fna3d::Device::add_dispose_effect`].
 pub fn load_shader_from_bytes(
     device: &mut crate::Device,
     bytes: &[u8],

@@ -94,6 +94,7 @@ impl<'a, T> AsMutPtr<T> for Option<&'a mut T> {
 /// ## Ownership
 ///
 /// `Device` methods take `&mut` and it strongly enforces the rule of ownership.
+#[derive(Debug)]
 pub struct Device {
     raw: *mut FNA3D_Device,
 }
@@ -525,7 +526,7 @@ impl Device {
     /// * `depth_format`:
     ///    The format of the depth/stencil renderbuffer.
     /// * `preserve_depth_stencil_contents`:
-    ///   Set this to `true` to store the depth/stencil contents
+    ///   Set this to 1 to store the color/depth/stencil contents
     ///   for future use. Most of the time you'll want to
     ///   keep this at 0 to not waste GPU bandwidth.
     pub fn set_render_targets(
@@ -534,7 +535,7 @@ impl Device {
         num_render_targets: u32,
         depth_stencil_buffer: Option<&mut Renderbuffer>,
         depth_format: enums::DepthFormat,
-        preserve_depth_stencil_contents: bool,
+        preserve_target_contents: bool,
     ) {
         unsafe {
             FNA3D_SetRenderTargets(
@@ -543,7 +544,7 @@ impl Device {
                 num_render_targets as i32,
                 depth_stencil_buffer.as_mut_ptr(),
                 depth_format as FNA3D_DepthFormat,
-                preserve_depth_stencil_contents as u8,
+                preserve_target_contents as u8,
             );
         }
     }
@@ -562,9 +563,9 @@ impl Device {
     /// match your window changes.
     ///
     /// * `params`: The new settings for the backbuffer.
-    pub fn reset_backbuffer(&mut self, params: &mut PresentationParameters) {
+    pub fn reset_backbuffer(&mut self, params: &PresentationParameters) {
         unsafe {
-            FNA3D_ResetBackbuffer(self.raw, params as *mut _);
+            FNA3D_ResetBackbuffer(self.raw, params as *const _ as *mut _);
         }
     }
 
@@ -742,7 +743,7 @@ impl Device {
     /// deletes the resource instead of the programmer).
     ///
     /// * `texture`: The FNA3D_Texture to be destroyed.
-    pub fn add_dispose_texture(&mut self, texture: &mut Texture) {
+    pub fn add_dispose_texture(&mut self, texture: *mut Texture) {
         unsafe {
             FNA3D_AddDisposeTexture(self.raw, texture);
         }
@@ -774,8 +775,7 @@ impl Device {
         w: u32,
         h: u32,
         level: u32,
-        data: *mut c_void,
-        data_len: u32,
+        data: &[u8],
     ) {
         unsafe {
             FNA3D_SetTextureData2D(
@@ -786,8 +786,8 @@ impl Device {
                 w as i32,
                 h as i32,
                 level as i32,
-                data,
-                data_len as i32,
+                data.as_ptr() as *mut _,
+                data.len() as i32,
             );
         }
     }
@@ -1174,6 +1174,7 @@ impl Device {
     pub fn set_vertex_buffer_data<T>(
         &mut self,
         buf: *mut Buffer,
+        // TODO: can it be removed
         buf_offset_in_bytes: u32,
         data: &[T],
         opts: enums::SetDataOptions,
@@ -1293,14 +1294,14 @@ impl Device {
         data: &[T],
         opts: enums::SetDataOptions,
     ) {
-        let data_len_in_bytes = data.len() * std::mem::size_of::<T>();
+        let len_bytes = data.len() * std::mem::size_of::<T>();
         unsafe {
             FNA3D_SetIndexBufferData(
                 self.raw,
                 buf,
                 buf_offset_in_bytes as i32,
                 data.as_ptr() as *mut _,
-                data_len_in_bytes as i32,
+                len_bytes as i32,
                 opts as u32,
             );
         }
@@ -1319,19 +1320,19 @@ impl Device {
     pub fn get_index_buffer_data<T>(
         &mut self,
         buf: *mut Buffer,
-        buf_offset_in_bytes: i32,
+        buf_offset_in_bytes: u32,
         data: &[T],
         // data: *mut c_void,
         // data_len: i32,
     ) {
-        let len_in_bytes = data.len() * std::mem::size_of::<T>();
+        let len_bytes = data.len() * std::mem::size_of::<T>();
         unsafe {
             FNA3D_GetIndexBufferData(
                 self.raw,
                 buf,
-                buf_offset_in_bytes,
+                buf_offset_in_bytes as i32,
                 data.as_ptr() as *mut _,
-                len_in_bytes as i32,
+                len_bytes as i32,
             );
         }
     }

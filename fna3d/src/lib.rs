@@ -8,18 +8,17 @@
 //!
 //! ## What is `fna3d`?
 //!
-//! `fna3d` is a wrapper around [`fna3d-sys`], which is Rust FFI to [FNA3D] generated with
-//! [bindgen].
+//! `fna3d` is a wrapper around `fna3d-sys`, which is Rust FFI to [FNA3D] generated with [bindgen].
 //!
 //!  [FNA3D] is the 3D graphics library for [FNA] written in C99. [FNA] is a reimplementation of
 //! [XNA]. [XNA] is a famous game framework.
 //!
 //! ## What does Rust-FNA3D do?
 //!
-//! The biggest difference from the original FNA3D API is that [`Device`] enforces the rule of
-//! ownership. Other changes are for improving the output `bindgen` with a thin layer:
+//! The biggest difference from the original FNA3D API is that most functionalities are re-exported
+//! as [`Device`] methods and it strongly enforces the ownership. Other changes are for improving
+//! the output `bindgen` with a thin layer:
 //!
-//! * It re-exports most functionalities as [`Device`] methods.
 //! * It wraps the API with rusty types: slices, enums and booleans
 //! * It wrap some legacy API with more meaningful one
 //!
@@ -30,7 +29,7 @@
 //! [FNA]: https://fna-xna.github.io
 //! [XNA]: https://en.wikipedia.org/wiki/Microsoft_XNA
 //! [bindgen]: https://github.com/rust-lang/rust-bindgen
-//! [file]: https://github.com/toyboot4e/rust-fna3d/docs/wrapping_c.md
+//! [file]: https://github.com/toyboot4e/rust-fna3d/blob/master/docs/wrapping_c.md
 
 pub use bitflags;
 pub use fna3d_sys as sys;

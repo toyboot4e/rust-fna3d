@@ -22,9 +22,9 @@ Let's get into examples.
 
 ### 2-1. Wrapping constants with an enum
 
-NOTE: this is the case where we we use [`bindgen::Builder`](https://docs.rs/bindgen/newest/bindgen/struct.Builder.html) with default settings. The documentation tells how to change the output.
+NOTE: this is the case where we we use [`bindgen::Builder`](https://docs.rs/bindgen/newest/bindgen/struct.Builder.html) with default settings. If you want to know, the documentation tells us how to change the output.
 
-Consider the constants as an example:
+Consider the constants as an example of `bindgen` output:
 
 ```rust
 pub const FNA3D_IndexElementSize_FNA3D_INDEXELEMENTSIZE_16BIT: FNA3D_IndexElementSize = 0;
@@ -47,7 +47,7 @@ enum_from_primitive! {
 }
 ```
 
-We used [enum_primitive](https://crates.io/crates/enum_primitive) crate to implement `num_traits::FromPrimitive`. TODO: [enum_primitive_derive](https://docs.rs/enum-primitive-derive/newest/enum_primitive_derive/) or [num_derive](https://docs.rs/num-derive/newest/num_derive/)
+We used [enum_primitive](https://crates.io/crates/enum_primitive) crate to implement `num_traits::FromPrimitive`. TODO: [enum_primitive_derive](https://docs.rs/enum-primitive-derive/newest/enum_primitive_derive/) or [num_derive](https://docs.rs/num-derive/newest/num_derive/) or num_enum
 
 Now `IndexElementSize` can be created from u32:
 
@@ -61,7 +61,7 @@ assert_eq!(IndexElementSize::from_u32(0), Some(IndexElementSize::Bits16));
 
 ### 2-2. Wrapping bitflags
 
-Consider the bitflag constants as an example:
+Consider the bitflag constants as an example of `bindgen` output:
 
 ```rust
 pub const FNA3D_ClearOptions_FNA3D_CLEAROPTIONS_TARGET: FNA3D_ClearOptions = 1;
@@ -152,7 +152,7 @@ impl DepthStencilState {
         self.raw.depthBufferEnable = b as u8;
     }
 
-    // Use `enums::CompareFunction` to wrap `FNA3D_CompareFunction` i.e. `u32`
+    // Use an enum to wrap `FNA3D_CompareFunction` i.e. C enum binded as an alias of `u32`
     pub fn depth_buffer_function(&self) -> enums::CompareFunction {
         enums::CompareFunction::from_u32(self.raw.depthBufferFunction).unwrap()
     }
@@ -164,7 +164,7 @@ impl DepthStencilState {
 ```
 
 3. [x] prefer `u32` to `i32` in some cases (e.g. indices) and cast it to `i32` using `as`
-4. [x] casting types to `*mut T`
+4. [x] casting types to `*mut T`:
 
 We don't need mutability to get type `*mut T`:
 

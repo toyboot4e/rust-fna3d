@@ -11,13 +11,13 @@ Please refer to the [API documentation](https://docs.rs/rust-fna3d). It's for ma
 * [docs/quick_start.md](https://github.com/toyboot4e/rust-fna3d/blob/master/docs/quick_start.md): how  to add dependency to Rust-FNA3D
 * [docs/tips.md](https://github.com/toyboot4e/rust-fna3d/blob/master/docs/tips.md): using `cargo +nightly doc`
 * [docs/wrapping_c.md](https://github.com/toyboot4e/rust-fna3d/blob/master/docs/wrapping_c.md): how I wrapped FNA3D in Rust
-* [docs/referendes.md](https://github.com/toyboot4e/rust-fna3d/blob/master/docs/refs.md): other repositories using FNA3D
+* [docs/references.md](https://github.com/toyboot4e/rust-fna3d/blob/master/docs/refs.md): other repositories using FNA3D
 
 ## State of this wrapper
 
-Almost ready. Remaining tasks:
+Close to ready. Remaining tasks:
 
-* [ ] Do not run `cmake` every time we run our project
+* [ ] Multi platform support of `build.rs`
 * [ ] Publish it on crates.io and make sure it works fine
 * [ ] Add more wrapper types rather than re-exporting raw types
 * [ ] Add more methods to wrapper types

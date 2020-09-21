@@ -1,8 +1,8 @@
 //! Wrapper of `FNA3D_Image.h`
 //!
-//! Iternally, `FNA3D_Image` uses [`stb_image`] (`stbi`) with callback functions where arbitrary
-//! IO is allowed. You also can use [`stb_image`] directory without callbacks or other libraries
-//! such as [`SDL_RWops`] in SDL2.
+//! Iternally, `FNA3D_Image` uses [`stb_image`] (`stbi`) with callback functions where arbitrary IO
+//! is allowed. You also can use [`stb_image`] directory without callbacks or you can use other
+//! libraries such as [`SDL_RWops`] in SDL2.
 //!
 //! [`stb_image`]: https://github.com/nothings/stb/blob/master/stb_image.h
 //! [`SDL_RWops`]: https://wiki.libsdl.org/SDL_RWops
@@ -34,23 +34,54 @@
 //! }
 //! ```
 
-use fna3d_sys as sys;
-
 use std::{
     fs::File,
-    io::{self, BufReader, Read, Seek, SeekFrom},
+    io::{self, BufReader, Read, Seek, SeekFrom, Write},
     os::raw::{c_char, c_void},
     path::Path,
 };
 
+use crate::Texture;
+use fna3d_sys as sys;
+
 /// Callback used to pull data from the stream
-pub type ReadFunc = sys::FNA3D_Image_ReadFunc;
+type ReadFunc = sys::FNA3D_Image_ReadFunc;
 
 /// Callback used to seek around a stream
-pub type SkipFunc = sys::FNA3D_Image_SkipFunc;
+type SkipFunc = sys::FNA3D_Image_SkipFunc;
 
-/// Callback used to check that we're reached the end of a stream
-pub type EofFunc = sys::FNA3D_Image_EOFFunc;
+/// Callback used to check that we're reached to the end of a stream
+type EofFunc = sys::FNA3D_Image_EOFFunc;
+
+/// Callback used to check that we're reached to the end of a stream
+type WriteFunc = sys::FNA3D_Image_WriteFunc;
+
+/// Decodes PNG/JPG/GIF data into raw RGBA8 texture data
+///
+/// Be sure to [`free`] the returned memory after use!
+///
+/// The return type is not [`Vec`] because it frees its content when dropping.
+///
+/// [`Vec`]: std::vec::Vec
+pub fn from_reader<R: Read + Seek>(
+    reader: R,
+    force_size: Option<[u32; 2]>,
+) -> (*const u8, u32, [u32; 2]) {
+    let context = LoadContext {
+        reader,
+        is_end: false,
+    };
+
+    unsafe {
+        self::load_impl(
+            Some(LoadCallbacks::<R>::read),
+            Some(LoadCallbacks::<R>::skip),
+            Some(LoadCallbacks::<R>::eof),
+            std::mem::transmute(&context),
+            force_size,
+        )
+    }
+}
 
 /// Decodes PNG/JPG/GIF data into raw RGBA8 texture data
 ///
@@ -71,50 +102,91 @@ pub fn from_path(
     self::from_reader(reader, force_size)
 }
 
-/// Decodes PNG/JPG/GIF data into raw RGBA8 texture data
-///
-/// Be sure to [`free`] the returned memory after use!
-///
-/// The return type is not [`Vec`] because it frees its content when dropping.
-///
-/// [`Vec`]: std::vec::Vec
-pub fn from_reader<R: Read + Seek>(
-    reader: R,
-    force_size: Option<[u32; 2]>,
-) -> (*const u8, u32, [u32; 2]) {
-    let context = StbiCallbackState {
-        reader,
-        is_end: false,
-    };
-
-    unsafe {
-        self::load(
-            Some(StbiCallbacks::<R>::read),
-            Some(StbiCallbacks::<R>::skip),
-            Some(StbiCallbacks::<R>::eof),
-            std::mem::transmute(&context),
-            force_size,
-        )
-    }
-}
-
-/// Frees pixels loaded with [`from_reader`](from_reader) or [`from_path`](from_path)
+/// Frees pixels loaded with a method in this module
 pub fn free(mem: *mut u8) {
     unsafe {
         sys::FNA3D_Image_Free(mem);
     }
 }
 
-// --------------------------------------------------------------------------------
-// impls
+/// Encodes RGBA8 image data into PNG data
+pub fn save_png<T: Write>(
+    writer: T,
+    data: *mut Texture,
+    src_w: u32,
+    src_h: u32,
+    dst_w: u32,
+    dst_h: u32,
+) {
+    let mut cx = SaveContext { writer };
 
-struct StbiCallbackState<R: Read + Seek> {
+    unsafe {
+        fna3d_sys::FNA3D_Image_SavePNG(
+            Some(SaveContext::<T>::write),
+            &mut cx as *mut _ as _,
+            src_w as i32,
+            src_h as i32,
+            dst_w as i32,
+            dst_h as i32,
+            data as *mut u8,
+        );
+    }
+}
+
+pub fn save_png_to(
+    path: impl AsRef<Path>,
+    data: *mut u8,
+    src_w: u32,
+    src_h: u32,
+    dst_w: u32,
+    dst_h: u32,
+) -> io::Result<()> {
+    let file = File::create(path)?;
+    let mut cx = SaveContext { writer: file };
+
+    unsafe {
+        fna3d_sys::FNA3D_Image_SavePNG(
+            Some(SaveContext::<File>::write),
+            &mut cx as *mut _ as _,
+            src_w as i32,
+            src_h as i32,
+            dst_w as i32,
+            dst_h as i32,
+            data,
+        );
+    }
+
+    Ok(())
+}
+
+struct SaveContext<T: Write> {
+    writer: T,
+}
+
+impl<T: Write> SaveContext<T> {
+    unsafe extern "C" fn write(
+        context: *mut ::std::os::raw::c_void,
+        data: *mut ::std::os::raw::c_void,
+        size: i32,
+    ) {
+        let cx = &mut *(context as *mut Self);
+        let buf = std::slice::from_raw_parts(data as *mut u8, size as usize);
+        // TODO: don't unwrap
+        cx.writer.write(buf).unwrap();
+    }
+}
+
+// --------------------------------------------------------------------------------
+// image load impls
+
+/// Context passed around callback functions
+struct LoadContext<R: Read + Seek> {
     reader: R,
-    is_end: bool,
+    is_end: bool, // FIXME: is this right?
 }
 
 /// Callback functions for `FNA3D_Image.h`, i.e. `stb_image.h`
-struct StbiCallbacks<R: Read + Seek> {
+struct LoadCallbacks<R: Read + Seek> {
     phantom: std::marker::PhantomData<R>,
 }
 
@@ -145,34 +217,34 @@ fn read_as_much(mut reader: impl Read, mut buf: &mut [u8]) -> io::Result<usize> 
     Ok(read)
 }
 
-impl<R: Read + Seek> StbiCallbacks<R> {
+impl<R: Read + Seek> LoadCallbacks<R> {
     /// Reads up to `size` bytes
     unsafe extern "C" fn read(context: *mut c_void, out_ptr: *mut c_char, size: i32) -> i32 {
-        let cx = &mut *(context as *mut StbiCallbackState<R>);
+        let cx = &mut *(context as *mut LoadContext<R>);
 
         let out = std::slice::from_raw_parts_mut(out_ptr as *mut u8, size as usize);
         let len_read = self::read_as_much(&mut cx.reader, out).unwrap();
 
-        log::trace!("stbi readFunc: {} -> {}", size, len_read);
+        log::trace!("FNA3D_Image stbi readFunc: {} -> {}", size, len_read);
 
         len_read as i32
     }
 
-    /// FIXME: is this OK?
+    /// FIXME: is this OK? I've never seen it's called and I'm really not confident
     ///
     /// Skips `n` bytes
     unsafe extern "C" fn skip(context: *mut c_void, n: i32) {
-        log::trace!("stbi skipFunc: {}", n);
-        let cx = &mut *(context as *mut StbiCallbackState<R>);
+        log::trace!("FNA3D_Image stbi skipFunc: {}", n);
+        let cx = &mut *(context as *mut LoadContext<R>);
         cx.reader
             .seek(SeekFrom::Current(n as i64))
             .unwrap_or_else(|err| panic!("error in anf skip func {}", err));
     }
 
-    /// FIXME: is this OK? I've never seen it's called and really not confident
+    /// FIXME: is this OK? I've never seen it's called and I'm really not confident
     unsafe extern "C" fn eof(context: *mut c_void) -> i32 {
-        let cx = &mut *(context as *mut StbiCallbackState<R>);
-        log::trace!("stbi eofFunc: is_end={}", cx.is_end);
+        let cx = &mut *(context as *mut LoadContext<R>);
+        log::trace!("FNA3D_Image stbi eofFunc: is_end={}", cx.is_end);
         cx.is_end as i32
     }
 }
@@ -194,7 +266,7 @@ impl<R: Read + Seek> StbiCallbacks<R> {
 ///
 /// Returns a block of memory suitable for use with `FNA3D_SetTextureData2D`.
 /// Be sure to free the memory with `FNA3D_Image_Free` after use!
-unsafe fn load(
+unsafe fn load_impl(
     read_fn: ReadFunc,
     skip_fn: SkipFunc,
     eof_fn: EofFunc,

@@ -2,7 +2,13 @@
 
 ## Cargo
 
-Crates.io also uses the nightly version of `cargo doc`. If you like the [Infra Rustdoc Links](https://rust-lang.github.io/rfcs/1946-intra-rustdoc-links.html) feature, use nightly `cargo doc` in local, too!.
+### `cargo doc` in nightly version
+
+Crates.io uses the nightly version of `cargo doc` by default. If you like the [Infra Rustdoc Links](https://rust-lang.github.io/rfcs/1946-intra-rustdoc-links.html) feature, use nightly `cargo doc` in local, too!.
+
+### Duplicate crates detection
+
+`cargo tree -d` prints duplicate crates. Cargo should batch dependencies as much as possible thanks to the semvar [specification](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html). If not, it's time (for me) to update dependent crates.
 
 ## Graphics
 

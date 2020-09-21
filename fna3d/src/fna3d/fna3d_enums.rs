@@ -191,7 +191,7 @@ enum_from_primitive! {
         /// The SetData operation can overwrite the portions of existing data.
         None = sys::FNA3D_SetDataOptions_FNA3D_SETDATAOPTIONS_NONE,
         /// The SetData operation will discard the entire buffer. A pointer to a new memory area is
-        /// returned and rendering from the previous area do notstall
+        /// returned and rendering from the previous area do not stall
         Discard = sys::FNA3D_SetDataOptions_FNA3D_SETDATAOPTIONS_DISCARD,
         /// The SetData operation will not overwrite existing data. This allows the driver to
         /// return immediately from a SetData operation and continue rendering.
