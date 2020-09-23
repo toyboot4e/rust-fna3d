@@ -212,7 +212,7 @@ impl Default for RasterizerState {
 }
 
 impl RasterizerState {
-    pub fn raw_ref(&self) -> &sys::FNA3D_RasterizerState {
+    pub fn raw(&self) -> &sys::FNA3D_RasterizerState {
         &self.raw
     }
 
@@ -472,6 +472,16 @@ impl Default for BlendState {
     }
 }
 
+impl BlendState {
+    pub fn raw(&self) -> &sys::FNA3D_BlendState {
+        &self.raw
+    }
+
+    pub fn raw_mut(&mut self) -> &mut sys::FNA3D_BlendState {
+        &mut self.raw
+    }
+}
+
 /// Constructors (taken from FNA)
 impl BlendState {
     pub fn with_blend(
@@ -506,7 +516,7 @@ impl BlendState {
         )
     }
 
-    pub fn not_premultiplied() -> Self {
+    pub fn non_premultiplied() -> Self {
         Self::with_blend(
             enums::Blend::SourceAlpha,
             enums::Blend::SourceAlpha,
@@ -522,16 +532,6 @@ impl BlendState {
             enums::Blend::One,
             enums::Blend::One,
         )
-    }
-}
-
-impl BlendState {
-    pub fn raw_ref(&self) -> &sys::FNA3D_BlendState {
-        &self.raw
-    }
-
-    pub fn raw_mut(&mut self) -> &mut sys::FNA3D_BlendState {
-        &mut self.raw
     }
 }
 
@@ -663,7 +663,7 @@ impl Default for DepthStencilState {
 
 /// Wrap enums and booleans
 impl DepthStencilState {
-    pub fn raw_ref(&self) -> &sys::FNA3D_DepthStencilState {
+    pub fn raw(&self) -> &sys::FNA3D_DepthStencilState {
         &self.raw
     }
 

@@ -1,7 +1,5 @@
 //! Build script of `fna3d-sys`
 //!
-//! FIXME: seems like this script does not work without `main.rs`
-//!
 //! * WARN: This script is for macOS only for now
 //! * WARN: This script requires some manual patching `CMakeList.txt` files
 //!
@@ -16,6 +14,7 @@
 //!
 //! * TODO: Vulkan headers?
 //! * TODO: enalbe release build and stand-alone app?
+//! * TODO: remove `CMakeCache.txt` automatically (or `Error: could not load cache`)
 //! * FIXME: @rpath? (run executable without cargo after outputting)
 //!
 //! # Resources

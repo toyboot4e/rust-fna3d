@@ -225,16 +225,12 @@ impl<R: Read + Seek> LoadCallbacks<R> {
         let out = std::slice::from_raw_parts_mut(out_ptr as *mut u8, size as usize);
         let len_read = self::read_as_much(&mut cx.reader, out).unwrap();
 
-        log::trace!("FNA3D_Image stbi readFunc: {} -> {}", size, len_read);
-
         len_read as i32
     }
 
-    /// FIXME: is this OK? I've never seen it's called and I'm really not confident
-    ///
     /// Skips `n` bytes
     unsafe extern "C" fn skip(context: *mut c_void, n: i32) {
-        log::trace!("FNA3D_Image stbi skipFunc: {}", n);
+        // log::warn!("FNA3D_Image stbi skipFunc called: {}", n);
         let cx = &mut *(context as *mut LoadContext<R>);
         cx.reader
             .seek(SeekFrom::Current(n as i64))
@@ -244,7 +240,7 @@ impl<R: Read + Seek> LoadCallbacks<R> {
     /// FIXME: is this OK? I've never seen it's called and I'm really not confident
     unsafe extern "C" fn eof(context: *mut c_void) -> i32 {
         let cx = &mut *(context as *mut LoadContext<R>);
-        log::trace!("FNA3D_Image stbi eofFunc: is_end={}", cx.is_end);
+        log::warn!("FNA3D_Image stbi eofFunc called: is_end={}", cx.is_end);
         cx.is_end as i32
     }
 }

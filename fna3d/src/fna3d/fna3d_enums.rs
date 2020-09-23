@@ -113,7 +113,7 @@ enum_from_primitive! {
         Dxt3 = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_DXT3,
         /// DXT5. Texture format with compression. Surface dimensions must be a multiple 4
         Dxt5 = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_DXT5,
-        /// Signed 16-bit bump-map format for store 8 bits for <c>u</c> and <c>v</c> data.
+        /// Signed 16-bit bump-map format for store 8 bits for u and v data.
         NormalizedByte2 = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_NORMALIZEDBYTE2,
         /// Signed 16-bit bump-map format for store 8 bits per channel
         NormalizedByte4 = sys::FNA3D_SurfaceFormat_FNA3D_SURFACEFORMAT_NORMALIZEDBYTE4,
@@ -213,6 +213,8 @@ enum_from_primitive! {
         None = sys::FNA3D_SetDataOptions_FNA3D_SETDATAOPTIONS_NONE,
         /// The SetData operation will discard the entire buffer. A pointer to a new memory area is
         /// returned and rendering from the previous area do not stall
+        ///
+        /// FIXME: make API to ues this option
         Discard = sys::FNA3D_SetDataOptions_FNA3D_SETDATAOPTIONS_DISCARD,
         /// The SetData operation will not overwrite existing data. This allows the driver to
         /// return immediately from a SetData operation and continue rendering.

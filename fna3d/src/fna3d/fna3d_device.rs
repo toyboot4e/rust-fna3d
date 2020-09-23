@@ -228,9 +228,9 @@ impl Device {
                 type_ as FNA3D_PrimitiveType,
                 start_vertex as i32,
                 // min_vertex_index,
-                -1, // this is just for XNA compatibility and is ignored
+                -1, // this is ignored (it's just for XNA compatibility)
                 // num_vertices,
-                -1, // this is just for XNA compatibility and is ignored
+                -1, // this is ignored (it's just for XNA compatibility)
                 start_index as i32,
                 n_primitives as i32,
                 indices,
@@ -398,7 +398,7 @@ impl Device {
     ///   The new parameters to use for color blending.
     pub fn set_blend_state(&mut self, blend_state: &BlendState) {
         unsafe {
-            FNA3D_SetBlendState(self.raw, blend_state.raw_ref() as *const _ as *mut _);
+            FNA3D_SetBlendState(self.raw, blend_state.raw() as *const _ as *mut _);
         }
     }
 
@@ -410,10 +410,7 @@ impl Device {
     ///   The new parameters to use for depth/stencil work.
     pub fn set_depth_stencil_state(&mut self, depth_stencil_state: &DepthStencilState) {
         unsafe {
-            FNA3D_SetDepthStencilState(
-                self.raw,
-                depth_stencil_state.raw_ref() as *const _ as *mut _,
-            );
+            FNA3D_SetDepthStencilState(self.raw, depth_stencil_state.raw() as *const _ as *mut _);
         }
     }
 
@@ -425,7 +422,7 @@ impl Device {
     /// * `rasterizer_state`: The new parameters to use for rasterization work.
     pub fn apply_rasterizer_state(&mut self, rst: &RasterizerState) {
         unsafe {
-            FNA3D_ApplyRasterizerState(self.raw, rst.raw_ref() as *const _ as *mut _);
+            FNA3D_ApplyRasterizerState(self.raw, rst.raw() as *const _ as *mut _);
         }
     }
 
@@ -780,9 +777,7 @@ impl Device {
     /// * `level`:
     ///   The mipmap level being updated.
     /// * `data`:
-    ///   A pointer to the image data.
-    /// * `data_len`:
-    ///   The length of the image data in bytes.
+    ///   A slice to the image data.
     pub fn set_texture_data_2d(
         &mut self,
         texture: *mut Texture,
@@ -1216,7 +1211,6 @@ impl Device {
     pub fn set_vertex_buffer_data<T>(
         &mut self,
         buf: *mut Buffer,
-        // TODO: can it be removed
         buf_offset_in_bytes: u32,
         data: &[T],
         opts: enums::SetDataOptions,

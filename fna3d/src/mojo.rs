@@ -40,7 +40,10 @@ pub type EffectStateChanges = sys::mojo::MOJOSHADER_effectStateChanges;
 // Helpers
 
 use std::path::Path;
-use std::{fs, io};
+use std::{
+    fs,
+    io::{self, prelude::*},
+};
 
 #[derive(Debug)]
 pub enum LoadShaderError {
@@ -83,7 +86,7 @@ pub fn load_shader_from_bytes(
     }
 }
 
-/// Predefined [orthograpihcal projection] matrix. FIXME: does it work well in any viewport size?
+/// Predefined [orthograpihcal projection] matrix
 ///
 /// [orthograpihcal projection]: https://en.wikipedia.org/wiki/Orthographic_projection
 pub const ORTHOGRAPHICAL_MATRIX: [f32; 16] = [
@@ -91,14 +94,17 @@ pub const ORTHOGRAPHICAL_MATRIX: [f32; 16] = [
     0.0,
     0.0,
     -1.0,
+    //
     0.0,
     -0.00277777785, // -2.0 / viewport.h (?)
     0.0,
     1.0,
+    //
     0.0,
     0.0,
-    1.0,
+    1.0, // FIXME: sign
     0.0,
+    //
     0.0,
     0.0,
     0.0,
@@ -113,7 +119,6 @@ pub fn set_projection_matrix(data: *mut crate::mojo::Effect, mat: &[f32; 16]) {
     let target_name = std::ffi::CString::new("MatrixTransform").unwrap();
 
     unsafe {
-        use std::io::Write;
         // find the transform property
         for i in 0..(*data).param_count as isize {
             // filter parameters

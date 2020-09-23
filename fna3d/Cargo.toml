@@ -14,4 +14,4 @@ categories = ["game-engines"]
 enum_primitive = "0.1.1"
 fna3d-sys = { path = "../fna3d-sys" }
 bitflags = "1.2.1"
-log = "0.4.8"
+log = "0.4.11"
