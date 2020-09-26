@@ -30,20 +30,22 @@
 // `FNA3D.h` does not provide concrete MojoShader type definitions e.g. `fna3d_sys::MJOSHADER_Effect`.
 // So some types are re-exported from MojoShader headers.
 
-use fna3d_sys as sys;
-
 pub type Effect = sys::mojo::MOJOSHADER_effect;
 pub type EffectTechnique = sys::mojo::MOJOSHADER_effectTechnique;
 pub type EffectStateChanges = sys::mojo::MOJOSHADER_effectStateChanges;
+pub type EffectParam = sys::mojo::MOJOSHADER_effectParam;
 
 // --------------------------------------------------------------------------------
 // Helpers
 
-use std::path::Path;
 use std::{
+    ffi::{c_void, CStr},
     fs,
     io::{self, prelude::*},
+    path::Path,
 };
+
+use fna3d_sys as sys;
 
 #[derive(Debug)]
 pub enum LoadShaderError {
@@ -111,34 +113,44 @@ pub const ORTHOGRAPHICAL_MATRIX: [f32; 16] = [
     1.0,
 ];
 
-/// Helper for projection matrix to MojoShader with row-major slice
+/// Helper that sets projection matrix in row-major index
 ///
 /// I don't know the details but it's working.
-pub fn set_projection_matrix(data: *mut crate::mojo::Effect, mat: &[f32; 16]) {
+pub fn set_projection_matrix(data: *mut Effect, mat: &[f32; 16]) {
     // FIXME: do not allocate a new string
-    let target_name = std::ffi::CString::new("MatrixTransform").unwrap();
+    let name = std::ffi::CString::new("MatrixTransform").unwrap();
 
     unsafe {
-        // find the transform property
+        assert!(set_param(data, &name, mat));
+    }
+}
+
+pub fn find_param(data: *mut Effect, name: &CStr) -> Option<*mut c_void> {
+    unsafe {
         for i in 0..(*data).param_count as isize {
-            // filter parameters
-            let name = (*(*data).params.offset(i)).value.name;
-            let name = std::ffi::CStr::from_ptr(name);
-            if name != target_name.as_c_str() {
+            let target_name = (*(*data).params.offset(i)).value.name;
+            let target_name = std::ffi::CStr::from_ptr(target_name);
+            if target_name != name {
                 continue;
             }
 
-            // memcpy
-            let n_bytes = std::mem::size_of::<f32>() * 16;
-            let src: &[u8] = std::slice::from_raw_parts_mut(mat.as_ptr() as *mut u8, n_bytes);
-            let mut dest = std::slice::from_raw_parts_mut(
-                (*(*data).params.offset(i)).value.__bindgen_anon_1.values as *mut u8,
-                n_bytes,
-            );
-            dest.write(src)
-                .expect("failed to write universal effect data");
-
-            break; // why do we break? is there only one "MatrixTransform"?
+            return Some((*(*data).params.offset(i)).value.__bindgen_anon_1.values);
         }
+        None
+    }
+}
+
+/// Returns true if set
+pub unsafe fn set_param<T>(data: *mut Effect, name: &CStr, value: &T) -> bool {
+    if let Some(ptr) = find_param(data, name) {
+        // memcpy
+        let n_bytes = std::mem::size_of::<T>();
+        let src: &[u8] = std::slice::from_raw_parts_mut(value as *const _ as *mut u8, n_bytes);
+        let mut dest = std::slice::from_raw_parts_mut(ptr as *mut u8, n_bytes);
+        dest.write(src)
+            .expect("failed to write universal effect data");
+        true
+    } else {
+        false
     }
 }
