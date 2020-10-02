@@ -55,7 +55,101 @@ pub type Texture = sys::FNA3D_Texture;
 /// [`Device::apply_vertex_buffer_bindings`] parameter, which describes Vertex attributes
 pub type VertexBufferBinding = sys::FNA3D_VertexBufferBinding;
 
-pub type RenderTargetBinding = sys::FNA3D_RenderTargetBinding;
+pub struct RenderTargetBinding {
+    raw: sys::FNA3D_RenderTargetBinding,
+}
+
+#[repr(u8)]
+pub enum RenderTargetType {
+    /// w, h
+    TwoD = 0,
+    /// size, face
+    Cube = 1,
+}
+
+impl RenderTargetBinding {
+    pub fn raw(&self) -> &sys::FNA3D_RenderTargetBinding {
+        &self.raw
+    }
+
+    pub fn raw_mut(&mut self) -> &mut sys::FNA3D_RenderTargetBinding {
+        &mut self.raw
+    }
+
+    // two constructors handling the union
+
+    pub fn new_2d(
+        type_: RenderTargetType,
+        level_count: u32,
+        multi_sample_count: u32,
+        texture: *mut Texture,
+        w: u32,
+        h: u32,
+        color_buffer: *mut Renderbuffer,
+    ) -> Self {
+        Self {
+            raw: sys::FNA3D_RenderTargetBinding {
+                type_: type_ as u8,
+                __bindgen_anon_1: sys::FNA3D_RenderTargetBinding__bindgen_ty_1 {
+                    twod: sys::FNA3D_RenderTargetBinding__bindgen_ty_1__bindgen_ty_1 {
+                        width: w as i32,
+                        height: h as i32,
+                    },
+                },
+                levelCount: level_count as i32,
+                multiSampleCount: multi_sample_count as i32,
+                texture,
+                colorBuffer: color_buffer,
+            },
+        }
+    }
+
+    pub fn new_cube(
+        type_: enums::RenderTargetUsage,
+        level_count: u32,
+        multi_sample_count: u32,
+        texture: *mut Texture,
+        size: u32,
+        face: enums::CubeMapFace,
+        color_buffer: *mut Renderbuffer,
+    ) -> Self {
+        Self {
+            raw: sys::FNA3D_RenderTargetBinding {
+                type_: type_ as u8,
+                __bindgen_anon_1: sys::FNA3D_RenderTargetBinding__bindgen_ty_1 {
+                    cube: sys::FNA3D_RenderTargetBinding__bindgen_ty_1__bindgen_ty_2 {
+                        size: size as i32,
+                        face: face as u32,
+                    },
+                },
+                levelCount: level_count as i32,
+                multiSampleCount: multi_sample_count as i32,
+                texture,
+                colorBuffer: color_buffer,
+            },
+        }
+    }
+}
+
+pub enum RenderTargetBindingTypeDataAcecss<'a> {
+    /// w, h
+    TwoD(&'a mut sys::FNA3D_RenderTargetBinding__bindgen_ty_1__bindgen_ty_1),
+    /// size, face
+    Cube(&'a mut sys::FNA3D_RenderTargetBinding__bindgen_ty_1__bindgen_ty_2),
+}
+
+/// Accessors
+impl RenderTargetBinding {
+    pub fn type_data_mut(&mut self) -> RenderTargetBindingTypeDataAcecss<'_> {
+        unsafe {
+            match self.raw.type_ {
+                0 => RenderTargetBindingTypeDataAcecss::TwoD(&mut self.raw.__bindgen_anon_1.twod),
+                1 => RenderTargetBindingTypeDataAcecss::Cube(&mut self.raw.__bindgen_anon_1.cube),
+                _ => unreachable!(),
+            }
+        }
+    }
+}
 
 // --------------------------------------------------------------------------------
 // Type aliases
@@ -86,6 +180,18 @@ impl Color {
             y: self.raw.g as f32 / 255.0,
             z: self.raw.b as f32 / 255.0,
             w: self.raw.a as f32 / 255.0,
+        }
+    }
+
+    // TODO pre-multiplied alpha or not
+    pub fn multiply(&self, f: f32) -> Self {
+        Self {
+            raw: sys::FNA3D_Color {
+                r: (self.raw.r as f32 * f) as u8,
+                g: (self.raw.g as f32 * f) as u8,
+                b: (self.raw.b as f32 * f) as u8,
+                a: (self.raw.a as f32 * f) as u8,
+            },
         }
     }
 }
@@ -516,6 +622,7 @@ impl BlendState {
         )
     }
 
+    /// ImGUI font texture uses this blending function
     pub fn non_premultiplied() -> Self {
         Self::with_blend(
             enums::Blend::SourceAlpha,

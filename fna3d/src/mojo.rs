@@ -75,6 +75,9 @@ pub fn load_shader_from_bytes(
     let (effect, mojo_effect) =
         device.create_effect(bytes as *const _ as *mut _, bytes.len() as u32);
 
+    let techniques = unsafe { (*mojo_effect).techniques };
+    device.set_effect_technique(effect, techniques);
+
     // detect error
     let mojo_effect: &mut crate::mojo::Effect = unsafe { &mut *mojo_effect };
     if mojo_effect.error_count <= 0 {
@@ -113,9 +116,10 @@ pub const ORTHOGRAPHICAL_MATRIX: [f32; 16] = [
     1.0,
 ];
 
-/// Helper that sets projection matrix in row-major index
+/// Helper to set projection matrix in **COLUMN-MAJOR** representation
 ///
-/// I don't know the details but it's working.
+/// The matrix considers position vectors as row vectors. So it is often transposed from examples
+/// in mathmatical textbooks.
 pub fn set_projection_matrix(data: *mut Effect, mat: &[f32; 16]) {
     // FIXME: do not allocate a new string
     let name = std::ffi::CString::new("MatrixTransform").unwrap();
@@ -125,6 +129,7 @@ pub fn set_projection_matrix(data: *mut Effect, mat: &[f32; 16]) {
     }
 }
 
+/// Tries to find shader parameter
 pub fn find_param(data: *mut Effect, name: &CStr) -> Option<*mut c_void> {
     unsafe {
         for i in 0..(*data).param_count as isize {

@@ -16,11 +16,11 @@
 //! ## What does Rust-FNA3D do?
 //!
 //! The biggest difference from the original FNA3D API is that most functionalities are re-exported
-//! as [`Device`] methods and it strongly enforces the ownership. Other changes are for improving
-//! the output `bindgen` with a thin layer:
+//! as [`Device`] methods, where the borrow rules are strongly enforced. Other changes are just for
+//! improving the output `bindgen`:
 //!
-//! * It wraps the API with rusty types: slices, enums and booleans
-//! * It wrap some legacy API with more meaningful one
+//! * Wrapping the original API with rusty types: slices, enums and booleans
+//! * Wrapping some legacy API (XNA-compatibility API) with more meaningful one
 //!
 //! Details are noted in this [file]
 //!

@@ -1,8 +1,10 @@
 //! Wrapper of `FNA3D_Image.h`
 //!
 //! Iternally, `FNA3D_Image` uses [`stb_image`] (`stbi`) with callback functions where arbitrary IO
-//! is allowed. You also can use [`stb_image`] directory without callbacks or you can use other
-//! libraries such as [`SDL_RWops`] in SDL2.
+//! is allowed.
+//!
+//! Other options than `fna3d::img` are raw [`stb_image`] (with or without callbacks), [`SDL_RWops`]
+//! (SDL2) or else.
 //!
 //! [`stb_image`]: https://github.com/nothings/stb/blob/master/stb_image.h
 //! [`SDL_RWops`]: https://wiki.libsdl.org/SDL_RWops
@@ -109,7 +111,7 @@ pub fn free(mem: *mut u8) {
     }
 }
 
-/// Encodes RGBA8 image data into PNG data
+/// Encodes RGBA8 image data into PNG data with a writer
 pub fn save_png<T: Write>(
     writer: T,
     data: *mut Texture,
@@ -133,6 +135,7 @@ pub fn save_png<T: Write>(
     }
 }
 
+/// Encodes RGBA8 image data into PNG data to some path
 pub fn save_png_to(
     path: impl AsRef<Path>,
     data: *mut u8,

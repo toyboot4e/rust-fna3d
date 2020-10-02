@@ -537,7 +537,10 @@ impl Device {
         unsafe {
             FNA3D_SetRenderTargets(
                 self.raw,
-                render_targets.as_mut_ptr(),
+                match render_targets {
+                    Some(r) => r.raw_mut() as *mut _,
+                    None => std::ptr::null_mut(),
+                },
                 num_render_targets as i32,
                 depth_stencil_buffer.as_mut_ptr(),
                 depth_format as FNA3D_DepthFormat,
@@ -552,7 +555,7 @@ impl Device {
     /// * `target`: The render target to resolve once rendering is complete.
     pub fn resolve_target(&mut self, target: &mut RenderTargetBinding) {
         unsafe {
-            FNA3D_ResolveTarget(self.raw, target);
+            FNA3D_ResolveTarget(self.raw, target.raw_mut() as *mut _);
         }
     }
 
@@ -1439,7 +1442,7 @@ impl Device {
     /// Sets the active technique on the Effect.
     ///
     /// * `effect`:	The Effect to be modified.
-    /// * `technique`:	The technique to be used by future ApplyEffect calls.
+    /// * `technique`:	The technique to be used by future `apply_effect` calls.
     pub fn set_effect_technique(
         &mut self,
         effect: *mut Effect,
