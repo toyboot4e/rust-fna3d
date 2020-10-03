@@ -7,6 +7,9 @@ bindings to FNA3D generated with [`bindgen`](https://github.com/rust-lang/rust-b
 
 * [FFI - The Rustonomicon](https://doc.rust-lang.org/nomicon/ffi.html#foreign-function-interface)
 * [The (unofficial) Rust FFI Guide](https://michael-f-bryan.github.io/rust-ffi-guide/)
+* [Using C libraries in Rust: make a sys crate](https://kornel.ski/rust-sys-crate)
+* [Build Scripts - The Cargo Book](https://doc.rust-lang.org/cargo/reference/build-scripts.html#case-study-building-some-native-code)
+* [The `bindgen` User Guide](https://rust-lang.github.io/rust-bindgen/)
 
 ## 1. `build.rs`
 
