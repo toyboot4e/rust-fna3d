@@ -2,9 +2,15 @@
 //!
 //! This module has some helpers in addition to FNA3D items.
 //!
+//! # Column-major
+//!
+//! MojoShader uses column-major matrices, where position vectors are considered as column vectors.
+//! If you're using a row-major framework, you have to transpose your matrix when you set it to the
+//! projection matrix of MojoShader.
+//!
 //! # Example
 //!
-//! [Orthograpihcal projection] matrix loading:
+//! [Orthographic projection] matrix loading:
 //!
 //! ```
 //! pub fn load_shader_with_orthograpihcal_projection(
@@ -17,15 +23,15 @@
 //! }
 //! ```
 //!
-//! [`SpriteEffect.fx`] can be used for the `shader_path`.
+//! [`SpriteEffect.fxb`] can be used for the `shader_path`.
+//!
+//! [orthograpihc projection]: https://en.wikipedia.org/wiki/Orthographic_projection
+//! [`SpriteEffect.fxb`]: https://github.com/FNA-XNA/FNA/blob/d3d5840d9f42d109413b9c489af12e5642b336b9/src/Graphics/Effect/StockEffects/FXB/SpriteEffect.fxb
 //!
 //! # Dispose
 //!
 //! Effect data loaded with helpers in this modules have to be disposed with
 //! [`Device::add_dispose_effect`](crate::Device::add_dispose_effect).
-//!
-//! [orthograpihcal projection]: https://en.wikipedia.org/wiki/Orthographic_projection
-//! [`SpriteEffect.fx`]: https://github.com/FNA-XNA/FNA/blob/d3d5840d9f42d109413b9c489af12e5642b336b9/src/Graphics/Effect/StockEffects/HLSL/SpriteEffect.fx
 
 // `FNA3D.h` does not provide concrete MojoShader type definitions e.g. `fna3d_sys::MJOSHADER_Effect`.
 // So some types are re-exported from MojoShader headers.
