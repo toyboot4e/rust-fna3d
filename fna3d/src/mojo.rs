@@ -12,14 +12,16 @@
 //!
 //! [Orthographic projection] matrix loading:
 //!
-//! ```
+//! ```no_run
+//! use std::path::Path;
+//!
 //! pub fn load_shader_with_orthograpihcal_projection(
 //!     device: &mut fna3d::Device,
 //!     shader_path: impl AsRef<Path>,
-//! ) -> io::Result<(*mut fna3d::Effect, *mut fna3d::mojo::MOJOSHADER_Effect)> {
-//!     let (effect, data) = fna3d::mojo::load_shader_path(device, shader_path)?;
-//!     fna3d::mojo::set_projection_matrix(fna3d::mojo::ORTHOGRAPHICAL_MATRIX);
-//!     (effect, data)
+//! ) -> fna3d::mojo::Result<(*mut fna3d::Effect, *mut fna3d::mojo::Effect)> {
+//!     let (effect, data) = fna3d::mojo::load_shader_from_file(device, shader_path)?;
+//!     fna3d::mojo::set_projection_matrix(data, &fna3d::mojo::ORTHOGRAPHICAL_MATRIX);
+//!     Ok((effect, data))
 //! }
 //! ```
 //!
@@ -53,13 +55,13 @@ use std::{
 
 use fna3d_sys as sys;
 
+pub type Result<T> = std::result::Result<T, LoadShaderError>;
+
 #[derive(Debug)]
 pub enum LoadShaderError {
     Io(io::Error),
     EffectError(String),
 }
-
-pub type Result<T> = std::result::Result<T, LoadShaderError>;
 
 /// Helper for loading shader. Set projection matrix after loading
 pub fn load_shader_from_file(
