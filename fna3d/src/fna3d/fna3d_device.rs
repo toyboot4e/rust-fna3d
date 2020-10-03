@@ -29,7 +29,6 @@ impl<'a, T> AsMutPtr<T> for Option<&'a mut T> {
         }
     }
 }
-
 // --------------------------------------------------------------------------------
 // Device
 
@@ -37,7 +36,7 @@ impl<'a, T> AsMutPtr<T> for Option<&'a mut T> {
 ///
 /// # Functionalities
 ///
-/// See sidebar as method list.
+/// See the sidebar as list of methods.
 ///
 /// * [Init/Quit](#initquit)
 /// * [Presentation](#presentation)
@@ -53,7 +52,9 @@ impl<'a, T> AsMutPtr<T> for Option<&'a mut T> {
 /// * [Queries](#queris)
 /// * [Feature queries](#feature-queries)
 ///
-/// # Dispose
+/// # Drop / dispose
+///
+/// `Device` destories the FNA3D device when it goes out of scope.
 ///
 /// These types have to be disposed with corresponding methods in [`Device`]:
 ///
@@ -62,6 +63,9 @@ impl<'a, T> AsMutPtr<T> for Option<&'a mut T> {
 /// - [`Effect`]
 /// - [`Query`]
 /// - [`Texture`]
+///
+/// If you'd like to automate disposing these resources with `Device` via `Drop`, you have to cheat
+/// the borrow rules with pointers. This design might changes.
 ///
 /// # Initialization
 ///
@@ -86,14 +90,6 @@ impl<'a, T> AsMutPtr<T> for Option<&'a mut T> {
 ///     * [`FNA3D_ApplyVertexBufferBindings`]
 ///     * [`FNA3D_DrawIndexedPrimitives`]
 /// * [`FNA3D_SwapBuffers`]
-///
-/// # Drop
-///
-/// `Device` destories the FNA3D device when it goes out of scope.
-///
-/// ## Ownership
-///
-/// `Device` methods take `&mut` and it strongly enforces the rule of ownership.
 #[derive(Debug)]
 pub struct Device {
     raw: *mut FNA3D_Device,
@@ -112,6 +108,7 @@ impl Device {
         self.raw
     }
 
+    /// Cheat borrow rules with this method
     pub fn from_raw(raw: *mut FNA3D_Device) -> Self {
         Self { raw }
     }
@@ -130,6 +127,8 @@ impl Device {
     ///
     /// Returns a device ready for use. Be sure to only call device functions from
     /// the thread that it was created on!
+    ///
+    /// See [initialization](./struct.Device.html#initialization)
     pub fn from_params(mut params: PresentationParameters, do_debug: bool) -> Self {
         Self {
             raw: unsafe { FNA3D_CreateDevice(&mut params, do_debug as u8) },
@@ -146,12 +145,8 @@ impl Device {
 /// Presentation
 /// ---
 impl Device {
-    /// Presents the backbuffer to the window.
+    /// Presents the backbuffer to the window. `None` represents the full region
     ///
-    /// * `src`:
-    ///   The region of the buffer to present (or None).
-    /// * `dest`:
-    ///   The region of the window to update (or None).
     /// * `override_window_handle`:
     ///   The OS window handle (not really "overridden").
     pub fn swap_buffers(
@@ -172,8 +167,11 @@ impl Device {
 /// ---
 ///
 /// A "draw call" is actually a call of a drawing function, which is often
-/// [`FNA3D_DrawIndexedPrimitives`] in FNA3D. Vertex/index data and sampler state (which contains
-/// textures) are set with other methods.
+/// [`FNA3D_DrawIndexedPrimitives`] in FNA3D.
+///
+/// Set vertex/index data and sampler state before making draw calls.
+///
+/// See [rendering cycle](./struct.Device.html#rendering-cycle)
 impl Device {
     /// Clears the active draw buffers of any previous contents.
     ///
@@ -200,19 +198,6 @@ impl Device {
     /// Draws data from vertex/index buffers
     ///
     /// This is good for reducing duplicate vertices.
-    ///
-    /// * `type_`:
-    ///   The primitive topology of the vertex data.
-    /// * `start_vertex`:
-    ///   The starting offset to read from the vertex buffer.
-    /// * `start_index`:
-    ///   The starting offset to read from the index buffer.
-    /// * `n_primitives`:
-    ///   The number of primitives to draw.
-    /// * `indices`:
-    ///   The index buffer to bind for this draw call.
-    /// * `index_elem_size`:
-    ///   The size of the index type for this index buffer.
     pub fn draw_indexed_primitives(
         &mut self,
         type_: enums::PrimitiveType,
@@ -276,21 +261,14 @@ impl Device {
     /// Draws data from vertex buffers.
     ///
     /// This may require duplicate vertices so prefer `draw_indexed_primitives` basically.
-    ///
-    /// * `type_`:
-    ///   The primitive topology of the vertex data.
-    /// * `vertexStart`:
-    ///   The starting offset to read from the vertex buffer.
-    /// * `primitiveCount`:
-    ///   The number of primitives to draw.
     pub fn draw_primitives(
         &mut self,
         type_: enums::PrimitiveType,
         vertex_start: u32,
-        prim_count: u32,
+        n_primitives: u32,
     ) {
         let vertex_start = vertex_start as i32;
-        let prim_count = prim_count as i32;
+        let prim_count = n_primitives as i32;
         unsafe {
             FNA3D_DrawPrimitives(
                 self.raw,
@@ -307,26 +285,18 @@ impl Device {
 ///
 /// * TODO: what does mutable here mean
 impl Device {
-    /// Sets the view dimensions for rendering, relative to the active render target.
-    /// It is required to call this at least once after calling `set_render_targets`, as
-    /// the renderer may need to adjust these dimensions to fit the backend's
-    /// potentially goofy coordinate systems.
-    ///
-    /// * `viewport`:
-    ///   The new view dimensions for future draw calls.
+    /// Sets the view dimensions for rendering, relative to the active render target. It is required
+    /// to call this at least once after calling `set_render_targets`, as the renderer may need to
+    /// adjust these dimensions to fit the backend's potentially goofy coordinate systems.
     pub fn set_viewport(&mut self, viewport: &Viewport) {
         unsafe {
             FNA3D_SetViewport(self.raw, viewport as *const _ as *mut _);
         }
     }
 
-    /// Sets the scissor box for rendering, relative to the active render target.
-    /// It is required to call this at least once after calling `set_render_targets`, as
-    /// the renderer may need to adjust these dimensions to fit the backend's
-    /// potentially goofy coordinate systems.
-    ///
-    /// * `scissor`:
-    ///   The new scissor box for future draw calls.
+    /// Sets the scissor box for rendering, relative to the active render target. It is required to
+    /// call this at least once after calling `set_render_targets`, as the renderer may need to
+    /// adjust these dimensions to fit the backend's potentially goofy coordinate systems.
     pub fn set_scissor_rect(&mut self, scissor: &Rect) {
         unsafe {
             FNA3D_SetScissorRect(self.raw, scissor as *const _ as *mut _);
@@ -337,7 +307,7 @@ impl Device {
     ///
     /// * `blend_factor`:
     ///   Filled with color being used as the device blend factor.
-    pub fn get_blend_factor(&mut self, blend_factor: Color) {
+    pub fn blend_factor(&mut self, blend_factor: Color) {
         unsafe {
             FNA3D_GetBlendFactor(self.raw, &mut blend_factor.raw() as *mut _);
         }
@@ -355,7 +325,7 @@ impl Device {
     /// Gets the mask from which multisample fragment data is sampled from.
     ///
     /// Returns the coverage mask used to determine sample locations.
-    pub fn get_multi_sample_mask(&self) -> i32 {
+    pub fn multi_sample_mask(&self) -> i32 {
         unsafe { FNA3D_GetMultiSampleMask(self.raw) }
     }
 
@@ -371,7 +341,7 @@ impl Device {
     /// Gets the reference value used for certain types of stencil testing.
     ///
     /// Returns the stencil reference value.
-    pub fn get_reference_stencil(&self) -> i32 {
+    pub fn reference_stencil(&self) -> i32 {
         unsafe { FNA3D_GetReferenceStencil(self.raw) }
     }
 
@@ -390,36 +360,25 @@ impl Device {
 ///
 /// * TODO: what does immutable mean. fixed length?
 impl Device {
-    /// Applies a blending state to use for future draw calls. This only needs to be
-    /// called when the state actually changes. Redundant calls may negatively affect
-    /// performance!
-    ///
-    /// * `blend_state`:
-    ///   The new parameters to use for color blending.
+    /// Applies a blending state to use for future draw calls. This only needs to be called when the
+    /// state actually changes. Redundant calls may negatively affect performance!
     pub fn set_blend_state(&mut self, blend_state: &BlendState) {
         unsafe {
             FNA3D_SetBlendState(self.raw, blend_state.raw() as *const _ as *mut _);
         }
     }
 
-    /// Applies depth/stencil states to use for future draw calls. This only needs to
-    /// be called when the states actually change. Redundant calls may negatively
-    /// affect performance!
-    ///
-    /// * `depth_stencil_state`:
-    ///   The new parameters to use for depth/stencil work.
+    /// Applies depth/stencil states to use for future draw calls. This only needs to be called when
+    /// the states actually change. Redundant calls may negatively affect performance!
     pub fn set_depth_stencil_state(&mut self, depth_stencil_state: &DepthStencilState) {
         unsafe {
             FNA3D_SetDepthStencilState(self.raw, depth_stencil_state.raw() as *const _ as *mut _);
         }
     }
 
-    /// Applies the rasterizing state to use for future draw calls.
-    /// It's generally a good idea to call this for each draw call, but if you really
-    /// wanted to you could try reducing it to when the state changes and when the
-    /// render target state changes.
-    ///
-    /// * `rasterizer_state`: The new parameters to use for rasterization work.
+    /// Applies the rasterizing state to use for future draw calls. It's generally a good idea to
+    /// call this for each draw call, but if you really wanted to you could try reducing it to when
+    ///  the state changes and when the render target state changes.
     pub fn apply_rasterizer_state(&mut self, rst: &RasterizerState) {
         unsafe {
             FNA3D_ApplyRasterizerState(self.raw, rst.raw() as *const _ as *mut _);
@@ -432,10 +391,6 @@ impl Device {
     ///
     /// * `index`:
     ///   The sampler slot to update.
-    /// * `texture`:
-    ///   The texture bound to this sampler.
-    /// * `sampler`:
-    ///   The new parameters to use for this slot's texture sampling.
     pub fn verify_sampler(&mut self, index: u32, texture: *mut Texture, sampler: &SamplerState) {
         unsafe {
             FNA3D_VerifySampler(
@@ -453,10 +408,6 @@ impl Device {
     ///
     /// * `index`:
     ///   The vertex sampler slot to update.
-    /// * `texture`:
-    ///   The texture bound to this sampler.
-    /// * `sampler`:
-    ///   The new parameters to use for this slot's texture sampling.
     pub fn verify_vertex_sampler(
         &mut self,
         index: u32,

@@ -4,7 +4,7 @@
 //!
 //! ## Usage
 //!
-//! First call [`prepare_window_attributes`] then prepare your [`Device`].
+//! First call [`prepare_window_attributes`] then initialize your [`Device`].
 //!
 //! ## What is `fna3d`?
 //!
@@ -16,13 +16,13 @@
 //! ## What does Rust-FNA3D do?
 //!
 //! The biggest difference from the original FNA3D API is that most functionalities are re-exported
-//! as [`Device`] methods, where the borrow rules are strongly enforced. Other changes are just for
-//! improving the output `bindgen`:
+//! as [`Device`] methods, where the **borrow rules are strongly enforced**. Other changes are just
+//! for improving the output of `bindgen`:
 //!
 //! * Wrapping the original API with rusty types: slices, enums and booleans
 //! * Wrapping some legacy API (XNA-compatibility API) with more meaningful one
 //!
-//! Details are noted in this [file]
+//! Details are noted in this [file].
 //!
 //! [ANF]: https://github.com/toyboot4e/anf
 //! [FNA3D]: https://github.com/FNA-XNA/FNA3D

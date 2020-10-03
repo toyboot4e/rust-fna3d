@@ -15,11 +15,11 @@
 //! ```no_run
 //! use std::path::Path;
 //!
-//! pub fn load_shader_with_orthograpihcal_projection(
+//! pub fn load_shader_with_orthographic_projection(
 //!     device: &mut fna3d::Device,
 //!     shader_path: impl AsRef<Path>,
 //! ) -> fna3d::mojo::Result<(*mut fna3d::Effect, *mut fna3d::mojo::Effect)> {
-//!     let (effect, data) = fna3d::mojo::load_shader_from_file(device, shader_path)?;
+//!     let (effect, data) = fna3d::mojo::from_file(device, shader_path)?;
 //!     fna3d::mojo::set_projection_matrix(data, &fna3d::mojo::ORTHOGRAPHICAL_MATRIX);
 //!     Ok((effect, data))
 //! }
@@ -27,7 +27,7 @@
 //!
 //! [`SpriteEffect.fxb`] can be used for the `shader_path`.
 //!
-//! [orthograpihc projection]: https://en.wikipedia.org/wiki/Orthographic_projection
+//! [Orthographic projection]: https://en.wikipedia.org/wiki/Orthographic_projection
 //! [`SpriteEffect.fxb`]: https://github.com/FNA-XNA/FNA/blob/d3d5840d9f42d109413b9c489af12e5642b336b9/src/Graphics/Effect/StockEffects/FXB/SpriteEffect.fxb
 //!
 //! # Dispose
@@ -63,20 +63,20 @@ pub enum LoadShaderError {
     EffectError(String),
 }
 
-/// Helper for loading shader. Set projection matrix after loading
-pub fn load_shader_from_file(
+/// Helper for loading shader. Be sure to set projection matrix after loading!
+pub fn from_file(
     device: &mut crate::Device,
     shader_path: impl AsRef<Path>,
 ) -> Result<(*mut crate::Effect, *mut crate::mojo::Effect)> {
     let data = fs::read(shader_path).map_err(|e| LoadShaderError::Io(e))?;
-    self::load_shader_from_bytes(device, &data)
+    self::from_bytes(device, &data)
 }
 
-/// Helper for loading shader. Set projection matrix after loading
+/// Helper for loading shader. Be sure to set projection matrix after loading!
 ///
 /// If ok, returns (effect_handle, effect_data_access). The latter is automatically disposed after
 /// calling [`fna3d::Device::add_dispose_effect`].
-pub fn load_shader_from_bytes(
+pub fn from_bytes(
     device: &mut crate::Device,
     bytes: &[u8],
 ) -> Result<(*mut crate::Effect, *mut crate::mojo::Effect)> {
@@ -99,10 +99,10 @@ pub fn load_shader_from_bytes(
     }
 }
 
-/// Predefined [orthograpihcal projection] matrix
+/// Predefined [orthograpihc projection] matrix
 ///
-/// [orthograpihcal projection]: https://en.wikipedia.org/wiki/Orthographic_projection
-pub const ORTHOGRAPHICAL_MATRIX: [f32; 16] = [
+/// [orthograpihc projection]: https://en.wikipedia.org/wiki/Orthographic_projection
+pub const ORTHOGRAPHIC_MATRIX: [f32; 16] = [
     0.0015625, // 2.0 / viewport.w (?)
     0.0,
     0.0,
@@ -137,7 +137,7 @@ pub fn set_projection_matrix(data: *mut Effect, mat: &[f32; 16]) {
     }
 }
 
-/// Tries to find shader parameter
+/// Tries to find a shader parameter with name
 pub fn find_param(data: *mut Effect, name: &CStr) -> Option<*mut c_void> {
     unsafe {
         for i in 0..(*data).param_count as isize {
@@ -153,7 +153,7 @@ pub fn find_param(data: *mut Effect, name: &CStr) -> Option<*mut c_void> {
     }
 }
 
-/// Returns true if set
+/// Returns true if the parameter is found
 pub unsafe fn set_param<T>(data: *mut Effect, name: &CStr, value: &T) -> bool {
     if let Some(ptr) = find_param(data, name) {
         // memcpy

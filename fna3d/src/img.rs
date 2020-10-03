@@ -12,26 +12,27 @@
 //! # Example (presudo code)
 //!
 //! ```no_run
-//! pub struct MyTexture2D {
+//! pub struct MyTexture2d {
 //!     raw: fna3d::Texture,
 //!     w: u32,
 //!     h: u32,
 //! }
 //!
-//! impl MyTexture2D {
+//! impl MyTexture2d {
 //!     pub fn from_path(
 //!         device: &mut fna3d::Device,
 //!         path: impl AsRef<std::path::Path>,
 //!     ) -> Option<Self> {
-//!         let (pixels_ptr, len, [w, h]) = fna3d::img::from_path(path, None);
+//!         let (raw, len, [w, h]) = fna3d::img::from_path(path, None);
 //!
-//!         if pixels_ptr == std::ptr::null_mut() {
+//!         if raw == std::ptr::null_mut() {
 //!             return None;
 //!         }
 //!
-//!         let texture: MyTexture2D = unimplemented!();
+//!         let texture = MyTexture2d { raw, w, h };
 //!         fna3d::img::free(pixels_ptr as *mut _);
-//!         return Some(texture);
+//!
+//!         Some(texture)
 //!     }
 //! }
 //! ```
