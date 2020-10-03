@@ -1,5 +1,7 @@
 //! Build script of `fna3d-sys`
 //!
+//! If the compilation fails, run `cargo clean`.
+//!
 //! # What it does
 //!
 //! 1. pull FNA3D recursively if there's not
@@ -11,18 +13,17 @@
 //! # TODOs
 //!
 //! * TODO: Windows/Linux
-//! * TODO: bundling libFNA3D.dylib with executable?
-//! * TODO: static linking?
-//! * FIXME: @rpath? (run executable without cargo after outputting)
-//!
-//! # Resources
+//! * publishing executable with rust-FNA3D-sys
+//! ** TODO: bundling libFNA3D.dylib with executable?
+//! ** TODO: static linking?
 
-use cmake::Config;
 use std::{
     env,
     path::{Path, PathBuf},
     process::Command,
 };
+
+use cmake::Config;
 
 // type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
@@ -41,8 +42,7 @@ fn main() {
 }
 
 fn pull_and_apply_patches() {
-    let root = env::var("CARGO_MANIFEST_DIR").unwrap();
-    let root = PathBuf::from(root);
+    let root = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
 
     Command::new("git")
         .current_dir(&root)
@@ -53,24 +53,22 @@ fn pull_and_apply_patches() {
     {
         // MojoShader
         let dir = root.join("FNA3D/MojoShader");
-        let dir = dir.into_os_string().into_string().unwrap();
         let patch = root.join("mojoshader_patch.diff");
-        let patch = patch.into_os_string().into_string().unwrap();
         apply_patch(&dir, &patch);
     }
 
     {
         // FNA3D
         let dir = root.join("FNA3D");
-        let dir = dir.into_os_string().into_string().unwrap();
         let patch = root.join("fna3d_patch.diff");
-        let patch = patch.into_os_string().into_string().unwrap();
         apply_patch(&dir, &patch);
     }
 }
 
-/// Checkouts to master then applies the patch
-fn apply_patch(dir: &str, patch: &str) {
+fn apply_patch(dir: &Path, patch: &Path) {
+    let dir = format!("{}", dir.display());
+    let patch = format!("{}", patch.display());
+
     // Command::new("git")
     //     .current_dir(dir)
     //     .args(&["checkout", "master"])
@@ -82,11 +80,13 @@ fn apply_patch(dir: &str, patch: &str) {
     //         )
     //     });
 
-    println!("applying patch for {}", dir);
+    println!("=====> applying patch for {}", dir);
 
     Command::new("git")
-        .current_dir(dir)
-        .args(&["apply", patch])
+        .current_dir(&dir)
+        .args(&["apply", &patch])
+        // suppress patch error
+        .stderr(std::process::Stdio::null())
         .status()
         .unwrap_or_else(|e| {
             panic!(
@@ -95,13 +95,12 @@ fn apply_patch(dir: &str, patch: &str) {
             )
         });
 
-    println!("=====> succeeded!");
+    println!("<===== succeeded!");
 }
 
 /// Runs `cmake` (only when it's necessary) and links the output libraries
 fn run_cmake() {
-    let root = env::var("CARGO_MANIFEST_DIR").unwrap();
-    let root = PathBuf::from(root);
+    let root = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
 
     // MojoShader
@@ -116,7 +115,6 @@ fn run_cmake() {
     println!("cargo:rustc-link-lib=static=mojoshader");
 
     // FNA3D
-    // TODO: does it work for Windows and Linux?
     let out_file_path = out_dir.join("libFNA3D.dylib");
     if !out_file_path.is_file() {
         let path = root.join("FNA3D");
@@ -129,30 +127,31 @@ fn run_cmake() {
 }
 
 /// Generates bindings using a wrapper header file
-fn gen_bindings(wrapper_path: impl AsRef<Path>, dest_file_name: impl AsRef<Path>) {
+fn gen_bindings(wrapper_path: impl AsRef<Path>, dst_file_name: impl AsRef<Path>) {
     let wrapper = wrapper_path.as_ref();
-    let dest_file_name = dest_file_name.as_ref();
+    let dst_file_name = dst_file_name.as_ref();
 
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
-    let dest = out_dir.join(&dest_file_name);
+    let dst = out_dir.join(&dst_file_name);
 
     println!("cargo:rerun-if-changed={}", wrapper.display());
     let bindings = bindgen::Builder::default()
         .header(format!("{}", wrapper.display()))
         // SUPPORT MOJOSHADER EFFECT (only needed when building MojoShader)
         .clang_arg("-DMOJOSHADER_EFFECT_SUPPORT")
-        // Tell cargo to invalidate the built crate whenever any of the
-        // included header files changed.
+        // Tell cargo to invalidate the built crate whenever any of the included header files
+        // changed
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
         .generate()
-        .unwrap_or_else(|_| {
+        .unwrap_or_else(|e| {
             panic!(
-                "Unable to generate bindings for {}",
-                dest_file_name.display()
+                "Unable to generate bindings for `{}`. Original error {:?}",
+                dst_file_name.display(),
+                e
             )
         });
 
     bindings
-        .write_to_file(&dest)
-        .unwrap_or_else(|_| panic!("Couldn't write bindings for {}", dest_file_name.display()));
+        .write_to_file(&dst)
+        .unwrap_or_else(|_| panic!("Couldn't write bindings for {}", dst_file_name.display()));
 }
