@@ -439,7 +439,7 @@ impl Device {
     ///   if applicable. Not every rendering backend has native base vertex support, so we work
     ///   around it by passing this here.
     ///
-    /// - [`apply_effect`]: #method.apply_effect
+    /// [`apply_effect`]: #method.apply_effect
     pub fn apply_vertex_buffer_bindings(
         &mut self,
         bindings: &[VertexBufferBinding],
@@ -467,20 +467,19 @@ impl Device {
     ///
     /// * `render_targets`:
     ///    The targets to write to, or `None` for the backbuffer (screen).
-    /// * `num_render_targets`:
+    /// * `n_render_targets`:
     ///    The size of the renderTargets array (can be 0).
     /// * `depth_stencil_buffer`:
     ///    The depth/stencil renderbuffer (can be `None`).
     /// * `depth_format`:
     ///    The format of the depth/stencil renderbuffer.
     /// * `preserve_depth_stencil_contents`:
-    ///   Set this to 1 to store the color/depth/stencil contents
-    ///   for future use. Most of the time you'll want to
-    ///   keep this at 0 to not waste GPU bandwidth.
+    ///   `true` to store the color/depth/stencil contents for future use. Most of the time you'll
+    ///    want to keep this at 0 to not waste GPU bandwidth.
     pub fn set_render_targets(
         &mut self,
         render_targets: Option<&mut RenderTargetBinding>,
-        num_render_targets: u32,
+        n_render_targets: u32,
         depth_stencil_buffer: Option<&mut Renderbuffer>,
         depth_format: enums::DepthFormat,
         preserve_target_contents: bool,
@@ -492,7 +491,7 @@ impl Device {
                     Some(r) => r.raw_mut() as *mut _,
                     None => std::ptr::null_mut(),
                 },
-                num_render_targets as i32,
+                n_render_targets as i32,
                 depth_stencil_buffer.as_mut_ptr(),
                 depth_format as FNA3D_DepthFormat,
                 preserve_target_contents as u8,
@@ -520,31 +519,10 @@ impl Device {
         }
     }
 
-    ///  Read the backbuffer's contents directly into client memory. This function is
-    ///  basically one giant CPU/GPU sync point, do NOT ever call this during any
-    ///  performance-critical situation! Just use it for screenshots.
-    ///
-    /// * `x`:
-    ///   The x offset of the backbuffer region to read.
-    /// * `y`:
-    ///   The y offset of the backbuffer region to read.
-    /// * `w`:
-    ///   The width of the backbuffer region to read.
-    /// * `h`:
-    ///   The height of the backbuffer region to read.
-    /// * `data`:
-    ///   The pointer to read the backbuffer data into.
-    /// * `data_len`:
-    ///   The size of the backbuffer data in bytes.
-    pub fn read_backbuffer(
-        &mut self,
-        x: u32,
-        y: u32,
-        w: u32,
-        h: u32,
-        // TODO: what is data??
-        data: &mut [u8],
-    ) {
+    /// Read the backbuffer's contents directly into client memory. This function is  basically one
+    /// giant CPU/GPU sync point, do NOT ever call this during any  performance-critical situation!
+    /// Just use it for screenshots.
+    pub fn read_backbuffer(&mut self, x: u32, y: u32, w: u32, h: u32, data: &mut [u8]) {
         unsafe {
             FNA3D_ReadBackbuffer(
                 self.raw,
@@ -558,43 +536,28 @@ impl Device {
         }
     }
 
-    /// Gets the current dimensions of the backbuffer.
-    ///
-    /// * `w`:
-    ///   Filled with the backbuffer's width.
-    /// * `h`:
-    ///   Filled with the backbuffer's height.
-    pub fn get_backbuffer_size(&mut self) -> (i32, i32) {
+    pub fn get_backbuffer_size(&mut self) -> (u32, u32) {
         let (mut w, mut h) = (0, 0);
         unsafe {
             FNA3D_GetBackbufferSize(self.raw, &mut w, &mut h);
         }
-        (w, h)
+        (w as u32, h as u32)
     }
 
-    /// Gets the current pixel format of the backbuffer.
-    ///
-    /// Returns the backbuffer's pixel format.
     pub fn get_backbuffer_surface_format(&self) -> enums::SurfaceFormat {
         let prim = unsafe { FNA3D_GetBackbufferSurfaceFormat(self.raw) };
         // FIXME: is it ok to unwrap??
         enums::SurfaceFormat::from_u32(prim).unwrap()
     }
 
-    /// Gets the format of the backbuffer's depth/stencil buffer.
-    ///
-    /// Returns the backbuffer's depth/stencil format.
     pub fn get_backbuffer_depth_format(&self) -> enums::DepthFormat {
         let prim = unsafe { FNA3D_GetBackbufferDepthFormat(self.raw) };
         // FIXME: is it ok to unwrap??
         enums::DepthFormat::from_u32(prim).unwrap()
     }
 
-    /// Gets the multisample sample count of the backbuffer.
-    ///
-    /// Returns the backbuffer's multisample sample count.
-    pub fn get_backbuffer_multi_sample_count(&self) -> i32 {
-        unsafe { FNA3D_GetBackbufferMultiSampleCount(self.raw) }
+    pub fn get_backbuffer_multi_sample_count(&self) -> u32 {
+        unsafe { FNA3D_GetBackbufferMultiSampleCount(self.raw) as u32 }
     }
 }
 
@@ -605,10 +568,6 @@ impl Device {
     ///
     /// * `fmt`:
     ///   The pixel format of the texture data.
-    /// * `w`:
-    ///   The width of the texture image.
-    /// * `h`:
-    ///   The height of the texture image.
     /// * `level_count`:
     ///   The number of mipmap levels to allocate.
     /// * `is_render_target`:
@@ -640,10 +599,6 @@ impl Device {
     ///
     /// * `fmt`:
     ///   The pixel format of the texture data.
-    /// * `width`:
-    ///   The width of the texture image.
-    /// * `height`:
-    ///   The height of the texture image.
     /// * `depth`:
     ///   The depth of the texture image.
     /// * `level_count`:
@@ -654,8 +609,8 @@ impl Device {
     pub fn create_texture_3d(
         &mut self,
         fmt: enums::SurfaceFormat,
-        width: u32,
-        height: u32,
+        w: u32,
+        h: u32,
         depth: u32,
         level_count: u32,
         // TODO: maybe make a wrapper
@@ -664,8 +619,8 @@ impl Device {
             FNA3D_CreateTexture3D(
                 self.raw,
                 fmt as u32,
-                width as i32,
-                height as i32,
+                w as i32,
+                h as i32,
                 depth as i32,
                 level_count as i32,
             )
@@ -688,8 +643,8 @@ impl Device {
     pub fn create_texture_cube(
         &mut self,
         fmt: enums::SurfaceFormat,
-        size: i32,
-        level_count: i32,
+        size: u32,
+        level_count: u32,
         is_render_target: bool,
         // TODO: maybe make a wrapper
     ) -> *mut Texture {
@@ -697,8 +652,8 @@ impl Device {
             FNA3D_CreateTextureCube(
                 self.raw,
                 fmt as u32,
-                size,
-                level_count,
+                size as i32,
+                level_count as i32,
                 is_render_target as u8,
             )
         }
@@ -718,20 +673,8 @@ impl Device {
 
     /// Uploads image data to a 2D texture object.
     ///
-    /// * `texture`:
-    ///   The texture to be updated.
-    /// * `x`:
-    ///   The x offset of the subregion being updated.
-    /// * `y`:
-    ///   The y offset of the subregion being updated.
-    /// * `w`:
-    ///   The width of the subregion being updated.
-    /// * `h`:
-    ///   The height of the subregion being updated.
     /// * `level`:
     ///   The mipmap level being updated.
-    /// * `data`:
-    ///   A slice to the image data.
     pub fn set_texture_data_2d(
         &mut self,
         texture: *mut Texture,
@@ -759,26 +702,8 @@ impl Device {
 
     /// Uploads image data to a 3D texture object.
     ///
-    /// * `texture`:
-    ///   The texture to be updated.
-    /// * `x`:
-    ///   The x offset of the subregion being updated.
-    /// * `y`:
-    ///   The y offset of the subregion being updated.
-    /// * `z`:
-    ///   The z offset of the subregion being updated.
-    /// * `w`:
-    ///   The width of the subregion being updated.
-    /// * `h`:
-    ///   The height of the subregion being updated.
-    /// * `d`:
-    ///   The depth of the subregion being updated.
     /// * `level`:
     ///   The mipmap level being updated.
-    /// * `data`:
-    ///   A pointer to the image data.
-    /// * `data_len`:
-    ///   The size of the image data in bytes.
     pub fn set_texture_data_3d(
         &mut self,
         texture: &mut Texture,
@@ -787,10 +712,9 @@ impl Device {
         z: u32,
         w: u32,
         h: u32,
-        d: u32,
+        depth: u32,
         level: u32,
-        data: *mut c_void,
-        data_len: i32,
+        data: &mut [u8],
     ) {
         unsafe {
             FNA3D_SetTextureData3D(
@@ -801,82 +725,53 @@ impl Device {
                 z as i32,
                 w as i32,
                 h as i32,
-                d as i32,
+                depth as i32,
                 level as i32,
-                data,
-                data_len,
+                data.as_mut_ptr() as *mut _,
+                data.len() as i32,
             );
         }
     }
 
     /// Uploads image data to a single face of a texture cube object.
     ///
-    /// * `texture`:
-    ///   The texture to be updated.
     /// * `fmt`:
     ///   Should match the format provided to CreateTextureCube.
-    /// * `x`:
-    ///   The x offset of the subregion being updated.
-    /// * `y`:
-    ///   The y offset of the subregion being updated.
-    /// * `w`:
-    ///   The width of the subregion being updated.
-    /// * `h`:
-    ///   The height of the subregion being updated.
     /// * `cube_map_face`:
     ///   The face of the cube being updated.
     /// * `level`:
     ///   The mipmap level being updated.
-    /// * `data`:
-    ///   A pointer to the image data.
-    /// * `data_len`:
-    ///   The size of the image data in bytes.
     pub fn set_texture_data_cube(
         &mut self,
         texture: &mut Texture,
-        x: i32,
-        y: i32,
-        w: i32,
-        h: i32,
+        x: u32,
+        y: u32,
+        w: u32,
+        h: u32,
         cube_map_face: enums::CubeMapFace,
         level: i32,
-        data: *mut ::std::os::raw::c_void,
-        data_len: i32,
+        data: &mut [u8],
     ) {
         unsafe {
             FNA3D_SetTextureDataCube(
                 self.raw,
                 texture,
-                x,
-                y,
-                w,
-                h,
+                x as i32,
+                y as i32,
+                w as i32,
+                h as i32,
                 cube_map_face as u32,
                 level,
-                data,
-                data_len,
+                data.as_mut_ptr() as *mut _,
+                data.len() as i32,
             );
         }
     }
 
     /// Uploads YUV image data to three ALPHA8 texture objects.
     ///
-    /// * `y`:
-    ///   The texture storing the Y data.
-    /// * `u`:
-    ///   The texture storing the U (Cb) data.
-    /// * `v`:
-    ///   The texture storing the V (Cr) data.
-    /// * `y_width`:
-    ///   The width of the Y plane.
-    /// * `y_height`:
-    ///   The height of the Y plane.
-    /// * `uv_width`:
-    ///   The width of the U/V planes.
-    /// * `uv_height`:
-    ///   The height of the U/V planes.
     /// * `data`:
-    ///   A sluce of the raw YUV image data.
+    ///   A slice of the raw YUV image data.
     pub fn set_texture_data_yuv(
         &mut self,
         y: &mut Texture,
@@ -904,26 +799,12 @@ impl Device {
         }
     }
 
-    //// Pulls image data from a 2D texture into client memory. Like any GetData,
+    /// Pulls image data from a 2D texture into client memory. Like any GetData,
     /// this is generally asking for a massive CPU/GPU sync point, don't call this
     /// unless there's absolutely no other way to use the image data!
     ///
-    /// * `texture`:
-    ///   The texture object being read.
-    /// * `x`:
-    ///   The x offset of the subregion being read.
-    /// * `y`:
-    ///   The y offset of the subregion being read.
-    /// * `w`:
-    ///   The width of the subregion being read.
-    /// * `h`:
-    ///   The height of the subregion being read.
     /// * `level`:
     ///   The mipmap level being read.
-    /// * `data`:
-    ///   The pointer being filled with the image data.
-    /// * `data_len`:
-    ///   The size of the image data in bytes.
     pub fn get_texture_data_2d(
         &mut self,
         texture: &mut Texture,
@@ -953,15 +834,8 @@ impl Device {
     /// this is generally asking for a massive CPU/GPU sync point, don't call this
     /// unless there's absolutely no other way to use the image data!
     ///
-    /// * `texture`:	The texture object being read.
-    /// * `x`:		The x offset of the subregion being read.
-    /// * `y`:		The y offset of the subregion being read.
-    /// * `z`:		The z offset of the subregion being read.
-    /// * `w`:		The width of the subregion being read.
-    /// * `h`:		The height of the subregion being read.
-    /// * `d`:		The depth of the subregion being read.
-    /// * `level`:	The mipmap level being read.
-    /// * `data`:	The slice being filled with the image data.
+    /// * `level`:
+    ///    The mipmap level being read.
     pub fn get_texture_data_3d(
         &mut self,
         texture: &mut Texture,
@@ -970,7 +844,7 @@ impl Device {
         z: u32,
         w: u32,
         h: u32,
-        d: u32,
+        depth: u32,
         level: u32,
         data: &mut [u8],
     ) {
@@ -983,7 +857,7 @@ impl Device {
                 z as i32,
                 w as i32,
                 h as i32,
-                d as i32,
+                depth as i32,
                 level as i32,
                 data as *const _ as *mut _,
                 data.len() as i32,
@@ -997,14 +871,10 @@ impl Device {
     /// image data!
     ///
     /// * `texture`:	The texture object being read.
-    /// * `fmt`:	Should match the format provided to CreateTextureCube.
-    /// * `x`:		The x offset of the subregion being read.
-    /// * `y`:		The y offset of the subregion being read.
-    /// * `w`:		The width of the subregion being read.
-    /// * `h`:		The height of the subregion being read.
-    /// * `cubeMapFace`:	The face of the cube being read.
-    /// * `level`:	The mipmap level being read.
-    /// * `data`:	The slice being filled with the image data.
+    /// * `cube_map_face`:
+    ///    The face of the cube being read.
+    /// * `level`:
+    ///    The mipmap level being read.
     pub fn get_texture_data_cube(
         &mut self,
         texture: *mut Texture,
@@ -1038,17 +908,14 @@ impl Device {
 impl Device {
     /// Creates a color buffer to be used by `set_render_targets` / `resolve_target`.
     ///
-    /// * `width`:		The width of the color buffer.
-    /// * `height`:		The height of the color buffer.
-    /// * `fmt`:		The pixel format of the color buffer.
-    /// * `multi_sample_count`:	The MSAA value for the color buffer.
-    /// * `texture`:		The texture that this buffer will be resolving to.
+    /// * `multi_sample_count`:
+    ///    The MSAA value for the color buffer.
     ///
-    /// Returns a color FNA3D_Renderbuffer object.
+    /// Returns a color [`FNA3D_Renderbuffer`] object.
     pub fn gen_color_renderbuffer(
         &mut self,
-        width: u32,
-        height: u32,
+        w: u32,
+        h: u32,
         fmt: enums::SurfaceFormat,
         multi_sample_count: u32,
         texture: *mut Texture,
@@ -1056,8 +923,8 @@ impl Device {
         unsafe {
             FNA3D_GenColorRenderbuffer(
                 self.raw,
-                width as i32,
-                height as i32,
+                w as i32,
+                h as i32,
                 fmt as u32,
                 multi_sample_count as i32,
                 texture,
@@ -1067,24 +934,22 @@ impl Device {
 
     /// Creates a depth/stencil buffer to be used by `set_render_targets`.
     ///
-    /// * `width`:		The width of the depth/stencil buffer.
-    /// * `height`:		The height of the depth/stencil buffer.
-    /// * `fmt`:		The storage format of the depth/stencil buffer.
-    /// * `multi_sample_count`:	The MSAA value for the depth/stencil buffer.
+    /// * `multi_sample_count`:
+    ///    The MSAA value for the depth/stencil buffer.
     ///
-    /// Returns a depth/stencil FNA3D_Renderbuffer object.
+    /// Returns a depth/stencil [`FNA3D_Renderbuffer`] object.
     pub fn gen_depth_stencil_renderbuffer(
         &mut self,
-        width: u32,
-        height: u32,
+        w: u32,
+        h: u32,
         fmt: enums::DepthFormat,
         multi_sample_count: i32,
     ) -> *mut Renderbuffer {
         unsafe {
             FNA3D_GenDepthStencilRenderbuffer(
                 self.raw,
-                width as i32,
-                height as i32,
+                w as i32,
+                h as i32,
                 fmt as u32,
                 multi_sample_count,
             )
@@ -1092,7 +957,7 @@ impl Device {
     }
 
     /// Sends a renderbuffer to be destroyed by the renderer. Note that we call it
-    /// "AddDispose" because it may not be immediately destroyed by the renderer if
+    /// "add_dispose" because it may not be immediately destroyed by the renderer if
     /// this is not called from the main thread (for example, if a garbage collector
     /// deletes the resource instead of the programmer).
     ///
@@ -1113,11 +978,7 @@ impl Device {
     /// Creates a vertex buffer to be used by Draw*Primitives.
     ///
     /// * `dynamic`:
-    ///   Set to 1 if this buffer will be updated frequently.
-    /// * `usage`:
-    ///   Set to WRITEONLY if you do not intend to call GetData.
-    /// * `size_in_bytes`:
-    ///   The length of the vertex buffer.
+    ///   Set to `true` if this buffer will be updated frequently.
     ///
     /// Returns an allocated FNA3D_Buffer* object. Note that the contents of the
     /// buffer are undefined, so you must call `SetData` at least once before drawing!
@@ -1154,12 +1015,6 @@ impl Device {
     /// This is wrapped in `VertexBuffer:SetData` in FNA. Remember to call
     /// `apply_vertex_buffer_bindings` before drawing.
     ///
-    /// * `buf`:
-    ///   The vertex buffer to be updated.
-    /// * `buf_offset_in_bytes`:
-    ///   The starting offset of the buffer to write into.
-    /// * `data`:
-    ///   The client data to write into the buffer.
     /// * `opts`:
     ///   Try not to call NONE if this is a dynamic buffer!
     pub fn set_vertex_buffer_data<T>(
@@ -1186,15 +1041,6 @@ impl Device {
     }
 
     /// Pulls data from a region of the vertex buffer into a client pointer.
-    ///
-    /// * `buffer`:
-    ///   The vertex buffer to be read from.
-    /// * `buf_offset_in_bytes`:
-    ///   The starting offset of the buffer to write into.
-    /// * `data`:
-    ///   The client data to write into from the buffer.
-    /// * `elem_size_in_bytes`:
-    ///   The size of each element in the client buffer.
     pub fn get_vertex_buffer_data(
         &mut self,
         buffer: *mut Buffer,

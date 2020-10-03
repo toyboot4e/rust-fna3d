@@ -199,7 +199,9 @@ enum_from_primitive! {
     #[repr(u32)]
     /// Vertex/index buffer component, which hints optimization of memory placement
     pub enum BufferUsage {
+        /// Intend to call `set_data` methods in `Device`
         None = sys::FNA3D_BufferUsage_FNA3D_BUFFERUSAGE_NONE,
+        /// Not intend to call `set_data` methods in `Device`
         WriteOnly = sys::FNA3D_BufferUsage_FNA3D_BUFFERUSAGE_WRITEONLY,
     }
 }
