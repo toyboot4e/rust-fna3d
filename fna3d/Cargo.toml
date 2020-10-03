@@ -11,7 +11,9 @@ license = "MIT"
 categories = ["game-engines"]
 
 [dependencies]
-enum_primitive = "0.1.1"
 fna3d-sys = { path = "../fna3d-sys" }
-bitflags = "1.2.1"
 log = "0.4.11"
+
+bitflags = "1.2.1"
+enum-primitive-derive = "0.2.1"
+num-traits = "0.2.12"

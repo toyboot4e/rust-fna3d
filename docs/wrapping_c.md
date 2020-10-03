@@ -38,19 +38,19 @@ pub type FNA3D_IndexElementSize = u32;
 We want to wram them with an `enum`:
 
 ```rust
-use enum_primitive::*;
+use enum_primitive_derive::Primitive;
 use fna3d_sys as sys;
-enum_from_primitive! {
-    #[derive(Debug, Copy, Clone, PartialEq)]
-    #[repr(u32)]
-    pub enum IndexElementSize {
-        Bits16 = sys::FNA3D_IndexElementSize_FNA3D_INDEXELEMENTSIZE_16BIT,
-        Bits32 = sys::FNA3D_IndexElementSize_FNA3D_INDEXELEMENTSIZE_32BIT,
-    }
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Primitive)]
+#[repr(u32)]
+pub enum IndexElementSize {
+    Bits16 = sys::FNA3D_IndexElementSize_FNA3D_INDEXELEMENTSIZE_16BIT,
+    Bits32 = sys::FNA3D_IndexElementSize_FNA3D_INDEXELEMENTSIZE_32BIT,
 }
 ```
 
-We used [enum_primitive](https://crates.io/crates/enum_primitive) crate to implement `num_traits::FromPrimitive`. TODO: [enum_primitive_derive](https://docs.rs/enum-primitive-derive/newest/enum_primitive_derive/) or [num_derive](https://docs.rs/num-derive/newest/num_derive/) or num_enum
+We used [enum_primitive_derive](https://crates.io/crates/enum_primitive_derive) crate to implement `num_traits::FromPrimitive`.
+
+Other option would be [num_derive](https://docs.rs/num-derive/latest/num_derive/) or [num_enum](https://docs.rs/num_enum/latest/num_enum/)
 
 Now `IndexElementSize` can be created from u32:
 
@@ -59,7 +59,6 @@ use fna3d::{IndexElementSize, utils::FromPrimitive};
 assert_eq!(IndexElementSize::from_u32(0), Some(IndexElementSize::Bits16));
 ```
 
-* TODO: use derive macro for it. or can I use `num` crate?
 * [bindgen #1096: Improve codegen for C style enums](https://github.com/rust-lang/rust-bindgen/issues/1096)
 
 ### 2-2. Wrapping bitflags

@@ -6,13 +6,13 @@ use std::{
     ptr,
 };
 
+use fna3d_sys::*;
+use num_traits::FromPrimitive;
+
 use crate::{
     fna3d::{fna3d_enums as enums, fna3d_structs::*},
     mojo,
 };
-use enum_primitive::*;
-
-use fna3d_sys::*;
 
 // --------------------------------------------------------------------------------
 // Helpers

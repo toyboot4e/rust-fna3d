@@ -50,7 +50,8 @@ pub mod mojo;
 pub mod utils {
     //! Helpers
 
-    pub use enum_primitive::FromPrimitive;
+    pub use enum_primitive_derive::Primitive;
+    pub use num_traits::{FromPrimitive, ToPrimitive};
 
     use fna3d_sys as sys;
     use std::os::raw::c_void;

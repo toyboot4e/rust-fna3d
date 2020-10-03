@@ -10,7 +10,7 @@
 //!
 //! [paste]: https://github.com/dtolnay/paste
 
-use enum_primitive::*;
+use num_traits::FromPrimitive;
 
 use crate::fna3d::fna3d_enums as enums;
 use fna3d_sys as sys;
