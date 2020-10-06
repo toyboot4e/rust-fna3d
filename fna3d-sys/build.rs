@@ -4,11 +4,11 @@
 //!
 //! # What it does
 //!
-//! 1. pull FNA3D recursively if there's not
-//! 2. apply patches to FNA3D and MojoShader
-//! 3. run `cmake` and build MojoShader and FNA3D (if they're not built yet)
-//! 4. link to the output libraries
-//! 5. make bindings (FFI) to the C libraries
+//! 1. Pulls FNA3D recursively if there's not
+//! 2. Applies patches to FNA3D and MojoShader
+//! 3. Compiles MojoShader and FNA3D if they're not found in `OUT_DIR`
+//! 4. Links to the output libraries
+//! 5. Makes bindings (FFI) to the C libraries
 //!
 //! # TODOs
 //!
@@ -25,23 +25,15 @@ use std::{
 
 use cmake::Config;
 
-// type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
-
 fn main() {
-    // get submodules ready
-    pull_and_apply_patches();
-
-    // compile MojoShader and FNA3D
-    run_cmake();
-
-    // make bindings to them
+    self::prepare();
+    self::compile();
     self::gen_bindings("fna3d_wrapper.h", "fna3d_bindings.rs");
     self::gen_bindings("mojoshader_wrapper.h", "mojoshader_bindings.rs");
-
-    // these files are statically included in src/lib.rs
 }
 
-fn pull_and_apply_patches() {
+/// Pulls FNA3D and applies patches
+fn prepare() {
     let root = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
 
     Command::new("git")
@@ -63,43 +55,32 @@ fn pull_and_apply_patches() {
         let patch = root.join("fna3d_patch.diff");
         apply_patch(&dir, &patch);
     }
-}
 
-fn apply_patch(dir: &Path, patch: &Path) {
-    let dir = format!("{}", dir.display());
-    let patch = format!("{}", patch.display());
+    fn apply_patch(dir: &Path, patch: &Path) {
+        let dir = format!("{}", dir.display());
+        let patch = format!("{}", patch.display());
 
-    // Command::new("git")
-    //     .current_dir(dir)
-    //     .args(&["checkout", "master"])
-    //     .status()
-    //     .unwrap_or_else(|e| {
-    //         panic!(
-    //             "failed to checkout master in dir `{}`. original error {}",
-    //             dir, e
-    //         )
-    //     });
+        println!("=====> applying patch for {}", dir);
 
-    println!("=====> applying patch for {}", dir);
+        Command::new("git")
+            .current_dir(&dir)
+            .args(&["apply", &patch])
+            // suppress patch error
+            .stderr(std::process::Stdio::null())
+            .status()
+            .unwrap_or_else(|e| {
+                panic!(
+                    "failed to apply patch `{}` in dir `{}`. original error {}",
+                    patch, dir, e
+                )
+            });
 
-    Command::new("git")
-        .current_dir(&dir)
-        .args(&["apply", &patch])
-        // suppress patch error
-        .stderr(std::process::Stdio::null())
-        .status()
-        .unwrap_or_else(|e| {
-            panic!(
-                "failed to apply patch `{}` in dir `{}`. original error {}",
-                patch, dir, e
-            )
-        });
-
-    println!("<===== succeeded!");
+        println!("<===== succeeded!");
+    }
 }
 
 /// Runs `cmake` (only when it's necessary) and links the output libraries
-fn run_cmake() {
+fn compile() {
     let root = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
 
@@ -127,8 +108,8 @@ fn run_cmake() {
 }
 
 /// Generates bindings using a wrapper header file
-fn gen_bindings(wrapper_path: impl AsRef<Path>, dst_file_name: impl AsRef<Path>) {
-    let wrapper = wrapper_path.as_ref();
+fn gen_bindings(wrapper: impl AsRef<Path>, dst_file_name: impl AsRef<Path>) {
+    let wrapper = wrapper.as_ref();
     let dst_file_name = dst_file_name.as_ref();
 
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
@@ -137,10 +118,8 @@ fn gen_bindings(wrapper_path: impl AsRef<Path>, dst_file_name: impl AsRef<Path>)
     println!("cargo:rerun-if-changed={}", wrapper.display());
     let bindings = bindgen::Builder::default()
         .header(format!("{}", wrapper.display()))
-        // SUPPORT MOJOSHADER EFFECT (only needed when building MojoShader)
+        // Needed when building MojoShader
         .clang_arg("-DMOJOSHADER_EFFECT_SUPPORT")
-        // Tell cargo to invalidate the built crate whenever any of the included header files
-        // changed
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
         .generate()
         .unwrap_or_else(|e| {
