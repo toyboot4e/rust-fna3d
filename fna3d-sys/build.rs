@@ -85,8 +85,8 @@ fn compile() {
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
 
     // MojoShader
-    let out_file_path = out_dir.join("libmojoshader.a");
-    if !out_file_path.is_file() {
+    let out_lib_path = out_dir.join("libmojoshader.a");
+    if !out_lib_path.is_file() {
         let path = root.join("FNA3D/MojoShader");
         let _out = Config::new(path)
             .cflag("-DMOJOSHADER_EFFECT_SUPPORT")
@@ -96,8 +96,8 @@ fn compile() {
     println!("cargo:rustc-link-lib=static=mojoshader");
 
     // FNA3D
-    let out_file_path = out_dir.join("libFNA3D.dylib");
-    if !out_file_path.is_file() {
+    let out_lib_path = out_dir.join("libFNA3D.dylib");
+    if !out_lib_path.is_file() {
         let path = root.join("FNA3D");
         let _out = Config::new(path)
             .cflag("-DMOJOSHADER_EFFECT_SUPPORT")

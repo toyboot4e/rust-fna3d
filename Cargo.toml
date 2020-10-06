@@ -1,5 +1,19 @@
-[workspace]
-members = [
-    "fna3d-sys",
-    "fna3d",
-]
+[package]
+name = "fna3d"
+version = "0.1.0"
+authors = ["toyboot4e <toyboot4e@gmail.com>"]
+description = "Wrapper of FNA3D"
+repository = "https://github.com/toyboot4e/rust-fna3d"
+readme = "README.md"
+keywords = ["graphics", "library", "gamedev"]
+edition = "2018"
+license = "MIT"
+categories = ["game-engines"]
+
+[dependencies]
+fna3d-sys = { path = "fna3d-sys" }
+log = "0.4.11"
+
+bitflags = "1.2.1"
+enum-primitive-derive = "0.2.1"
+num-traits = "0.2.12"

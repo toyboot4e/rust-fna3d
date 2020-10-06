@@ -19,7 +19,3 @@ name = "fna3d_sys"
 [build-dependencies]
 bindgen = "0.55.1"
 cmake = "0.1"
-
-[dependencies]
-
-[dev-dependencies]
