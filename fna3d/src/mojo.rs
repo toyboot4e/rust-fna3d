@@ -16,7 +16,7 @@
 //! use std::path::Path;
 //!
 //! pub fn load_shader_with_orthographic_projection(
-//!     device: &mut fna3d::Device,
+//!     device: &fna3d::Device,
 //!     shader_path: impl AsRef<Path>,
 //! ) -> fna3d::mojo::Result<(*mut fna3d::Effect, *mut fna3d::mojo::Effect)> {
 //!     let (effect, data) = fna3d::mojo::from_file(device, shader_path)?;
@@ -65,7 +65,7 @@ pub enum LoadShaderError {
 
 /// Helper for loading shader. Be sure to set projection matrix after loading!
 pub fn from_file(
-    device: &mut crate::Device,
+    device: &crate::Device,
     shader_path: impl AsRef<Path>,
 ) -> Result<(*mut crate::Effect, *mut crate::mojo::Effect)> {
     let data = fs::read(shader_path).map_err(|e| LoadShaderError::Io(e))?;
@@ -77,7 +77,7 @@ pub fn from_file(
 /// If ok, returns (effect_handle, effect_data_access). The latter is automatically disposed after
 /// calling [`fna3d::Device::add_dispose_effect`].
 pub fn from_bytes(
-    device: &mut crate::Device,
+    device: &crate::Device,
     bytes: &[u8],
 ) -> Result<(*mut crate::Effect, *mut crate::mojo::Effect)> {
     let (effect, mojo_effect) =
@@ -99,7 +99,7 @@ pub fn from_bytes(
     }
 }
 
-/// Predefined [orthograpihc projection] matrix
+/// Predefined [orthograpihc projection] matrix (column-major)
 ///
 /// [orthograpihc projection]: https://en.wikipedia.org/wiki/Orthographic_projection
 pub const ORTHOGRAPHIC_MATRIX: [f32; 16] = [
@@ -126,6 +126,8 @@ pub const ORTHOGRAPHIC_MATRIX: [f32; 16] = [
 
 /// Helper to set projection matrix in **COLUMN-MAJOR** representation
 ///
+/// Works only for `SpriteEffect.fxb`.
+///
 /// The matrix considers position vectors as row vectors. So it is often transposed from examples
 /// in mathmatical textbooks.
 pub fn set_projection_matrix(data: *mut Effect, mat: &[f32; 16]) {
@@ -133,7 +135,9 @@ pub fn set_projection_matrix(data: *mut Effect, mat: &[f32; 16]) {
     let name = std::ffi::CString::new("MatrixTransform").unwrap();
 
     unsafe {
-        assert!(set_param(data, &name, mat));
+        if !set_param(data, &name, mat) {
+            panic!("could not find MatrixTransform parameter in shader");
+        }
     }
 }
 

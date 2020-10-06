@@ -20,7 +20,7 @@
 //!
 //! impl MyTexture2d {
 //!     pub fn from_path(
-//!         device: &mut fna3d::Device,
+//!         device: &fna3d::Device,
 //!         path: impl AsRef<std::path::Path>,
 //!     ) -> Option<Self> {
 //!         let (raw, len, [w, h]) = fna3d::img::from_path(path, None);

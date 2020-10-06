@@ -15,9 +15,8 @@
 //!
 //! ## What does Rust-FNA3D do?
 //!
-//! The biggest difference from the original FNA3D API is that most functionalities are re-exported
-//! as [`Device`] methods, where the **borrow rules are strongly enforced**. Other changes are just
-//! for improving the output of `bindgen`:
+//! [`Device`] is a reference counted pointer to owned version of FNA3D device. Other changes are
+//! just for improving the output of `bindgen`:
 //!
 //! * Wrapping the original API with rusty types: slices, enums and booleans
 //! * Wrapping some legacy API (XNA-compatibility API) with more meaningful one
@@ -71,6 +70,7 @@ pub mod utils {
             let slice = ::std::ffi::CStr::from_ptr(msg);
             let string = slice.to_string_lossy().into_owned();
             println!("{}", string);
+            // log::warn!("{}", string);
         }
     }
 

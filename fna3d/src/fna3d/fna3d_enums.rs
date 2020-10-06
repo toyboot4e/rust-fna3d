@@ -1,6 +1,4 @@
 //! Wrappers of enum variants defined as constants by `bindgen`
-//!
-//! * TODO: use enum_primitive_derive .. or can we forget them all?
 
 use fna3d_sys as sys;
 
