@@ -18,18 +18,16 @@ use crate::{
 // --------------------------------------------------------------------------------
 // Helpers
 
-trait AsMutPtr<T> {
-    fn as_mut_ptr(self) -> *mut T;
-}
-
-impl<'a, T> AsMutPtr<T> for Option<&'a mut T> {
-    fn as_mut_ptr(self) -> *mut T {
-        match self {
-            Some(value) => value as *mut T,
+/// Option<T> -> *mut T
+macro_rules! as_ptr {
+    ($opt:expr) => {
+        match $opt {
+            Some(value) => value as *const _ as *mut _,
             None => ptr::null_mut(),
         }
-    }
+    };
 }
+
 // --------------------------------------------------------------------------------
 // Device
 
@@ -148,14 +146,17 @@ impl Device {
     ///   The OS window handle (not really "overridden").
     pub fn swap_buffers(
         &self,
-        mut src: Option<Rect>,
-        mut dest: Option<Rect>,
+        src: Option<Rect>,
+        dest: Option<Rect>,
         override_window_handle: *mut c_void,
     ) {
-        let src = src.as_mut().as_mut_ptr();
-        let dest = dest.as_mut().as_mut_ptr();
         unsafe {
-            FNA3D_SwapBuffers(self.raw(), src, dest, override_window_handle);
+            FNA3D_SwapBuffers(
+                self.raw(),
+                as_ptr!(&src),
+                as_ptr!(&dest),
+                override_window_handle,
+            );
         }
     }
 }
@@ -484,7 +485,7 @@ impl Device {
                     None => std::ptr::null_mut(),
                 },
                 n_render_targets as i32,
-                depth_stencil_buffer.as_mut_ptr(),
+                as_ptr!(&depth_stencil_buffer),
                 depth_format as FNA3D_DepthFormat,
                 preserve_target_contents as u8,
             );
