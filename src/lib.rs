@@ -30,21 +30,13 @@
 //! [bindgen]: https://github.com/rust-lang/rust-bindgen
 //! [file]: https://github.com/toyboot4e/rust-fna3d/blob/master/docs/wrapping_c.md
 
-pub use bitflags;
-pub use fna3d_sys as sys;
+pub use ::{bitflags, fna3d_sys as sys};
 
-// FNA3D.h
 mod fna3d;
-pub use crate::fna3d::fna3d_device::*;
-pub use crate::fna3d::fna3d_enums::*;
-pub use crate::fna3d::fna3d_functions::*;
-pub use crate::fna3d::fna3d_structs::*;
-
-// FNA3D_Image.h
 pub mod img;
-
-// mojoshader.h (and some more)
 pub mod mojo;
+
+pub use crate::fna3d::{fna3d_device::*, fna3d_enums::*, fna3d_functions::*, fna3d_structs::*};
 
 pub mod utils {
     //! Helpers

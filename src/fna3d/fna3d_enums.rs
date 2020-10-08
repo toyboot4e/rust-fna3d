@@ -1,8 +1,6 @@
 //! Wrappers of enum variants defined as constants by `bindgen`
 
-use fna3d_sys as sys;
-
-use enum_primitive_derive::Primitive;
+use ::{enum_primitive_derive::Primitive, fna3d_sys as sys};
 
 // for documentation (types in scope are automatically linked with [`TypeName`])
 #[allow(unused_imports)]

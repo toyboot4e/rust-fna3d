@@ -46,14 +46,15 @@ pub type EffectParam = sys::mojo::MOJOSHADER_effectParam;
 // --------------------------------------------------------------------------------
 // Helpers
 
-use std::{
-    ffi::{c_void, CStr},
-    fs,
-    io::{self, prelude::*},
-    path::Path,
+use ::{
+    fna3d_sys as sys,
+    std::{
+        ffi::{c_void, CStr},
+        fs,
+        io::{self, prelude::*},
+        path::Path,
+    },
 };
-
-use fna3d_sys as sys;
 
 pub type Result<T> = std::result::Result<T, LoadShaderError>;
 

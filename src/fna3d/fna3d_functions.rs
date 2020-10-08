@@ -1,5 +1,4 @@
-use fna3d_sys as sys;
-use std::ffi::c_void;
+use ::{fna3d_sys as sys, std::ffi::c_void};
 
 /// FNA3D version
 pub fn linked_version() -> u32 {

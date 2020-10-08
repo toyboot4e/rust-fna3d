@@ -10,10 +10,9 @@
 //!
 //! [paste]: https://github.com/dtolnay/paste
 
-use num_traits::FromPrimitive;
+use ::{fna3d_sys as sys, num_traits::FromPrimitive};
 
 use crate::fna3d::fna3d_enums as enums;
-use fna3d_sys as sys;
 
 // for documentation (types in scope are automatically linked with [`TypeName`])
 #[allow(unused_imports)]

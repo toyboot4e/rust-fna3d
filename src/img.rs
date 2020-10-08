@@ -37,15 +37,17 @@
 //! }
 //! ```
 
-use std::{
-    fs::File,
-    io::{self, BufReader, Read, Seek, SeekFrom, Write},
-    os::raw::{c_char, c_void},
-    path::Path,
+use ::{
+    fna3d_sys as sys,
+    std::{
+        fs::File,
+        io::{self, BufReader, Read, Seek, SeekFrom, Write},
+        os::raw::{c_char, c_void},
+        path::Path,
+    },
 };
 
 use crate::Texture;
-use fna3d_sys as sys;
 
 /// Callback used to pull data from the stream
 type ReadFunc = sys::FNA3D_Image_ReadFunc;

@@ -1,14 +1,15 @@
 //! Wrapper of `FNA3D_Device`
 
-use std::{
-    // this should be `std::ffi::c_void` but `bindgen` uses:
-    os::raw::c_void,
-    ptr,
-    rc::Rc,
+use ::{
+    fna3d_sys::*,
+    num_traits::FromPrimitive,
+    std::{
+        // this should be `std::ffi::c_void` but `bindgen` uses:
+        os::raw::c_void,
+        ptr,
+        rc::Rc,
+    },
 };
-
-use fna3d_sys::*;
-use num_traits::FromPrimitive;
 
 use crate::{
     fna3d::{fna3d_enums as enums, fna3d_structs::*},
