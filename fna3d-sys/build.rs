@@ -60,9 +60,6 @@ fn prepare() {
     fn apply_patch(dir: &Path, patch: &Path) {
         let dir = format!("{}", dir.display());
         let patch = format!("{}", patch.display());
-
-        println!("=====> applying patch for {}", dir);
-
         Command::new("git")
             .current_dir(&dir)
             .args(&["apply", &patch])
@@ -75,8 +72,6 @@ fn prepare() {
                     patch, dir, e
                 )
             });
-
-        println!("<===== succeeded!");
     }
 }
 
@@ -119,19 +114,22 @@ fn gen_bindings(wrapper: impl AsRef<Path>, dst_file_name: impl AsRef<Path>) {
     println!("cargo:rerun-if-changed={}", wrapper.display());
     let bindings = bindgen::Builder::default()
         .header(format!("{}", wrapper.display()))
-        // Needed when building MojoShader
         .clang_arg("-DMOJOSHADER_EFFECT_SUPPORT")
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
         .generate()
-        .unwrap_or_else(|e| {
+        .unwrap_or_else(|err| {
             panic!(
                 "Unable to generate bindings for `{}`. Original error {:?}",
                 dst_file_name.display(),
-                e
+                err
             )
         });
 
-    bindings
-        .write_to_file(&dst)
-        .unwrap_or_else(|_| panic!("Couldn't write bindings for {}", dst_file_name.display()));
+    bindings.write_to_file(&dst).unwrap_or_else(|err| {
+        panic!(
+            "Couldn't write bindings for {}. Original error {}",
+            dst_file_name.display(),
+            err
+        )
+    });
 }
