@@ -17,13 +17,14 @@
 //! ** TODO: bundling libFNA3D.dylib with executable?
 //! ** TODO: static linking?
 
-use std::{
-    env,
-    path::{Path, PathBuf},
-    process::Command,
+use ::{
+    cmake::Config,
+    std::{
+        env,
+        path::{Path, PathBuf},
+        process::Command,
+    },
 };
-
-use cmake::Config;
 
 fn main() {
     self::prepare();
