@@ -85,6 +85,7 @@ fn compile() {
     if !out_lib_path.is_file() {
         let path = root.join("FNA3D/MojoShader");
         let _out = Config::new(path)
+            .cflag("-w") // suppress errors
             .cflag("-DMOJOSHADER_EFFECT_SUPPORT")
             .build();
     }
@@ -96,6 +97,7 @@ fn compile() {
     if !out_lib_path.is_file() {
         let path = root.join("FNA3D");
         let _out = Config::new(path)
+            .cflag("-w") // suppress errors
             .cflag("-DMOJOSHADER_EFFECT_SUPPORT")
             .build();
     }
