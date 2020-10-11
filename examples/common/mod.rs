@@ -1,8 +1,11 @@
 //! Common utilities among samples
 
-use sdl2::{event::Event, EventPump};
+use {
+    anyhow::Error,
+    sdl2::{event::Event, EventPump},
+};
 
-pub type Result<T> = std::result::Result<T, String>;
+pub type Result<T> = anyhow::Result<T>;
 
 /// Runs SDL2 + FNA3D game in a simple way
 pub fn run(
@@ -13,14 +16,16 @@ pub fn run(
     let (sdl, vid, win) = {
         let flags = fna3d::prepare_window_attributes();
 
-        let sdl = sdl2::init()?;
-        let vid = sdl.video()?;
+        // `map_err(Error:msg)` came from `anyhow`
+        let sdl = sdl2::init().map_err(Error::msg)?;
+        let vid = sdl.video().map_err(Error::msg)?;
         let win = vid
             .window(title, size.0, size.1)
             .set_window_flags(flags.0)
             .position_centered()
             .build()
-            .map_err(|e| e.to_string())?;
+            .map_err(|e| e.to_string())
+            .map_err(Error::msg)?;
 
         let size = fna3d::get_drawable_size(win.raw() as *mut _);
         log::info!("FNA3D drawable size: [{}, {}]", size.0, size.1);
@@ -51,5 +56,5 @@ pub fn run(
         (params, device)
     };
 
-    (game_loop)(sdl.event_pump()?, device)
+    (game_loop)(sdl.event_pump().map_err(Error::msg)?, device)
 }
