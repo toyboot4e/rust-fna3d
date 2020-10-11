@@ -32,7 +32,7 @@ macro_rules! as_ptr {
 // --------------------------------------------------------------------------------
 // Device
 
-/// The graphics device
+/// FNA3D graphics device
 ///
 /// # Functionalities
 ///
@@ -1386,7 +1386,9 @@ impl Device {
         unsafe { FNA3D_SupportsNoOverwrite(self.raw()) != 0 }
     }
 
-    /// Returns the number of sampler slots supported by the renderer (texture, vertex_texture)
+    /// (n_max_textures, n_max_vertex_texture)
+    ///
+    /// Returns the number of sampler slots supported by the renderer
     pub fn get_max_texture_slots(&self) -> (u32, u32) {
         let (mut textures, mut vertex_textures): (i32, i32) = (0, 0);
         unsafe {

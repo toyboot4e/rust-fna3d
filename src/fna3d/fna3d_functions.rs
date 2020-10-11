@@ -23,10 +23,10 @@ pub fn prepare_window_attributes() -> SdlWindowFlags {
 }
 
 /// After your window is created, call this to check for high-DPI support.
-pub fn get_drawable_size(window: *mut c_void) -> (i32, i32) {
+pub fn get_drawable_size(window: *mut c_void) -> (u32, u32) {
     let (mut w, mut h) = (0, 0);
     unsafe {
         sys::FNA3D_GetDrawableSize(window, &mut w, &mut h);
     }
-    (w, h)
+    (w as u32, h as u32)
 }

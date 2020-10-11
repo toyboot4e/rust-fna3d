@@ -30,22 +30,22 @@
 //! [bindgen]: https://github.com/rust-lang/rust-bindgen
 //! [file]: https://github.com/toyboot4e/rust-fna3d/blob/master/docs/wrapping_c.md
 
-pub use ::{bitflags, fna3d_sys as sys};
-
 mod fna3d;
 pub mod img;
 pub mod mojo;
 
 pub use crate::fna3d::{fna3d_device::*, fna3d_enums::*, fna3d_functions::*, fna3d_structs::*};
+pub use ::{bitflags, fna3d_sys as sys};
 
 pub mod utils {
     //! Helpers
 
-    pub use enum_primitive_derive::Primitive;
-    pub use num_traits::{FromPrimitive, ToPrimitive};
+    pub use {
+        enum_primitive_derive::Primitive,
+        num_traits::{FromPrimitive, ToPrimitive},
+    };
 
-    use fna3d_sys as sys;
-    use std::os::raw::c_void;
+    use {fna3d_sys as sys, std::os::raw::c_void};
 
     use crate::fna3d::fna3d_enums as enums;
 
@@ -70,9 +70,11 @@ pub mod utils {
     pub fn default_params_from_window_handle(
         window_handle: *mut c_void,
     ) -> sys::FNA3D_PresentationParameters {
+        let (w, h) = crate::get_drawable_size(window_handle);
+
         sys::FNA3D_PresentationParameters {
-            backBufferWidth: 1280,
-            backBufferHeight: 720,
+            backBufferWidth: w as i32,
+            backBufferHeight: h as i32,
             backBufferFormat: enums::SurfaceFormat::Color as u32,
             multiSampleCount: 0,
             // this is actually `SDL_Window*` (though it's `*mut c_void`)
