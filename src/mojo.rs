@@ -1,10 +1,21 @@
 //! MojoShader types and some helpers
 //!
-//! This module has some helpers in addition to FNA3D items.
+//! This module has some helpers in addition to the original items.
+//!
+//! # Effect
+//!
+//! Effect is an abstraction over shaders in XNA. It's actually not so good but we have to stick
+//! with it if we use FNA3D.
+//!
+//! For compiling `fx_2_0` on macOS Catalina, see [this] repository.
+//!
+//! [this]: https://github.com/toyboot4e/fxc
 //!
 //! # Column-major
 //!
 //! MojoShader uses column-major matrices, where position vectors are considered as column vectors.
+//!
+//! FNA is using row-major matrices while MojoShader is column-major.
 //! If you're using a row-major framework, you have to transpose your matrix when you set it to the
 //! projection matrix of MojoShader.
 //!
@@ -15,25 +26,31 @@
 //! ```no_run
 //! use std::path::Path;
 //!
-//! pub fn load_shader_with_orthographic_projection(
+//! /// SpriteEffect.fxb with orthographic projection matrix
+//! pub fn load_2d_shader(
 //!     device: &fna3d::Device,
 //!     shader_path: impl AsRef<Path>,
 //! ) -> fna3d::mojo::Result<(*mut fna3d::Effect, *mut fna3d::mojo::Effect)> {
-//!     let (effect, data) = fna3d::mojo::from_file(device, shader_path)?;
-//!     fna3d::mojo::set_projection_matrix(data, &fna3d::mojo::ORTHOGRAPHICAL_MATRIX);
-//!     Ok((effect, data))
+//!     let (effect, effect_data) = fna3d::mojo::from_file(device, shader_path)?;
+//!     let mat = fna3d::mojo::orthographic_off_center(0.0, 1280.0, 720.0, 0.0, 1.0, 0.0);
+//!     let name = std::ffi::CString::new("MatrixTransform").unwrap();
+//!     unsafe {
+//!         assert!(fna3d::mojo::set_param(effect_data, &name, &mat));
+//!     }
+//!     Ok((effect, effect_data))
 //! }
 //! ```
 //!
-//! [`SpriteEffect.fxb`] can be used for the `shader_path`.
+//! [`SpriteEffect.fxb`] could be used for the `shader_path`.
 //!
 //! [Orthographic projection]: https://en.wikipedia.org/wiki/Orthographic_projection
 //! [`SpriteEffect.fxb`]: https://github.com/FNA-XNA/FNA/blob/d3d5840d9f42d109413b9c489af12e5642b336b9/src/Graphics/Effect/StockEffects/FXB/SpriteEffect.fxb
 //!
 //! # Dispose
 //!
-//! Effect data loaded with helpers in this modules have to be disposed with
-//! [`Device::add_dispose_effect`](crate::Device::add_dispose_effect).
+//! [`crate::Effect`] loaded with a helper in this modules have to be disposed with
+//! [`Device::add_dispose_effect`](crate::Device::add_dispose_effect). Then [`crate::mojo::Effect`]
+//! is also disposed.
 
 // `FNA3D.h` does not provide concrete MojoShader type definitions e.g. `fna3d_sys::MJOSHADER_Effect`.
 // So some types are re-exported from MojoShader headers.
@@ -109,32 +126,9 @@ pub fn from_bytes(
     }
 }
 
-/// Predefined [orthograpihc projection] matrix (column-major)
-///
-/// [orthograpihc projection]: https://en.wikipedia.org/wiki/Orthographic_projection
-pub const ORTHOGRAPHIC_MATRIX: [f32; 16] = [
-    0.0015625, // 2.0 / viewport.w (?)
-    0.0,
-    0.0,
-    -1.0,
-    //
-    0.0,
-    -0.00277777785, // -2.0 / viewport.h (?)
-    0.0,
-    1.0,
-    //
-    0.0,
-    0.0,
-    1.0, // FIXME: sign
-    0.0,
-    //
-    0.0,
-    0.0,
-    0.0,
-    1.0,
-];
-
 /// Column-major orthographic matrix
+///
+/// `fna3d::mojo::orthographic_off_center(0.0, width, height, 0.0, 1.0, 0.0);`
 ///
 /// * bottom is down and top is up, so `bottom` > `top`
 /// * z axis goes from the screen to your face, so `near` > `far`

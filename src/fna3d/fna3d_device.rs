@@ -32,11 +32,11 @@ macro_rules! as_ptr {
 // --------------------------------------------------------------------------------
 // Device
 
-/// FNA3D graphics device
+/// FNA3D device
 ///
 /// # Functionalities
 ///
-/// See the sidebar as list of methods.
+/// See the sidebar as a list of methods.
 ///
 /// * [Init/Quit](#initquit)
 /// * [Presentation](#presentation)
@@ -54,7 +54,8 @@ macro_rules! as_ptr {
 ///
 /// # Drop / dispose
 ///
-/// `Device` destories the FNA3D device when it goes out of scope.
+/// `Device` is reference counted and it destories the FNA3D device when they go out of scope. This
+/// is cheating the borrow rules actually.
 ///
 /// These types have to be disposed with corresponding methods in [`Device`]:
 ///
@@ -63,9 +64,6 @@ macro_rules! as_ptr {
 /// - [`Effect`]
 /// - [`Query`]
 /// - [`Texture`]
-///
-/// If you'd like to automate disposing these resources with `Device` via `Drop`, you have to cheat
-/// the borrow rules with pointers. This design might changes.
 ///
 /// # Initialization
 ///
@@ -183,6 +181,19 @@ impl Device {
     ///   The new value of the cleared depth buffer.
     /// * `stencil`:
     ///   The new value of the cleared stencil buffer.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// fn just_clear(device: &fna3d::Device) {
+    ///     device.clear(
+    ///         fna3d::ClearOptions::TARGET,
+    ///         fna3d::Color::cornflower_blue().as_vec4(),
+    ///         0.0,
+    ///         0,
+    ///     );
+    /// }
+    /// ```
     pub fn clear(&self, options: enums::ClearOptions, color: Vec4, depth: f32, stencil: i32) {
         unsafe {
             FNA3D_Clear(

@@ -25,7 +25,7 @@ Let's get into examples.
 
 ### 2-1. Wrapping constants with an enum
 
-NOTE: this is the case where we we use [`bindgen::Builder`](https://docs.rs/bindgen/newest/bindgen/struct.Builder.html) with default settings. If you want to know, the documentation tells us how to change the output.
+NOTE: this is the case where we use [`bindgen::Builder`](https://docs.rs/bindgen/newest/bindgen/struct.Builder.html) with default settings.
 
 Consider the constants as an example of `bindgen` output:
 
@@ -38,8 +38,11 @@ pub type FNA3D_IndexElementSize = u32;
 We want to wram them with an `enum`:
 
 ```rust
-use enum_primitive_derive::Primitive;
-use fna3d_sys as sys;
+use {
+    enum_primitive_derive::Primitive,
+    fna3d_sys as sys,
+};
+
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Primitive)]
 #[repr(u32)]
 pub enum IndexElementSize {
@@ -109,7 +112,7 @@ pub struct FNA3D_DepthStencilState {
 Issues:
 
 * Some fields are not strictly typed.
-* It is a big `struct` but it implements `Copy`.
+* Although it is a big `struct`, it implements `Copy`.
 
 So let's make a wrapper of it. We'll start with this:
 
@@ -138,6 +141,8 @@ impl DepthStencilState {
 
 It's just for type conversions and not intended to provide with direct access to the fields. We'll make accessors to get or set them.
 
+> Other option is implementing `std::op::Deref` and `std::op::DerefMut` for the wrapping struct. Then we don't need to call `raw` method and user can even set the fields directly (though they may not be strictly typed).
+
 ### 3-2. Accessors
 
 1. [x] use snake case
@@ -165,7 +170,7 @@ impl DepthStencilState {
 }
 ```
 
-3. [x] prefer `u32` to `i32` in some cases (e.g. indices) and cast it to `i32` using `as`
+3. [x] prefer `u32` to `i32` in some cases (e.g. indices) and cast it to `i32` using `as` when accessing to the original variable or function (with or without considering overflow)
 4. [x] casting types to `*mut T`:
 
 We don't need mutability to get type `*mut T`:
@@ -175,11 +180,15 @@ We don't need mutability to get type `*mut T`:
 
 So `value as *const _ as *mut _` is sufficient in most cases.
 
-In reverse, `value: *mut T` can be casted to `&mut T` as this: `&mut *(value as *mut T)`.
+In reverse, `value: *mut T` can be casted to `&mut T` as this: `unsafe { &mut *(value as *mut T) }`.
 
 ### 3-3. Trait implementations
 
 * `Debug`, `Clone`
 * `Copy` if it's cheap
 * `Default`
-* `Hash`, `Eq`, `PartialEq` .. needed?
+* `Hash`, `PartialEq`, `Eq`, `PartialOrd`, `Ord`
+
+I didn't need to implement operators but [auto_ops](https://docs.rs/auto_ops/) is nice.
+
+### 3-4. Constructors

@@ -158,11 +158,9 @@ impl RenderTargetBinding {
 /// The view bounds for render-target surface
 pub type Viewport = sys::FNA3D_Viewport;
 
-/// An RGBA color
+/// 24 bits RGBA color
 ///
-/// 24 bit color with alpha value Each value is represented with 8 bits. Another way to represent a
-///  color is using normalized floating values. Actually, `Color` is casted to [`Vec4`] in
-/// [`Device::clear`](crate::Device::clear).
+/// [`Color::as_vec4`] is available.
 #[derive(Debug, Clone, Copy)]
 pub struct Color {
     raw: sys::FNA3D_Color,

@@ -1,4 +1,4 @@
-//! Wrapper of `FNA3D_Image.h`
+//! `FNA3D_Image.h` with some helpers
 //!
 //! Iternally, `FNA3D_Image` uses [`stb_image`] (`stbi`) with callback functions where arbitrary IO
 //! is allowed.
@@ -13,7 +13,7 @@
 //!
 //! ```no_run
 //! pub struct MyTexture2d {
-//!     raw: fna3d::Texture,
+//!     raw: *mut fna3d::Texture,
 //!     w: u32,
 //!     h: u32,
 //! }
@@ -23,13 +23,22 @@
 //!         device: &fna3d::Device,
 //!         path: impl AsRef<std::path::Path>,
 //!     ) -> Option<Self> {
-//!         let (raw, len, [w, h]) = fna3d::img::from_path(path, None);
+//!         let (pixels_ptr, len, [w, h]) = fna3d::img::from_path(path, None);
 //!
-//!         if raw == std::ptr::null_mut() {
+//!         if pixels_ptr == std::ptr::null_mut() {
 //!             return None;
 //!         }
 //!
+//!         let pixels: &[u8] = unsafe { std::slice::from_raw_parts(pixels_ptr, len as usize) };
+//!         let raw = device.create_texture_2d(
+//!             fna3d::SurfaceFormat::Color,
+//!             w,
+//!             h,
+//!             0,
+//!             false,
+//!         );
 //!         let texture = MyTexture2d { raw, w, h };
+//!
 //!         fna3d::img::free(pixels_ptr as *mut _);
 //!
 //!         Some(texture)
@@ -60,6 +69,13 @@ type EofFunc = sys::FNA3D_Image_EOFFunc;
 
 /// Callback used to check that we're reached to the end of a stream
 type WriteFunc = sys::FNA3D_Image_WriteFunc;
+
+/// Frees pixels loaded with a helper method in this module
+pub fn free(mem: *const u8) {
+    unsafe {
+        sys::FNA3D_Image_Free(mem as *mut _);
+    }
+}
 
 /// Decodes PNG/JPG/GIF data into raw RGBA8 texture data
 ///
@@ -112,13 +128,6 @@ pub fn from_reader<R: Read + Seek>(
             std::mem::transmute(&context),
             force_size,
         )
-    }
-}
-
-/// Frees pixels loaded with a method in this module
-pub fn free(mem: *const u8) {
-    unsafe {
-        sys::FNA3D_Image_Free(mem as *mut _);
     }
 }
 

@@ -1,27 +1,24 @@
 //! Wrapper of [FNA3D], the graphics library for [FNA]
 //!
-//! It's for making a higher-level framework on it! Take [ANF] as an example.
-//!
-//! ## Usage
-//!
-//! First call [`prepare_window_attributes`] then initialize your [`Device`].
+//! See [examples](https://github.com/toyboot4e/rust-fna3d/tree/master/examples) to get started.
 //!
 //! ## What is `fna3d`?
 //!
 //! `fna3d` is a wrapper around `fna3d-sys`, which is Rust FFI to [FNA3D] generated with [bindgen].
 //!
-//!  [FNA3D] is the 3D graphics library for [FNA] written in C99. [FNA] is a reimplementation of
-//! [XNA]. [XNA] is a famous game framework.
+//!  [FNA3D] is the 3D graphics library for [FNA] written in C99 in 2020. [FNA] is a
+//! reimplementation of [XNA]. [XNA] is a famous game framework.
 //!
 //! ## What does Rust-FNA3D do?
 //!
-//! [`Device`] is a reference counted pointer to owned version of FNA3D device. Other changes are
-//! just for improving the output of `bindgen`:
+//! [`Device`] is reference counted and it drops FNA3D device when they go out of scope.
+//!
+//! Other changes are trivial; they're just for improvements to the default output of `bindgen`:
 //!
 //! * Wrapping the original API with rusty types: slices, enums and booleans
 //! * Wrapping some legacy API (XNA-compatibility API) with more meaningful one
 //!
-//! Details are noted in this [file].
+//! Details are noted in this [file] on GitHub.
 //!
 //! [ANF]: https://github.com/toyboot4e/anf
 //! [FNA3D]: https://github.com/FNA-XNA/FNA3D
