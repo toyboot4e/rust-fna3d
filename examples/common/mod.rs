@@ -5,6 +5,9 @@ use {
     sdl2::{event::Event, EventPump},
 };
 
+pub const SHADER: &[u8] = include_bytes!("SpriteEffect.fxb");
+pub const ICON: &[u8] = include_bytes!("deadly-strike.png");
+
 pub type Result<T> = anyhow::Result<T>;
 
 /// Runs SDL2 + FNA3D game in a simple way
@@ -13,6 +16,9 @@ pub fn run(
     size: (u32, u32),
     game_loop: impl FnOnce(EventPump, fna3d::Device) -> Result<()>,
 ) -> Result<()> {
+    log::info!("FNA3D linked version: {}", fna3d::linked_version());
+    fna3d::utils::hook_log_functions_default();
+
     let (sdl, vid, win) = {
         let flags = fna3d::prepare_window_attributes();
 
@@ -37,6 +43,12 @@ pub fn run(
         let params = fna3d::utils::default_params_from_window_handle(win.raw() as *mut _);
         let device = fna3d::Device::from_params(params, true);
 
+        {
+            let (max_tx, max_v_tx) = device.get_max_texture_slots();
+            log::info!("device max textures: {}", max_tx);
+            log::info!("device max vertex textures: {}", max_v_tx);
+        }
+
         let vp = fna3d::Viewport {
             x: 0,
             y: 0,
@@ -56,5 +68,5 @@ pub fn run(
         (params, device)
     };
 
-    (game_loop)(sdl.event_pump().map_err(Error::msg)?, device)
+    game_loop(sdl.event_pump().map_err(Error::msg)?, device)
 }

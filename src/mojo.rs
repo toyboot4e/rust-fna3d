@@ -50,7 +50,7 @@ use ::{
     fna3d_sys as sys,
     std::{
         ffi::{c_void, CStr},
-        fs,
+        fmt, fs,
         io::{self, prelude::*},
         path::Path,
     },
@@ -62,6 +62,15 @@ pub type Result<T> = std::result::Result<T, LoadShaderError>;
 pub enum LoadShaderError {
     Io(io::Error),
     EffectError(String),
+}
+
+impl fmt::Display for LoadShaderError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            LoadShaderError::Io(err) => write!(f, "{}", err),
+            LoadShaderError::EffectError(err) => write!(f, "Shader loading errors: {}", err),
+        }
+    }
 }
 
 /// Helper for loading shader. Be sure to set projection matrix after loading!
@@ -125,21 +134,39 @@ pub const ORTHOGRAPHIC_MATRIX: [f32; 16] = [
     1.0,
 ];
 
-/// Helper to set projection matrix in **COLUMN-MAJOR** representation
+/// Column-major orthographic matrix
 ///
-/// Works only for `SpriteEffect.fxb`.
-///
-/// The matrix considers position vectors as row vectors. So it is often transposed from examples
-/// in mathmatical textbooks.
-pub fn set_projection_matrix(data: *mut Effect, mat: &[f32; 16]) {
-    // FIXME: do not allocate a new string
-    let name = std::ffi::CString::new("MatrixTransform").unwrap();
-
-    unsafe {
-        if !set_param(data, &name, mat) {
-            panic!("could not find MatrixTransform parameter in shader");
-        }
-    }
+/// * bottom is down and top is up, so `bottom` > `top`
+/// * z axis goes from the screen to your face, so `near` > `far`
+pub fn orthographic_off_center(
+    left: f32,
+    right: f32,
+    bottom: f32,
+    top: f32,
+    near: f32,
+    far: f32,
+) -> [f32; 16] {
+    [
+        (2.0 / (right as f64 - left as f64)) as f32,
+        0.0,
+        0.0,
+        ((left as f64 + right as f64) / (left as f64 - right as f64)) as f32,
+        //
+        0.0,
+        (2.0 / (top as f64 - bottom as f64)) as f32,
+        0.0,
+        ((top as f64 + bottom as f64) / (bottom as f64 - top as f64)) as f32,
+        //
+        0.0,
+        0.0,
+        (1.0 / (near as f64 - far as f64)) as f32,
+        (near as f64 / (near as f64 - far as f64)) as f32,
+        //
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+    ]
 }
 
 /// Tries to find a shader parameter with name
@@ -160,15 +187,17 @@ pub fn find_param(data: *mut Effect, name: &CStr) -> Option<*mut c_void> {
 
 /// Returns true if the parameter is found
 pub unsafe fn set_param<T>(data: *mut Effect, name: &CStr, value: &T) -> bool {
-    if let Some(ptr) = find_param(data, name) {
-        // memcpy
-        let n_bytes = std::mem::size_of::<T>();
-        let src: &[u8] = std::slice::from_raw_parts_mut(value as *const _ as *mut u8, n_bytes);
-        let mut dest = std::slice::from_raw_parts_mut(ptr as *mut u8, n_bytes);
-        dest.write(src)
-            .expect("failed to write universal effect data");
-        true
-    } else {
-        false
-    }
+    let ptr = match self::find_param(data, name) {
+        Some(ptr) => ptr,
+        None => return false,
+    };
+
+    // memcpy
+    let n_bytes = std::mem::size_of::<T>();
+    let src: &[u8] = std::slice::from_raw_parts_mut(value as *const _ as *mut u8, n_bytes);
+    let mut dest = std::slice::from_raw_parts_mut(ptr as *mut u8, n_bytes);
+    dest.write(src)
+        .expect("failed to write universal effect data");
+
+    true
 }

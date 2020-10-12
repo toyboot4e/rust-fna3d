@@ -63,6 +63,33 @@ type WriteFunc = sys::FNA3D_Image_WriteFunc;
 
 /// Decodes PNG/JPG/GIF data into raw RGBA8 texture data
 ///
+/// Mainly for `include_bytes!`.
+pub fn from_undecoded_bytes(bytes: &[u8]) -> (*const u8, u32, [u32; 2]) {
+    let reader = std::io::Cursor::new(bytes);
+    self::from_reader(reader, None)
+}
+
+/// Decodes PNG/JPG/GIF data into raw RGBA8 texture data
+///
+/// Be sure to [`free`] the returned memory after use!
+///
+/// The return type is not [`Vec`] because it frees its content when dropping.
+///
+/// [`Vec`]: std::vec::Vec
+pub fn from_path(
+    path: impl AsRef<Path>,
+    force_size: Option<[u32; 2]>,
+) -> (*const u8, u32, [u32; 2]) {
+    let path = path.as_ref();
+    let reader = File::open(path)
+        .ok()
+        .unwrap_or_else(|| panic!("failed to open file {}", path.display()));
+    let reader = BufReader::new(reader); // FIXME: is this good?
+    self::from_reader(reader, force_size)
+}
+
+/// Decodes PNG/JPG/GIF data into raw RGBA8 texture data
+///
 /// Be sure to [`free`] the returned memory after use!
 ///
 /// The return type is not [`Vec`] because it frees its content when dropping.
@@ -88,29 +115,10 @@ pub fn from_reader<R: Read + Seek>(
     }
 }
 
-/// Decodes PNG/JPG/GIF data into raw RGBA8 texture data
-///
-/// Be sure to [`free`] the returned memory after use!
-///
-/// The return type is not [`Vec`] because it frees its content when dropping.
-///
-/// [`Vec`]: std::vec::Vec
-pub fn from_path(
-    path: impl AsRef<Path>,
-    force_size: Option<[u32; 2]>,
-) -> (*const u8, u32, [u32; 2]) {
-    let path = path.as_ref();
-    let reader = File::open(path)
-        .ok()
-        .unwrap_or_else(|| panic!("failed to open file {}", path.display()));
-    let reader = BufReader::new(reader); // FIXME: is this good?
-    self::from_reader(reader, force_size)
-}
-
 /// Frees pixels loaded with a method in this module
-pub fn free(mem: *mut u8) {
+pub fn free(mem: *const u8) {
     unsafe {
-        sys::FNA3D_Image_Free(mem);
+        sys::FNA3D_Image_Free(mem as *mut _);
     }
 }
 

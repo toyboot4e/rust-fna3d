@@ -1,4 +1,6 @@
 //! Creates a new window and clears the screen with cornflower-blue color
+//!
+//! Utilities came from `examples/common/mod.rs`.
 
 mod common;
 
@@ -11,9 +13,6 @@ use crate::common::Result;
 
 pub fn main() -> Result<()> {
     env_logger::init();
-
-    log::info!("FNA3D linked version: {}", fna3d::linked_version());
-    fna3d::utils::hook_log_functions_default();
 
     let title = "Rust-FNA3D triangle example";
     let size = (640, 360);
@@ -34,19 +33,18 @@ fn game_loop(mut pump: EventPump, device: fna3d::Device) -> Result<()> {
         // something like 30 FPS
         std::thread::sleep(Duration::from_nanos(1_000_000_000 / 30));
 
+        // clear the screen (the back frame buffer)
         device.clear(
             fna3d::ClearOptions::TARGET,
-            fna3d::Color::cornflower_blue(),
+            fna3d::Color::cornflower_blue().as_vec4(),
             0.0,
             0,
         );
-        self::tick_game(&device);
+
+        // process your game here
+
         device.swap_buffers(None, None, std::ptr::null_mut());
     }
 
     Ok(())
-}
-
-fn tick_game(device: &fna3d::Device) {
-    //
 }

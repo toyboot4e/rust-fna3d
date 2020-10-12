@@ -84,6 +84,7 @@ macro_rules! as_ptr {
 ///
 /// * [`FNA3D_Clear`]
 /// * for each draw call:
+///     * (set shader matrix)
 ///     * [`FNA3D_ApplyEffect`]
 ///     * [`FNA3D_SetVertexBufferData`]
 ///     * [`FNA3D_VerifySampler`]
@@ -182,12 +183,12 @@ impl Device {
     ///   The new value of the cleared depth buffer.
     /// * `stencil`:
     ///   The new value of the cleared stencil buffer.
-    pub fn clear(&self, options: enums::ClearOptions, color: Color, depth: f32, stencil: i32) {
+    pub fn clear(&self, options: enums::ClearOptions, color: Vec4, depth: f32, stencil: i32) {
         unsafe {
             FNA3D_Clear(
                 self.raw(),
                 options.bits(),
-                &mut color.as_vec4() as *mut _,
+                &color as *const _ as *mut _,
                 depth,
                 stencil,
             );
