@@ -1,9 +1,8 @@
 //! Common utilities among samples
 
-use {
-    anyhow::Error,
-    sdl2::{event::Event, EventPump},
-};
+pub mod gfx;
+
+use {anyhow::Error, sdl2::EventPump};
 
 pub const SHADER: &[u8] = include_bytes!("SpriteEffect.fxb");
 pub const ICON: &[u8] = include_bytes!("deadly-strike.png");
@@ -19,7 +18,7 @@ pub fn run(
     log::info!("FNA3D linked version: {}", fna3d::linked_version());
     fna3d::utils::hook_log_functions_default();
 
-    let (sdl, vid, win) = {
+    let (sdl, _vid, win) = {
         let flags = fna3d::prepare_window_attributes();
 
         // `map_err(Error:msg)` came from `anyhow`
@@ -39,7 +38,7 @@ pub fn run(
         (sdl, vid, win)
     };
 
-    let (params, device) = {
+    let (_params, device) = {
         let params = fna3d::utils::default_params_from_window_handle(win.raw() as *mut _);
         let device = fna3d::Device::from_params(params, true);
 

@@ -11,7 +11,10 @@ use {
     std::{mem, time::Duration},
 };
 
-use crate::common::Result;
+use crate::common::{
+    gfx::{Texture2d, Vertex},
+    Result,
+};
 
 const W: u32 = 1280;
 const H: u32 = 720;
@@ -24,10 +27,10 @@ pub fn main() -> Result<()> {
 }
 
 fn game_loop(mut pump: EventPump, device: fna3d::Device) -> Result<()> {
-    let mut game = GameData::new(device.clone())?;
+    let mut game = self::GameData::new(device.clone())?;
 
-    // Rustified enums are the biggest benefit when using Rust-SDL2 (not Rust-SDL2-sys)!
     'running: loop {
+        // Rustified enums are the biggest benefit when using Rust-SDL2 (not Rust-SDL2-sys)!
         for ev in pump.poll_iter() {
             match ev {
                 Event::Quit { .. } => break 'running,
@@ -55,50 +58,83 @@ fn game_loop(mut pump: EventPump, device: fna3d::Device) -> Result<()> {
 }
 
 pub struct GameData {
+    /// GPU side of things: shader and GPU vertices with attributes
+    draw: DrawData,
+    /// CPU vertices
+    verts: Vec<Vertex>,
+    /// GPU texture decoded from `DeadlyStrike.png`
+    texture: Texture2d,
+}
+
+impl GameData {
+    pub fn new(device: fna3d::Device) -> Result<Self> {
+        // GPU texture
+        let texture = Texture2d::from_undecoded_bytes(&device, common::ICON);
+
+        // CPU vertex buffer
+        let color = fna3d::Color::rgb(255, 255, 255);
+        let verts = {
+            let pos = (100.0, 100.0);
+            // 1/2 scale
+            let size = (texture.w as f32 / 2.0, texture.h as f32 / 2.0);
+            vec![
+                // Vertex::new(destination, uv, color) (z values are actually not used)
+                Vertex::new([pos.0, pos.1, 0.0], [0.0, 0.0], color),
+                Vertex::new([pos.0 + size.0, pos.1, 0.0], [1.0, 0.0], color),
+                Vertex::new([pos.0, pos.1 + size.1, 0.0], [0.0, 1.0], color),
+                Vertex::new([pos.0 + size.0, pos.1, 0.0], [1.0, 0.0], color),
+                Vertex::new([pos.0, pos.1 + size.1, 0.0], [0.0, 1.0], color),
+                Vertex::new([pos.0 + size.0, pos.1 + size.1, 0.0], [1.0, 1.0], color),
+            ]
+        };
+
+        let len_bytes = mem::size_of::<Vertex>() as u32 * verts.len() as u32;
+        let draw = DrawData::new(device, len_bytes)?;
+
+        Ok(Self {
+            draw,
+            verts,
+            texture,
+        })
+    }
+
+    pub fn tick(&mut self, _device: &fna3d::Device) -> Result<()> {
+        self.draw.draw_verts(&self.verts, self.texture.raw)?;
+
+        Ok(())
+    }
+}
+
+/// GPU side of things
+pub struct DrawData {
     /// The FNA3D device. Reference counted and disposed automatically
     device: fna3d::Device,
     /// Handle of FNA3D effect. The internals are opaque
     effect: *mut fna3d::Effect,
     /// Access to the internals of FNA3D effect
     effect_data: *mut fna3d::mojo::Effect,
-    /// CPU vertices
-    verts: Vec<Vertex>,
     /// GPU vertices
     vbuf: *mut fna3d::Buffer,
     /// Vertex attributes
     vbind: fna3d::VertexBufferBinding,
-    /// Deadily strike
-    texture: *mut fna3d::Texture,
 }
 
-impl Drop for GameData {
+impl Drop for DrawData {
     fn drop(&mut self) {
         self.device.add_dispose_effect(self.effect);
         self.device.add_dispose_vertex_buffer(self.vbuf);
     }
 }
 
-impl GameData {
-    pub fn new(device: fna3d::Device) -> Result<Self> {
+impl DrawData {
+    pub fn new(device: fna3d::Device, len_bytes: u32) -> Result<Self> {
+        // create SpriteEffect shader (the matrix is not set yet)
         let (effect, effect_data) =
             fna3d::mojo::from_bytes(&device, crate::common::SHADER).map_err(Error::msg)?;
 
-        // CPU vertex buffer
-        let color = fna3d::Color::rgb(255, 255, 255);
-        let verts = vec![
-            // Vertex::new(destination, uv, color) (z values are actually not used)
-            Vertex::new([100.0, 100.0, 0.0], [0.0, 0.0], color),
-            Vertex::new([484.0, 100.0, 0.0], [1.0, 0.0], color),
-            Vertex::new([100.0, 484.0, 0.0], [0.0, 1.0], color),
-        ];
-
         // GPU vertex buffer (marked as "dynamic")
-        let vbuf = device.gen_vertex_buffer(
-            true,
-            fna3d::BufferUsage::None,
-            mem::size_of::<Vertex>() as u32 * verts.len() as u32,
-        );
-        device.set_vertex_buffer_data(vbuf, 0, &verts, fna3d::SetDataOptions::None);
+        let vbuf = device.gen_vertex_buffer(true, fna3d::BufferUsage::None, len_bytes);
+        // device.set_vertex_buffer_data(vbuf, 0, &verts, fna3d::SetDataOptions::None);
 
         // vertex attributes
         // META: such types are just re-exported from FFI to FNA3D and don't have snake_case fields
@@ -109,31 +145,20 @@ impl GameData {
             instanceFrequency: 0,
         };
 
-        let texture = {
-            let (ptr, len, [w, h]) = fna3d::img::from_undecoded_bytes(common::ICON);
-
-            let texture = device.create_texture_2d(fna3d::SurfaceFormat::Color, w, h, 0, false);
-            let data: &[u8] = unsafe { std::slice::from_raw_parts(ptr, len as usize) };
-            let level = 0; // mipmap level
-            device.set_texture_data_2d(texture, 0, 0, w, h, level, data);
-
-            fna3d::img::free(ptr);
-            texture
-        };
-
         Ok(Self {
             device,
             effect,
             effect_data,
-            verts,
             vbuf,
             vbind,
-            texture,
         })
     }
 
-    pub fn tick(&mut self, device: &fna3d::Device) -> Result<()> {
-        // device.set_vertex_buffer_data(self.vbuf, 0, &self.verts, fna3d::SetDataOptions::None);
+    pub fn draw_verts(&mut self, verts: &[Vertex], texture: *mut fna3d::Texture) -> Result<()> {
+        // upload CPU vertices to GPU vertices
+        // (we don't have to do it every frame though)
+        self.device
+            .set_vertex_buffer_data(self.vbuf, 0, &verts, fna3d::SetDataOptions::None);
 
         // set the matrix parameter of the SpriteEffect shader to orthographic projection matrix
         let mat = fna3d::mojo::orthographic_off_center(0.0, W as f32, H as f32, 0.0, 1.0, 0.0);
@@ -156,72 +181,25 @@ impl GameData {
                 vertex_sampler_state_change_count: 0,
                 vertex_sampler_state_changes: std::ptr::null(),
             };
-            device.apply_effect(self.effect, 0, &changes)
+            self.device.apply_effect(self.effect, 0, &changes)
         }
 
         let sampler = fna3d::SamplerState::default();
         let slot = 0;
-        device.verify_sampler(slot, self.texture, &sampler);
+        self.device.verify_sampler(slot, texture, &sampler);
 
         // let's make a draw call
         let offset = 0;
         // self.vbind.vertexBuffer = self.vbuf;
         self.vbind.vertexOffset = offset;
-        device.apply_vertex_buffer_bindings(&[self.vbind], true, 0);
-        device.draw_primitives(fna3d::PrimitiveType::TriangleList, offset as u32, 3);
+        self.device
+            .apply_vertex_buffer_bindings(&[self.vbind], true, 0);
+        self.device.draw_primitives(
+            fna3d::PrimitiveType::TriangleList,
+            offset as u32,
+            verts.len() as u32,
+        );
 
         Ok(())
-    }
-}
-
-struct Vertex {
-    /// Destination position in pixels
-    ///
-    /// We don't need the z coordinate but the shader (`SpriteEffect.fxb`) requires it.
-    ///
-    /// * TODO: set up 2D only shader
-    dst: [f32; 3],
-    /// Color of the vertex
-    color: fna3d::Color,
-    /// Texture coordinates in normalized range [0, 1] (or wraps if it's out of the range)
-    uv: [f32; 2],
-}
-
-impl Vertex {
-    pub fn new(dst: [f32; 3], uv: [f32; 2], color: fna3d::Color) -> Self {
-        Self { dst, uv, color }
-    }
-
-    /// Vertex attributes (elements)
-    const ELEMS: [fna3d::VertexElement; 3] = [
-        // offsets are in bytes
-        fna3d::VertexElement {
-            offset: 0,
-            vertexElementFormat: fna3d::VertexElementFormat::Vector3 as u32,
-            vertexElementUsage: fna3d::VertexElementUsage::Position as u32,
-            usageIndex: 0,
-        },
-        fna3d::VertexElement {
-            offset: 12,
-            vertexElementFormat: fna3d::VertexElementFormat::Color as u32,
-            vertexElementUsage: fna3d::VertexElementUsage::Color as u32,
-            usageIndex: 0,
-        },
-        fna3d::VertexElement {
-            offset: 16,
-            vertexElementFormat: fna3d::VertexElementFormat::Vector2 as u32,
-            vertexElementUsage: fna3d::VertexElementUsage::TextureCoordinate as u32,
-            usageIndex: 0,
-        },
-    ];
-
-    /// Vertex attributes
-    pub fn declaration() -> fna3d::VertexDeclaration {
-        fna3d::VertexDeclaration {
-            // byte length of the vertex
-            vertexStride: mem::size_of::<Vertex>() as i32,
-            elementCount: 3,
-            elements: Self::ELEMS.as_ptr() as *mut _,
-        }
     }
 }

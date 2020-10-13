@@ -200,7 +200,7 @@ impl<T: Write> SaveContext<T> {
 }
 
 // --------------------------------------------------------------------------------
-// image load impls
+// Internal implementation
 
 /// Context passed around callback functions
 struct LoadContext<R: Read + Seek> {

@@ -21,8 +21,8 @@ pub fn main() -> Result<()> {
 }
 
 fn game_loop(mut pump: EventPump, device: fna3d::Device) -> Result<()> {
-    // Rustified enums are the biggest benefit when using Rust-SDL2 (not Rust-SDL2-sys)!
     'running: loop {
+        // Rustified enums are the biggest benefit when using Rust-SDL2 (not Rust-SDL2-sys)!
         for ev in pump.poll_iter() {
             match ev {
                 Event::Quit { .. } => break 'running,
