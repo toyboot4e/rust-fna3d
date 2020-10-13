@@ -11,7 +11,8 @@ use {
     std::{mem, time::Duration},
 };
 
-use crate::common::{
+use self::common::{
+    embedded,
     gfx::{Texture2d, Vertex},
     Result,
 };
@@ -41,17 +42,7 @@ fn game_loop(mut pump: EventPump, device: fna3d::Device) -> Result<()> {
         // something like 30 FPS
         std::thread::sleep(Duration::from_nanos(1_000_000_000 / 30));
 
-        device.clear(
-            fna3d::ClearOptions::TARGET,
-            fna3d::Color::rgb(120, 180, 140).as_vec4(),
-            0.0,
-            0,
-        );
-
-        // update and render
         game.tick(&device)?;
-
-        device.swap_buffers(None, None, std::ptr::null_mut());
     }
 
     Ok(())
@@ -69,7 +60,7 @@ pub struct GameData {
 impl GameData {
     pub fn new(device: fna3d::Device) -> Result<Self> {
         // GPU texture
-        let texture = Texture2d::from_undecoded_bytes(&device, common::ICON);
+        let texture = Texture2d::from_undecoded_bytes(&device, embedded::ICON);
 
         // CPU vertex buffer
         let color = fna3d::Color::rgb(255, 255, 255);
@@ -98,8 +89,17 @@ impl GameData {
         })
     }
 
-    pub fn tick(&mut self, _device: &fna3d::Device) -> Result<()> {
+    pub fn tick(&mut self, device: &fna3d::Device) -> Result<()> {
+        device.clear(
+            fna3d::ClearOptions::TARGET,
+            fna3d::Color::rgb(120, 180, 140).as_vec4(),
+            0.0,
+            0,
+        );
+
         self.draw.draw_verts(&self.verts, self.texture.raw)?;
+
+        device.swap_buffers(None, None, std::ptr::null_mut());
 
         Ok(())
     }
@@ -130,7 +130,7 @@ impl DrawData {
     pub fn new(device: fna3d::Device, len_bytes: u32) -> Result<Self> {
         // create SpriteEffect shader (the matrix is not set yet)
         let (effect, effect_data) =
-            fna3d::mojo::from_bytes(&device, crate::common::SHADER).map_err(Error::msg)?;
+            fna3d::mojo::from_bytes(&device, embedded::SHADER).map_err(Error::msg)?;
 
         // GPU vertex buffer (marked as "dynamic")
         let vbuf = device.gen_vertex_buffer(true, fna3d::BufferUsage::None, len_bytes);

@@ -1,11 +1,9 @@
 //! Common utilities among samples
 
+pub mod embedded;
 pub mod gfx;
 
 use {anyhow::Error, sdl2::EventPump};
-
-pub const SHADER: &[u8] = include_bytes!("SpriteEffect.fxb");
-pub const ICON: &[u8] = include_bytes!("deadly-strike.png");
 
 pub type Result<T> = anyhow::Result<T>;
 

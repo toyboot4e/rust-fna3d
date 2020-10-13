@@ -1,6 +1,6 @@
 = Credits
 
-* `common/deadly-strike.png`
+* `common/embeddeddeadly-strike.png`
 +
 https://game-icons.net/1x1/lorc/deadly-strike.html
 +

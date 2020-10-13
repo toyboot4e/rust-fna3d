@@ -9,7 +9,7 @@ use {
     std::time::Duration,
 };
 
-use crate::common::Result;
+use self::common::Result;
 
 pub fn main() -> Result<()> {
     env_logger::init();
