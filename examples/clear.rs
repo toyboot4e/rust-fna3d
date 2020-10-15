@@ -5,6 +5,7 @@
 mod common;
 
 use {
+    anyhow::Error,
     sdl2::{event::Event, EventPump},
     std::time::Duration,
 };
@@ -17,10 +18,14 @@ pub fn main() -> Result<()> {
     let title = "Rust-FNA3D triangle example";
     let size = (640, 360);
 
-    common::run(title, size, self::game_loop)
+    let init = common::init(title, size)?;
+    let pump = init.sdl.event_pump().map_err(Error::msg)?;
+
+    self::run(pump, init)
 }
 
-fn game_loop(mut pump: EventPump, device: fna3d::Device) -> Result<()> {
+fn run(mut pump: EventPump, init: common::Init) -> Result<()> {
+    let device = init.device.clone();
     'running: loop {
         // Rustified enums are the biggest benefit when using Rust-SDL2 (not Rust-SDL2-sys)!
         for ev in pump.poll_iter() {
@@ -43,7 +48,7 @@ fn game_loop(mut pump: EventPump, device: fna3d::Device) -> Result<()> {
 
         // process your game here
 
-        device.swap_buffers(None, None, std::ptr::null_mut());
+        device.swap_buffers(None, None, init.raw_window() as *mut _);
     }
 
     Ok(())

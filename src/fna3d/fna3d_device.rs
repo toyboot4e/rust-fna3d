@@ -144,6 +144,9 @@ impl Device {
     ///
     /// * `override_window_handle`:
     ///   The OS window handle (not really "overridden").
+    ///
+    /// Be sure to pass non-null window pointer. It may work well with e.g. Metal but not with
+    /// OpenGL.
     pub fn swap_buffers(
         &self,
         src: Option<Rect>,

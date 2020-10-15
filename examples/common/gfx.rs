@@ -61,6 +61,7 @@ pub struct Texture2d {
 }
 
 impl Texture2d {
+    /// For use with `include_bytes!`
     pub fn from_undecoded_bytes(device: &fna3d::Device, bytes: &[u8]) -> Self {
         let (ptr, len, [w, h]) = fna3d::img::from_undecoded_bytes(bytes);
 

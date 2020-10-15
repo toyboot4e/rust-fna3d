@@ -1,6 +1,6 @@
 use ::{fna3d_sys as sys, std::ffi::c_void};
 
-/// FNA3D version
+/// Version of FNA3D in use
 pub fn linked_version() -> u32 {
     unsafe { sys::FNA3D_LinkedVersion() }
 }

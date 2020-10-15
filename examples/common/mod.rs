@@ -7,16 +7,26 @@ use {anyhow::Error, sdl2::EventPump};
 
 pub type Result<T> = anyhow::Result<T>;
 
-/// Runs SDL2 + FNA3D game in a simple way
-pub fn run(
-    title: &str,
-    size: (u32, u32),
-    game_loop: impl FnOnce(EventPump, fna3d::Device) -> Result<()>,
-) -> Result<()> {
+pub struct Init {
+    pub sdl: sdl2::Sdl,
+    pub vid: sdl2::VideoSubsystem,
+    pub win: sdl2::video::Window,
+    pub params: fna3d::PresentationParameters,
+    pub device: fna3d::Device,
+}
+
+impl Init {
+    /// Use it when calling [`fna3d::Device::swap_buffers`]
+    pub fn raw_window(&self) -> *mut sdl2::sys::SDL_Window {
+        self.win.raw()
+    }
+}
+
+pub fn init(title: &str, size: (u32, u32)) -> Result<Init> {
     log::info!("FNA3D linked version: {}", fna3d::linked_version());
     fna3d::utils::hook_log_functions_default();
 
-    let (sdl, _vid, win) = {
+    let (sdl, vid, win) = {
         let flags = fna3d::prepare_window_attributes();
 
         // `map_err(Error:msg)` came from `anyhow`
@@ -36,7 +46,7 @@ pub fn run(
         (sdl, vid, win)
     };
 
-    let (_params, device) = {
+    let (params, device) = {
         let params = fna3d::utils::default_params_from_window_handle(win.raw() as *mut _);
         let device = fna3d::Device::from_params(params, true);
 
@@ -59,11 +69,20 @@ pub fn run(
         let rst = fna3d::RasterizerState::default();
         device.apply_rasterizer_state(&rst);
 
+        // let dsst = fna3d::DepthStencilState::default();
+        // device.set_depth_stencil_state(&dsst);
+
         let bst = fna3d::BlendState::alpha_blend();
         device.set_blend_state(&bst);
 
         (params, device)
     };
 
-    game_loop(sdl.event_pump().map_err(Error::msg)?, device)
+    Ok(Init {
+        sdl,
+        vid,
+        win,
+        params,
+        device,
+    })
 }

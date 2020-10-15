@@ -4,9 +4,7 @@
 //! prefered explicit definitions this time.
 //!
 //! * TODO: wrap "masks" with newtype struct?
-//! * TODO: remove `as u32` and maybe use `to_repr()`
 //! * TODO: wrap more structs
-//! * TODO: derive more traits
 //!
 //! [paste]: https://github.com/dtolnay/paste
 
@@ -25,7 +23,7 @@ use crate::fna3d::fna3d_enums::*;
 //
 // Those types have corresponding disposing functions in `Device`
 
-/// Index or vertex buffer
+/// Opaque struct that represents index or vertex buffer
 ///
 /// It is not strictly typed and more information have to be supplied with [`BufferUsage`],
 /// [`VertexDeclaration`] and [`IndexElementSize`].
@@ -35,30 +33,39 @@ use crate::fna3d::fna3d_enums::*;
 /// This type has to be disposed with a corresponding function in [`Device`]
 pub type Buffer = sys::FNA3D_Buffer;
 
+/// Opaque struct that represents FNA3D render buffer
+///
 /// Disposed with a corresponding function in [`Device`]
 pub type Renderbuffer = sys::FNA3D_Renderbuffer;
 
+/// Opaque struct that represents FNA3D effect
+///
 /// Disposed with a corresponding function in [`Device`]
 pub type Effect = sys::FNA3D_Effect;
 
+/// Opaque struct that represents FNA3D query
+///
 /// Disposed with a corresponding function in [`Device`]
 pub type Query = sys::FNA3D_Query;
 
-/// 2D or 3D texture data stored in GPU memory
+/// Opaque struct that represents 2D or 3D texture data stored in GPU memory
 ///
 /// # Dispose
 ///
 /// This type has to be disposed with a corresponding function in [`Device`]
 pub type Texture = sys::FNA3D_Texture;
 
-/// [`Device::apply_vertex_buffer_bindings`] parameter, which describes Vertex attributes
+/// [`Device::apply_vertex_buffer_bindings`] parameter, which describes vertex memory location and
+/// attributes
 pub type VertexBufferBinding = sys::FNA3D_VertexBufferBinding;
 
 pub struct RenderTargetBinding {
     raw: sys::FNA3D_RenderTargetBinding,
 }
 
+/// 2D | Cube
 #[repr(u8)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum RenderTargetType {
     /// w, h
     TwoD = 0,
@@ -130,25 +137,27 @@ impl RenderTargetBinding {
     }
 }
 
-pub enum RenderTargetBindingTypeDataAcecss<'a> {
-    /// w, h
-    TwoD(&'a mut sys::FNA3D_RenderTargetBinding__bindgen_ty_1__bindgen_ty_1),
-    /// size, face
-    Cube(&'a mut sys::FNA3D_RenderTargetBinding__bindgen_ty_1__bindgen_ty_2),
-}
+// /// 2D | Cube with access to internals
+// #[derive(Debug)]
+// pub enum RenderTargetBindingTypeDataAcecss<'a> {
+//     /// w, h
+//     TwoD(&'a mut sys::FNA3D_RenderTargetBinding__bindgen_ty_1__bindgen_ty_1),
+//     /// size, face
+//     Cube(&'a mut sys::FNA3D_RenderTargetBinding__bindgen_ty_1__bindgen_ty_2),
+// }
 
-/// Accessors
-impl RenderTargetBinding {
-    pub fn type_data_mut(&mut self) -> RenderTargetBindingTypeDataAcecss<'_> {
-        unsafe {
-            match self.raw.type_ {
-                0 => RenderTargetBindingTypeDataAcecss::TwoD(&mut self.raw.__bindgen_anon_1.twod),
-                1 => RenderTargetBindingTypeDataAcecss::Cube(&mut self.raw.__bindgen_anon_1.cube),
-                _ => unreachable!(),
-            }
-        }
-    }
-}
+// /// Accessors
+// impl RenderTargetBinding {
+//     pub fn type_data_mut(&mut self) -> RenderTargetBindingTypeDataAcecss<'_> {
+//         unsafe {
+//             match self.raw.type_ {
+//                 0 => RenderTargetBindingTypeDataAcecss::TwoD(&mut self.raw.__bindgen_anon_1.twod),
+//                 1 => RenderTargetBindingTypeDataAcecss::Cube(&mut self.raw.__bindgen_anon_1.cube),
+//                 _ => unreachable!(),
+//             }
+//         }
+//     }
+// }
 
 // --------------------------------------------------------------------------------
 // Type aliases
@@ -164,7 +173,19 @@ pub type Viewport = sys::FNA3D_Viewport;
 #[derive(Debug, Clone, Copy)]
 pub struct Color {
     raw: sys::FNA3D_Color,
+    // another approach would be implementing `std::ops::Deref` but I think this is OK
 }
+
+impl PartialEq<Self> for Color {
+    fn eq(&self, other: &Self) -> bool {
+        self.raw.r == other.raw.r
+            && self.raw.g == other.raw.g
+            && self.raw.b == other.raw.b
+            && self.raw.a == other.raw.a
+    }
+}
+
+impl Eq for Color {}
 
 impl Color {
     pub fn raw(&self) -> sys::FNA3D_Color {
@@ -251,14 +272,11 @@ impl Color {
     pub fn cornflower_blue() -> Self {
         Self::rgb(100, 149, 237)
     }
-
-    pub fn alice_blue() -> Self {
-        Self::rgba(240, 248, 255, 255)
-    }
 }
 
+/// Used to represent scissors rectangle
 pub type Rect = sys::FNA3D_Rect;
-/// Normalized coordinates
+/// Used to represent color
 pub type Vec4 = sys::FNA3D_Vec4;
 pub type PresentationParameters = sys::FNA3D_PresentationParameters;
 

@@ -6,7 +6,7 @@ Wrapper of [FNA3D](https://github.com/FNA-XNA/FNA3D), the graphics library for [
 
 Please refer to the [API documentation](https://docs.rs/rust-fna3d). It's for making a higher-level framework on it; take [ANF](https://github.com/toyboot4e/anf) as an example.
 
-## State of this wrapper
+## Status
 
 Close to ready. Remaining tasks:
 

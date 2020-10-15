@@ -140,21 +140,26 @@ pub fn orthographic_off_center(
     near: f32,
     far: f32,
 ) -> [f32; 16] {
+    // TODO: does it make sense to calculate in f64 and then cast to f32
     [
         (2.0 / (right as f64 - left as f64)) as f32,
         0.0,
         0.0,
-        ((left as f64 + right as f64) / (left as f64 - right as f64)) as f32,
+        -((right as f64 + left as f64) / (right as f64 - left as f64)) as f32,
         //
         0.0,
         (2.0 / (top as f64 - bottom as f64)) as f32,
         0.0,
-        ((top as f64 + bottom as f64) / (bottom as f64 - top as f64)) as f32,
+        -((top as f64 + bottom as f64) / (top as f64 - bottom as f64)) as f32,
         //
         0.0,
         0.0,
-        (1.0 / (near as f64 - far as f64)) as f32,
+        // FNA (TODO: which is correct FNA or Wiki)
+        -(1.0 / (far as f64 - near as f64)) as f32,
         (near as f64 / (near as f64 - far as f64)) as f32,
+        // wiki
+        // -(2.0 / (far as f64 - near as f64)) as f32,
+        // -((far as f64 + near as f64) / (far as f64 - near as f64)) as f32,
         //
         0.0,
         0.0,

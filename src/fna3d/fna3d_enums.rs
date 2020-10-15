@@ -51,7 +51,7 @@ bitflags::bitflags! {
     }
 }
 
-/// How vertex data is ordered
+/// Specifies primitive type used for drawing
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Primitive)]
 #[repr(u32)]
 pub enum PrimitiveType {
@@ -73,7 +73,7 @@ pub enum PrimitiveType {
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Primitive)]
 #[repr(u32)]
-/// (Dynamic) index buffer attribute
+/// 16 bits | 32 bits
 pub enum IndexElementSize {
     /// `i16` will be used as index type
     Bits16 = sys::FNA3D_IndexElementSize_FNA3D_INDEXELEMENTSIZE_16BIT,
@@ -163,7 +163,7 @@ pub enum DepthFormat {
     D24S8 = sys::FNA3D_DepthFormat_FNA3D_DEPTHFORMAT_D24S8,
 }
 
-/// Texture data component
+/// Cube map texture data component
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Primitive)]
 #[repr(u32)]
 pub enum CubeMapFace {
@@ -242,7 +242,7 @@ pub enum Blend {
     SourceAlphaSaturation = sys::FNA3D_Blend_FNA3D_BLEND_SOURCEALPHASATURATION,
 }
 
-/// [`BlendState`] component, whivh specifies function for color blending
+/// [`BlendState`] component, which specifies color blending function (expression)
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Primitive)]
 #[repr(u32)]
 pub enum BlendFunction {
@@ -284,7 +284,7 @@ pub enum StencilOperation {
     Invert = sys::FNA3D_StencilOperation_FNA3D_STENCILOPERATION_INVERT,
 }
 
-/// [`DepthStencilState`] component
+/// [`DepthStencilState`] component, which specifies comparison operator for depth testing
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Primitive)]
 #[repr(u32)]
 pub enum CompareFunction {

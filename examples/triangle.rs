@@ -24,11 +24,15 @@ pub fn main() -> Result<()> {
     env_logger::init();
 
     let title = "Rust-FNA3D triangle example";
-    common::run(title, (W, H), self::game_loop)
+
+    let init = common::init(title, (W, H))?;
+    let pump = init.sdl.event_pump().map_err(Error::msg)?;
+
+    self::run(pump, init)
 }
 
-fn game_loop(mut pump: EventPump, device: fna3d::Device) -> Result<()> {
-    let mut game = self::GameData::new(device.clone())?;
+fn run(mut pump: EventPump, init: common::Init) -> Result<()> {
+    let mut game = self::GameData::new(init)?;
 
     'running: loop {
         // Rustified enums are the biggest benefit when using Rust-SDL2 (not Rust-SDL2-sys)!
@@ -42,13 +46,14 @@ fn game_loop(mut pump: EventPump, device: fna3d::Device) -> Result<()> {
         // something like 30 FPS
         std::thread::sleep(Duration::from_nanos(1_000_000_000 / 30));
 
-        game.tick(&device)?;
+        game.tick()?;
     }
 
     Ok(())
 }
 
 pub struct GameData {
+    init: common::Init,
     /// GPU side of things: shader and GPU vertices with attributes
     draw: DrawData,
     /// CPU vertices
@@ -58,9 +63,9 @@ pub struct GameData {
 }
 
 impl GameData {
-    pub fn new(device: fna3d::Device) -> Result<Self> {
+    pub fn new(init: common::Init) -> Result<Self> {
         // GPU texture
-        let texture = Texture2d::from_undecoded_bytes(&device, embedded::ICON);
+        let texture = Texture2d::from_undecoded_bytes(&init.device, embedded::ICON);
 
         // CPU vertex buffer
         let color = fna3d::Color::rgb(255, 255, 255);
@@ -73,33 +78,36 @@ impl GameData {
                 Vertex::new([pos.0, pos.1, 0.0], [0.0, 0.0], color),
                 Vertex::new([pos.0 + size.0, pos.1, 0.0], [1.0, 0.0], color),
                 Vertex::new([pos.0, pos.1 + size.1, 0.0], [0.0, 1.0], color),
-                Vertex::new([pos.0 + size.0, pos.1, 0.0], [1.0, 0.0], color),
-                Vertex::new([pos.0, pos.1 + size.1, 0.0], [0.0, 1.0], color),
+                // Vertex::new([pos.0 + size.0, pos.1, 0.0], [1.0, 0.0], color),
+                // Vertex::new([pos.0, pos.1 + size.1, 0.0], [0.0, 1.0], color),
                 Vertex::new([pos.0 + size.0, pos.1 + size.1, 0.0], [1.0, 1.0], color),
             ]
         };
 
-        let len_bytes = mem::size_of::<Vertex>() as u32 * verts.len() as u32;
-        let draw = DrawData::new(device, len_bytes)?;
+        let draw = DrawData::new(init.device.clone(), verts.len() as u32)?;
 
         Ok(Self {
+            init,
             draw,
             verts,
             texture,
         })
     }
 
-    pub fn tick(&mut self, device: &fna3d::Device) -> Result<()> {
-        device.clear(
+    pub fn tick(&mut self) -> Result<()> {
+        self.init.device.clear(
             fna3d::ClearOptions::TARGET,
             fna3d::Color::rgb(120, 180, 140).as_vec4(),
             0.0,
             0,
         );
 
-        self.draw.draw_verts(&self.verts, self.texture.raw)?;
+        // self.draw.draw(&self.verts, self.texture.raw)?;
+        self.draw.draw_quads(&self.verts, self.texture.raw)?;
 
-        device.swap_buffers(None, None, std::ptr::null_mut());
+        self.init
+            .device
+            .swap_buffers(None, None, self.init.raw_window() as *mut _);
 
         Ok(())
     }
@@ -107,7 +115,7 @@ impl GameData {
 
 /// GPU side of things
 pub struct DrawData {
-    /// The FNA3D device. Reference counted and disposed automatically
+    /// FNA3D device. Reference counted and disposed automatically
     device: fna3d::Device,
     /// Handle of FNA3D effect. The internals are opaque
     effect: *mut fna3d::Effect,
@@ -117,6 +125,8 @@ pub struct DrawData {
     vbuf: *mut fna3d::Buffer,
     /// Vertex attributes
     vbind: fna3d::VertexBufferBinding,
+    /// GPU index buffer only for quadliterals
+    ibuf: *mut fna3d::Buffer,
 }
 
 impl Drop for DrawData {
@@ -127,14 +137,38 @@ impl Drop for DrawData {
 }
 
 impl DrawData {
-    pub fn new(device: fna3d::Device, len_bytes: u32) -> Result<Self> {
+    pub fn new(device: fna3d::Device, n_verts: u32) -> Result<Self> {
         // create SpriteEffect shader (the matrix is not set yet)
         let (effect, effect_data) =
             fna3d::mojo::from_bytes(&device, embedded::SHADER).map_err(Error::msg)?;
 
+        {
+            // set the matrix parameter of the SpriteEffect shader to orthographic projection matrix
+            let mat = fna3d::mojo::orthographic_off_center(0.0, W as f32, H as f32, 0.0, 1.0, 0.0);
+            let name = "MatrixTransform";
+            unsafe {
+                let name = std::ffi::CString::new(name)?;
+                if !fna3d::mojo::set_param(effect_data, &name, &mat) {
+                    eprintln!("failed to set MatrixTransform shader paramter. maybe not using SpriteEffect.fxb");
+                }
+            };
+        }
+
         // GPU vertex buffer (marked as "dynamic")
-        let vbuf = device.gen_vertex_buffer(true, fna3d::BufferUsage::None, len_bytes);
+        let vbuf = device.gen_vertex_buffer(
+            true,
+            fna3d::BufferUsage::None,
+            n_verts * mem::size_of::<Vertex>() as u32,
+        );
         // device.set_vertex_buffer_data(vbuf, 0, &verts, fna3d::SetDataOptions::None);
+
+        // GPU index buffer (marked as "static")
+        let ibuf = device.gen_index_buffer(false, fna3d::BufferUsage::None, 16 * n_verts);
+        {
+            // TODO: set ibuf
+            let data = [0 as i16, 1, 2, 3, 2, 1];
+            device.set_index_buffer_data(ibuf, 0, &data, fna3d::SetDataOptions::None);
+        }
 
         // vertex attributes
         // META: such types are just re-exported from FFI to FNA3D and don't have snake_case fields
@@ -151,24 +185,15 @@ impl DrawData {
             effect_data,
             vbuf,
             vbind,
+            ibuf,
         })
     }
 
-    pub fn draw_verts(&mut self, verts: &[Vertex], texture: *mut fna3d::Texture) -> Result<()> {
+    pub fn draw_quads(&mut self, verts: &[Vertex], texture: *mut fna3d::Texture) -> Result<()> {
         // upload CPU vertices to GPU vertices
         // (we don't have to do it every frame though)
         self.device
             .set_vertex_buffer_data(self.vbuf, 0, &verts, fna3d::SetDataOptions::None);
-
-        // set the matrix parameter of the SpriteEffect shader to orthographic projection matrix
-        let mat = fna3d::mojo::orthographic_off_center(0.0, W as f32, H as f32, 0.0, 1.0, 0.0);
-        let name = "MatrixTransform";
-        unsafe {
-            let name = std::ffi::CString::new(name)?;
-            if !fna3d::mojo::set_param(self.effect_data, &name, &mat) {
-                eprintln!("failed to set MatrixTransform shader paramter. maybe not using SpriteEffect.fxb");
-            }
-        };
 
         // apply "effect" (shaders in XNA abstraction --  not so good I hear though)
         {
@@ -190,15 +215,56 @@ impl DrawData {
 
         // let's make a draw call
         let offset = 0;
+        let n_prims = verts.len() as u32 / 2;
         // self.vbind.vertexBuffer = self.vbuf;
         self.vbind.vertexOffset = offset;
         self.device
             .apply_vertex_buffer_bindings(&[self.vbind], true, 0);
-        self.device.draw_primitives(
+        self.device.draw_indexed_primitives(
             fna3d::PrimitiveType::TriangleList,
             offset as u32,
-            verts.len() as u32,
+            0,
+            n_prims,
+            self.ibuf,
+            fna3d::IndexElementSize::Bits16,
         );
+
+        Ok(())
+    }
+
+    pub fn draw(&mut self, verts: &[Vertex], texture: *mut fna3d::Texture) -> Result<()> {
+        // upload CPU vertices to GPU vertices
+        // (we don't have to do it every frame though)
+        self.device
+            .set_vertex_buffer_data(self.vbuf, 0, &verts, fna3d::SetDataOptions::None);
+
+        // apply "effect" (shaders in XNA abstraction --  not so good I hear though)
+        {
+            // no change
+            let changes = fna3d::mojo::EffectStateChanges {
+                render_state_change_count: 0,
+                render_state_changes: std::ptr::null(),
+                sampler_state_change_count: 0,
+                sampler_state_changes: std::ptr::null(),
+                vertex_sampler_state_change_count: 0,
+                vertex_sampler_state_changes: std::ptr::null(),
+            };
+            self.device.apply_effect(self.effect, 0, &changes)
+        }
+
+        let sampler = fna3d::SamplerState::default();
+        let slot = 0;
+        self.device.verify_sampler(slot, texture, &sampler);
+
+        // let's make a draw call
+        let offset = 0;
+        let n_prims = verts.len() as u32 / 3;
+        // self.vbind.vertexBuffer = self.vbuf;
+        self.vbind.vertexOffset = offset;
+        self.device
+            .apply_vertex_buffer_bindings(&[self.vbind], true, 0);
+        self.device
+            .draw_primitives(fna3d::PrimitiveType::TriangleList, offset as u32, n_prims);
 
         Ok(())
     }
