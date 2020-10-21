@@ -6,10 +6,8 @@
 //! [bindgen]:  https://github.com/rust-lang/rust-bindgen
 //! [`Builder`]: https://docs.rs/bindgen/newest/bindgen/struct.Builder.html
 
-// Supress casing errors
-#![allow(non_upper_case_globals)]
-#![allow(non_camel_case_types)]
-#![allow(non_snake_case)]
+// suppress all errors
+#![allow(warnings)]
 
 // Include generated bindings
 include!(concat!(env!("OUT_DIR"), "/fna3d_bindings.rs"));

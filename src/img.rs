@@ -67,8 +67,8 @@ type SkipFunc = sys::FNA3D_Image_SkipFunc;
 /// Callback used to check that we're reached to the end of a stream
 type EofFunc = sys::FNA3D_Image_EOFFunc;
 
-/// Callback used to check that we're reached to the end of a stream
-type WriteFunc = sys::FNA3D_Image_WriteFunc;
+// /// Callback used to check that we're reached to the end of a stream
+// type WriteFunc = sys::FNA3D_Image_WriteFunc;
 
 /// Frees pixels loaded with a helper method in this module
 pub fn free(mem: *const u8) {

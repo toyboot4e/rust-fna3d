@@ -90,7 +90,7 @@ fn compile() {
             .build();
     }
     println!("cargo:rustc-link-search=native={}", out_dir.display());
-    println!("cargo:rustc-link-lib=static=mojoshader");
+    // println!("cargo:rustc-link-lib=static=mojoshader");
 
     // FNA3D
     let out_lib_path = out_dir.join("libFNA3D.dylib");
