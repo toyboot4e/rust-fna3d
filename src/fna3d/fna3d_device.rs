@@ -89,6 +89,10 @@ macro_rules! as_ptr {
 ///     * [`FNA3D_ApplyVertexBufferBindings`]
 ///     * [`FNA3D_DrawIndexedPrimitives`]
 /// * [`FNA3D_SwapBuffers`]
+///
+/// # Remarks
+///
+/// You may have to mark your vertex struct as `#[repr(C)]`.
 #[derive(Debug, Clone)]
 pub struct Device {
     lifetime: Rc<DeviceDrop>,
