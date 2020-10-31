@@ -1,5 +1,6 @@
-//! Creates a new window and clears the screen with cornflower-blue color. Then draws some
-//! triangles.
+//! Creates a new window and clears the screen with cornflower-blue color. Then draws the texture.
+//!
+//! Rust-FNA3D is not so easy t use, unfortunatelly.
 //!
 //! Utilities came from `examples/common/mod.rs`.
 
@@ -91,10 +92,6 @@ impl GameData {
         };
 
         let draw = DrawData::new(init.device.clone(), verts.len() as u32)?;
-
-        log::trace!("{:#?}", texture);
-        log::trace!("{:#?}", verts);
-        log::trace!("{:#?}", draw);
 
         Ok(Self {
             init,
