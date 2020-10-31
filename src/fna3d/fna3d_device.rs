@@ -191,7 +191,7 @@ impl Device {
     /// fn just_clear(device: &fna3d::Device) {
     ///     device.clear(
     ///         fna3d::ClearOptions::TARGET,
-    ///         fna3d::Color::cornflower_blue().as_vec4(),
+    ///         fna3d::Color::cornflower_blue().to_vec4(),
     ///         0.0,
     ///         0,
     ///     );
@@ -215,24 +215,24 @@ impl Device {
     pub fn draw_indexed_primitives(
         &self,
         type_: enums::PrimitiveType,
-        start_vertex: u32,
-        start_index: u32,
+        base_vtx: u32,
+        base_idx: u32,
         n_primitives: u32,
-        indices: *mut Buffer,
+        ibuf: *mut Buffer,
         index_elem_size: enums::IndexElementSize,
     ) {
         unsafe {
             FNA3D_DrawIndexedPrimitives(
                 self.raw(),
                 type_ as FNA3D_PrimitiveType,
-                start_vertex as i32,
+                base_vtx as i32,
                 // min_vertex_index,
                 -1, // this is ignored (it's just for XNA compatibility)
                 // num_vertices,
                 -1, // this is ignored (it's just for XNA compatibility)
-                start_index as i32,
+                base_idx as i32,
                 n_primitives as i32,
-                indices,
+                ibuf,
                 index_elem_size as FNA3D_IndexElementSize,
             );
         }
@@ -247,26 +247,26 @@ impl Device {
     pub fn draw_instanced_primitives(
         &self,
         type_: enums::PrimitiveType,
-        base_vertex: u32,
+        base_vtx: u32,
         min_vertex_index: u32,
         num_vertices: u32,
         start_index: u32,
         prim_count: u32,
         instance_count: u32,
-        indices: *mut Buffer,
+        ibuf: *mut Buffer,
         index_elem_size: enums::IndexElementSize,
     ) {
         unsafe {
             FNA3D_DrawInstancedPrimitives(
                 self.raw(),
                 type_ as FNA3D_PrimitiveType,
-                base_vertex as i32,
+                base_vtx as i32,
                 min_vertex_index as i32,
                 num_vertices as i32,
                 start_index as i32,
                 prim_count as i32,
                 instance_count as i32,
-                indices,
+                ibuf,
                 index_elem_size as FNA3D_IndexElementSize,
             );
         }
@@ -275,13 +275,8 @@ impl Device {
     /// Draws data from vertex buffers.
     ///
     /// This may require duplicate vertices so prefer `draw_indexed_primitives` basically.
-    pub fn draw_primitives(
-        &self,
-        type_: enums::PrimitiveType,
-        vertex_start: u32,
-        n_primitives: u32,
-    ) {
-        let vertex_start = vertex_start as i32;
+    pub fn draw_primitives(&self, type_: enums::PrimitiveType, base_vtx: u32, n_primitives: u32) {
+        let vertex_start = base_vtx as i32;
         let prim_count = n_primitives as i32;
         unsafe {
             FNA3D_DrawPrimitives(

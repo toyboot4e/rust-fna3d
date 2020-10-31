@@ -2,12 +2,17 @@
 
 use std::mem;
 
+/// The vertex data
+///
+/// `#[repr(C)]` is required because we're using Rust arraysin it
+#[derive(Debug, Clone)]
+#[repr(C)]
 pub struct Vertex {
     /// Destination position in pixels
     ///
     /// We don't need the z coordinate but the shader (`SpriteEffect.fxb`) requires it.
     ///
-    /// * TODO: set up 2D only shader
+    /// TODO: really? setup 2D only vertices
     dst: [f32; 3],
     /// Color of the vertex
     color: fna3d::Color,
@@ -15,13 +20,20 @@ pub struct Vertex {
     uv: [f32; 2],
 }
 
+mod test {
+    #[test]
+    fn test__() {
+        println!("{}", std::mem::align_of::<super::Vertex>());
+    }
+}
+
 impl Vertex {
     pub fn new(dst: [f32; 3], uv: [f32; 2], color: fna3d::Color) -> Self {
         Self { dst, uv, color }
     }
 
-    /// Vertex attributes (elements)
-    const ELEMS: [fna3d::VertexElement; 3] = [
+    /// Vertex attribute elements
+    const ELEMS: &'static [fna3d::VertexElement; 3] = &[
         // offsets are in bytes
         fna3d::VertexElement {
             offset: 0,
@@ -44,17 +56,17 @@ impl Vertex {
     ];
 
     /// Vertex attributes
-    pub fn declaration() -> fna3d::VertexDeclaration {
-        fna3d::VertexDeclaration {
-            // byte length of the vertex
-            vertexStride: mem::size_of::<Vertex>() as i32,
-            elementCount: 3,
-            elements: Self::ELEMS.as_ptr() as *mut _,
-        }
-    }
+    pub const DECLARATION: fna3d::VertexDeclaration = fna3d::VertexDeclaration {
+        // byte length of the vertex
+        vertexStride: mem::size_of::<Vertex>() as i32,
+        elementCount: 3,
+        elements: Self::ELEMS as *const _ as *mut _,
+    };
 }
 
+#[derive(Debug, Clone)]
 pub struct Texture2d {
+    /// Consider using `Rc<TextureDrop>` in real applications
     pub raw: *mut fna3d::Texture,
     pub w: u32,
     pub h: u32,
@@ -62,17 +74,27 @@ pub struct Texture2d {
 
 impl Texture2d {
     /// For use with `include_bytes!`
-    pub fn from_undecoded_bytes(device: &fna3d::Device, bytes: &[u8]) -> Self {
-        let (ptr, len, [w, h]) = fna3d::img::from_undecoded_bytes(bytes);
+    pub fn from_encoded_bytes(device: &fna3d::Device, bytes: &[u8]) -> Self {
+        let (ptr, len, [w, h]) = fna3d::img::from_encoded_bytes(bytes);
 
-        let texture = device.create_texture_2d(fna3d::SurfaceFormat::Color, w, h, 0, false);
-        let level = 0; // mipmap level
-        let data: &[u8] = unsafe { std::slice::from_raw_parts(ptr, len as usize) };
-        device.set_texture_data_2d(texture, 0, 0, w, h, level, data);
+        if ptr == std::ptr::null_mut() {
+            panic!("Unable to read the encoded bytes as an image!");
+        }
 
-        // unload pixel data in CPU side
+        // setup a GPU texture
+        let raw = {
+            let texture = device.create_texture_2d(fna3d::SurfaceFormat::Color, w, h, 0, false);
+
+            let pixels: &[u8] = unsafe { std::slice::from_raw_parts(ptr, len as usize) };
+            let level = 0; // mipmap level
+            device.set_texture_data_2d(texture, 0, 0, w, h, level, pixels);
+
+            texture
+        };
+
+        // free the CPU texture
         fna3d::img::free(ptr);
 
-        Self { raw: texture, w, h }
+        Self { raw, w, h }
     }
 }

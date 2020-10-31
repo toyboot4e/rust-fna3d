@@ -85,6 +85,17 @@ pub mod utils {
         }
     }
 
+    pub fn no_change_effect() -> crate::mojo::EffectStateChanges {
+        crate::mojo::EffectStateChanges {
+            render_state_change_count: 0,
+            render_state_changes: std::ptr::null(),
+            sampler_state_change_count: 0,
+            sampler_state_changes: std::ptr::null(),
+            vertex_sampler_state_change_count: 0,
+            vertex_sampler_state_changes: std::ptr::null(),
+        }
+    }
+
     bitflags::bitflags! {
         /// TODO: use this type in API
         pub struct ColorMask: u32 {

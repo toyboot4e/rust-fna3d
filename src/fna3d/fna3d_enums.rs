@@ -75,9 +75,9 @@ pub enum PrimitiveType {
 #[repr(u32)]
 /// 16 bits | 32 bits
 pub enum IndexElementSize {
-    /// `i16` will be used as index type
+    /// Each index uses 16 bits
     Bits16 = sys::FNA3D_IndexElementSize_FNA3D_INDEXELEMENTSIZE_16BIT,
-    /// `i32` will be used as index type
+    /// Each index uses 32 bits
     Bits32 = sys::FNA3D_IndexElementSize_FNA3D_INDEXELEMENTSIZE_32BIT,
 }
 

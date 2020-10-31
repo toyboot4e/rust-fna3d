@@ -169,7 +169,7 @@ pub type Viewport = sys::FNA3D_Viewport;
 
 /// 24 bits RGBA color
 ///
-/// [`Color::as_vec4`] is available.
+/// [`Color::to_vec4`] is available.
 #[derive(Debug, Clone, Copy)]
 pub struct Color {
     raw: sys::FNA3D_Color,
@@ -192,7 +192,7 @@ impl Color {
         self.raw
     }
 
-    pub fn as_vec4(&self) -> Vec4 {
+    pub fn to_vec4(&self) -> Vec4 {
         Vec4 {
             x: self.raw.r as f32 / 255.0,
             y: self.raw.g as f32 / 255.0,
@@ -793,6 +793,13 @@ impl DepthStencilState {
         &mut self.raw
     }
 
+    pub fn none() -> Self {
+        let mut me = Self::default();
+        me.raw.depthBufferEnable = false as u8;
+        me.raw.depthBufferWriteEnable = false as u8;
+        me
+    }
+
     // ----------------------------------------
     // depth buffer
 
@@ -925,17 +932,5 @@ impl DepthStencilState {
 
     pub fn set_renference_stencil(&mut self, stencil: i32) {
         self.raw.referenceStencil = stencil
-    }
-}
-
-impl DepthStencilState {
-    // TODO: what is this??
-    pub fn none() -> Self {
-        let mut me = Self::default();
-        me.set_is_depth_buffer_enabled(false);
-        me.set_is_depth_buffer_write_enabled(false);
-        // TODO: is this coorect?
-        me.set_depth_buffer_function(enums::CompareFunction::Always);
-        me
     }
 }

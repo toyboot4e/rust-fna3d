@@ -102,7 +102,7 @@ pub fn from_file(
 /// Helper for loading shader. Be sure to set projection matrix after loading!
 ///
 /// If ok, returns (effect_handle, effect_data_access). The latter is automatically disposed after
-/// calling [`fna3d::Device::add_dispose_effect`].
+/// calling [`crate::Device::add_dispose_effect`].
 pub fn from_bytes(
     device: &crate::Device,
     bytes: &[u8],

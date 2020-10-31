@@ -80,7 +80,7 @@ pub fn free(mem: *const u8) {
 /// Decodes PNG/JPG/GIF data into raw RGBA8 texture data
 ///
 /// Mainly for `include_bytes!`.
-pub fn from_undecoded_bytes(bytes: &[u8]) -> (*const u8, u32, [u32; 2]) {
+pub fn from_encoded_bytes(bytes: &[u8]) -> (*const u8, u32, [u32; 2]) {
     let reader = std::io::Cursor::new(bytes);
     self::from_reader(reader, None)
 }

@@ -3,10 +3,11 @@
 pub mod embedded;
 pub mod gfx;
 
-use {anyhow::Error, sdl2::EventPump};
+use anyhow::Error;
 
-pub type Result<T> = anyhow::Result<T>;
+type Result<T> = anyhow::Result<T>;
 
+/// Lifetime of the application
 pub struct Init {
     pub sdl: sdl2::Sdl,
     pub vid: sdl2::VideoSubsystem,
@@ -22,6 +23,7 @@ impl Init {
     }
 }
 
+/// Initializes the FNA3D device and the SDL2 window, wrapping them to an [`Init`] struct
 pub fn init(title: &str, size: (u32, u32)) -> Result<Init> {
     log::info!("FNA3D linked version: {}", fna3d::linked_version());
     fna3d::utils::hook_log_functions_default();
@@ -48,7 +50,8 @@ pub fn init(title: &str, size: (u32, u32)) -> Result<Init> {
 
     let (params, device) = {
         let params = fna3d::utils::default_params_from_window_handle(win.raw() as *mut _);
-        let device = fna3d::Device::from_params(params, true);
+        let do_debug = true;
+        let device = fna3d::Device::from_params(params, do_debug);
 
         {
             let (max_tx, max_v_tx) = device.get_max_texture_slots();
@@ -69,8 +72,8 @@ pub fn init(title: &str, size: (u32, u32)) -> Result<Init> {
         let rst = fna3d::RasterizerState::default();
         device.apply_rasterizer_state(&rst);
 
-        // let dsst = fna3d::DepthStencilState::default();
-        // device.set_depth_stencil_state(&dsst);
+        // let dst = fna3d::DepthStencilState::none();
+        // device.set_depth_stencil_state(&dst);
 
         let bst = fna3d::BlendState::alpha_blend();
         device.set_blend_state(&bst);
