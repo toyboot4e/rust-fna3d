@@ -14,7 +14,7 @@ use {
 
 use self::common::{
     embedded,
-    gfx::{Shader2d, Texture2d, Vertex},
+    gfx::{Shader2d, Texture2dDrop, Vertex},
 };
 
 const W: u32 = 1280;
@@ -57,22 +57,15 @@ pub struct GameData {
     /// Lifetime of the application
     init: common::Init,
     batcher: Batcher,
-    deadly_strike: Texture2d,
-    castle: Texture2d,
-}
-
-impl Drop for GameData {
-    fn drop(&mut self) {
-        self.init.device.add_dispose_texture(self.deadly_strike.raw);
-        self.init.device.add_dispose_texture(self.castle.raw);
-    }
+    deadly_strike: Texture2dDrop,
+    castle: Texture2dDrop,
 }
 
 impl GameData {
     pub fn new(init: common::Init) -> Result<Self> {
         // GPU texture
-        let deadly_strike = Texture2d::from_encoded_bytes(&init.device, embedded::ICON);
-        let castle = Texture2d::from_encoded_bytes(&init.device, embedded::CASTLE);
+        let deadly_strike = Texture2dDrop::from_encoded_bytes(&init.device, embedded::ICON);
+        let castle = Texture2dDrop::from_encoded_bytes(&init.device, embedded::CASTLE);
 
         let batcher = Batcher::new(&init.device)?;
 

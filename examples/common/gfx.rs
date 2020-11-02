@@ -72,20 +72,22 @@ impl Vertex {
     };
 }
 
-/// GPU texture
-///
-/// # Safety
-///
-/// It's NOT disposed automatically. Very unsafe!
+/// GPU texture disposed automatically
 #[derive(Debug, Clone)]
-pub struct Texture2d {
-    /// Consider using `Rc<TextureDrop>` in real applications
+pub struct Texture2dDrop {
+    device: fna3d::Device,
     pub raw: *mut fna3d::Texture,
     pub w: u32,
     pub h: u32,
 }
 
-impl Texture2d {
+impl Drop for Texture2dDrop {
+    fn drop(&mut self) {
+        self.device.add_dispose_texture(self.raw);
+    }
+}
+
+impl Texture2dDrop {
     /// For use with `include_bytes!`
     pub fn from_encoded_bytes(device: &fna3d::Device, bytes: &[u8]) -> Self {
         let (ptr, len, [w, h]) = fna3d::img::from_encoded_bytes(bytes);
@@ -106,7 +108,12 @@ impl Texture2d {
         // free the CPU texture
         fna3d::img::free(ptr);
 
-        Self { raw, w, h }
+        Self {
+            device: device.clone(),
+            raw,
+            w,
+            h,
+        }
     }
 }
 

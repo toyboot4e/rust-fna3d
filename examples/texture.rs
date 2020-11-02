@@ -14,7 +14,7 @@ use {
 
 use self::common::{
     embedded,
-    gfx::{Shader2d, Texture2d, Vertex},
+    gfx::{Shader2d, Texture2dDrop, Vertex},
 };
 
 const W: u32 = 1280;
@@ -61,19 +61,13 @@ pub struct GameData {
     /// CPU vertices
     verts: Vec<Vertex>,
     /// GPU texture decoded from `DeadlyStrike.png`
-    tex: Texture2d,
-}
-
-impl Drop for GameData {
-    fn drop(&mut self) {
-        self.init.device.add_dispose_texture(self.tex.raw);
-    }
+    tex: Texture2dDrop,
 }
 
 impl GameData {
     pub fn new(init: common::Init) -> Result<Self> {
         // GPU texture
-        let tex = Texture2d::from_encoded_bytes(&init.device, embedded::ICON);
+        let tex = Texture2dDrop::from_encoded_bytes(&init.device, embedded::ICON);
 
         // CPU vertex buffer
         let color = fna3d::Color::rgb(255, 255, 255);
