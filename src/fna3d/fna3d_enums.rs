@@ -175,9 +175,9 @@ pub enum CubeMapFace {
     NegativeZ = sys::FNA3D_CubeMapFace_FNA3D_CUBEMAPFACE_NEGATIVEZ,
 }
 
+/// Vertex/index buffer component, which hints optimization of memory placement
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Primitive)]
 #[repr(u32)]
-/// Vertex/index buffer component, which hints optimization of memory placement
 pub enum BufferUsage {
     /// Intend to call `set_data` methods in `Device`
     None = sys::FNA3D_BufferUsage_FNA3D_BUFFERUSAGE_NONE,
@@ -185,16 +185,14 @@ pub enum BufferUsage {
     WriteOnly = sys::FNA3D_BufferUsage_FNA3D_BUFFERUSAGE_WRITEONLY,
 }
 
+/// How vertex or index buffer data will be flushed during a SetData operation.
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Primitive)]
 #[repr(u32)]
-/// How vertex or index buffer data will be flushed during a SetData operation.
 pub enum SetDataOptions {
     /// The SetData operation can overwrite the portions of existing data.
     None = sys::FNA3D_SetDataOptions_FNA3D_SETDATAOPTIONS_NONE,
     /// The SetData operation will discard the entire buffer. A pointer to a new memory area is
     /// returned and rendering from the previous area do not stall
-    ///
-    /// FIXME: make API to ues this option
     Discard = sys::FNA3D_SetDataOptions_FNA3D_SETDATAOPTIONS_DISCARD,
     /// The SetData operation will not overwrite existing data. This allows the driver to
     /// return immediately from a SetData operation and continue rendering.

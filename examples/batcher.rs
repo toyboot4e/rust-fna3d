@@ -1,7 +1,5 @@
 //! `SpriteBatch` in FNA
 //!
-//! Set `RUST_LOG` to `TRACE` and see the log.
-//!
 //! Not that tested but the idea is there.
 
 mod common;
@@ -99,36 +97,41 @@ impl GameData {
     }
 
     fn render(&mut self) {
-        // push 30 quadliterals
-        for i in 0..3 {
-            // switch texture by 10
+        let size = [200.0, 200.0];
+
+        for i in 0..4 {
             let tex = if i % 2 == 0 {
                 self.deadly_strike.raw
             } else {
                 self.castle.raw
             };
 
-            // push 10 quadliterals
-            for _ in 0..10 {
+            // push 5 quadliterals
+            for j in 0..5 {
+                let pos = [
+                    100.0 + 5.0 * j as f32 + 150.0 * i as f32,
+                    100.0 + 40.0 * j as f32,
+                ];
+
                 let color = fna3d::Color::rgba(255, 255, 255, 255);
                 let quad = QuadData([
                     Vertex {
-                        dst: [0.0, 0.0, 0.0],
+                        dst: [pos[0], pos[1], 0.0],
                         color,
                         uv: [0.0, 0.0],
                     },
                     Vertex {
-                        dst: [200.0, 0.0, 0.0],
+                        dst: [pos[0] + size[0], pos[1], 0.0],
                         color,
                         uv: [1.0, 0.0],
                     },
                     Vertex {
-                        dst: [0.0, 200.0, 0.0],
+                        dst: [pos[0], pos[1] + size[1], 0.0],
                         color,
                         uv: [0.0, 1.0],
                     },
                     Vertex {
-                        dst: [200.0, 200.0, 0.0],
+                        dst: [pos[0] + size[0], pos[1] + size[1], 0.0],
                         color,
                         uv: [1.0, 1.0],
                     },

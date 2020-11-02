@@ -2,9 +2,9 @@
 
 Try examples with: `cargo run --example <name-of-example>`
 
-* `clear`: Just clears the screen
-* `texture`: Draws a texture onto the screen
-* `batcher`: Draws 30 textures onto the screen per frame .. but visually only one texture. Try it out with `RUST_LOG=TRACE`.
+* `clear`: Just clears the screen.
+* `texture`: Draws a texture onto the screen.
+* `batcher`: Draws 20 textures onto the screen per frame batching draw calls.
 
 == Credits
 

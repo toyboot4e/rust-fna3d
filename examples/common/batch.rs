@@ -1,3 +1,7 @@
+//! Quad-based draw call batcher
+//!
+//! Based on FNA's `SpriteBatch`. You would want to make some wrapper that provides a fluent API.
+
 use {
     anyhow::{Error, Result},
     std::mem,
@@ -7,10 +11,12 @@ use super::gfx::{Shader2d, Vertex};
 
 #[derive(Debug, Clone, Default)]
 pub struct QuadData(pub [Vertex; 4]);
-pub const N_QUADS: u32 = 2048;
+
+/// Buffer length of quadliterals
+const N_QUADS: u32 = 2048;
 
 #[derive(Debug)]
-pub struct Batch {
+struct Batch {
     device: fna3d::Device,
     vbuf: *mut fna3d::Buffer,
     vbind: fna3d::VertexBufferBinding,
@@ -29,12 +35,14 @@ impl Drop for Batch {
 }
 
 /// Creates index buffer for quadliterals
+///
+/// Each index element has 16 bits length
 macro_rules! gen_quad_indices {
     ( $n_quads:expr ) => {{
         let mut indices = [0; 6 * $n_quads as usize];
 
-        for n in 0..$n_quads as i16 {
-            let (i, v) = (n * 6, n * 4);
+        for q in 0..$n_quads as i16 {
+            let (i, v) = (q * 6, q * 4);
             indices[i as usize] = v as i16;
             indices[(i + 1) as usize] = v + 1 as i16;
             indices[(i + 2) as usize] = v + 2 as i16;
@@ -50,15 +58,17 @@ macro_rules! gen_quad_indices {
 impl Batch {
     pub fn new(device: &fna3d::Device) -> Result<Self> {
         // GPU vertex buffer (marked as "dynamic")
-        let n_verts = N_QUADS * 4;
+        let n_verts = 4 * N_QUADS;
         let vbuf = device.gen_vertex_buffer(
-            true,
+            true, // dynamic
             fna3d::BufferUsage::None,
             n_verts * mem::size_of::<Vertex>() as u32,
         );
 
         // GPU index buffer (marked as "static")
-        let ibuf = device.gen_index_buffer(false, fna3d::BufferUsage::None, 16 * n_verts);
+        let n_indices = 6 * N_QUADS;
+        // each index element has 16 bits length
+        let ibuf = device.gen_index_buffer(false, fna3d::BufferUsage::None, n_indices * 16);
         {
             let data = gen_quad_indices!(N_QUADS);
             device.set_index_buffer_data(ibuf, 0, &data, fna3d::SetDataOptions::None);
@@ -87,14 +97,20 @@ impl Batch {
         })
     }
 
-    /// Make sure the [`Batch`] is not yet satured
+    pub unsafe fn next_quad_mut(&mut self) -> &mut QuadData {
+        let quad = &mut self.quads[self.n_quads];
+        self.n_quads += 1;
+        quad
+    }
+
+    /// Make sure the [`Batch`] is not yet satured before calling this method
     pub unsafe fn push_quad(&mut self, quad: &QuadData, tex: *mut fna3d::Texture) {
         self.quads[self.n_quads] = quad.clone();
         self.track[self.n_quads] = tex;
         self.n_quads += 1;
     }
 
-    pub fn iter(&self) -> DrawCallIterator {
+    pub fn draw_calls(&self) -> DrawCallIterator {
         DrawCallIterator::from_batch(self)
     }
 }
@@ -103,9 +119,9 @@ impl Batch {
 #[derive(Debug)]
 pub struct DrawCall {
     pub texture: *mut fna3d::Texture,
-    /// low (inclusive)
+    /// low quad index (inclusive)
     pub lo: usize,
-    /// high (exclusive)
+    /// high quad index (exclusive)
     pub hi: usize,
 }
 
@@ -142,7 +158,7 @@ pub struct DrawCallIterator<'a> {
 }
 
 impl<'a> DrawCallIterator<'a> {
-    pub fn from_batch(batch: &'a Batch) -> Self {
+    fn from_batch(batch: &'a Batch) -> Self {
         Self { batch, ix: 0 }
     }
 }
@@ -188,9 +204,7 @@ impl Batcher {
     pub fn next_quad_mut(&mut self) -> &mut QuadData {
         self.flush_if_satured();
 
-        let quad = &mut self.batch.quads[self.batch.n_quads];
-        self.batch.n_quads += 1;
-        quad
+        unsafe { self.batch.next_quad_mut() }
     }
 
     pub fn push_quad(&mut self, quad: &QuadData, tex: *mut fna3d::Texture) {
@@ -212,19 +226,21 @@ impl Batcher {
             return;
         }
 
-        // upload the CPU vertices to the GPU vertices (we don't have to do it every frame in though)
-        {
-            let offset = 0;
-            self.batch.device.set_vertex_buffer_data(
-                self.batch.vbuf,
-                offset,
-                &self.batch.quads[0..self.batch.n_quads],
-                fna3d::SetDataOptions::None,
-            );
-        }
+        // we have to update the shader's orthographic offcenter matrix in real application where we
+        // can resize window
+        self.shader.apply_to_device();
 
-        for call in self.batch.iter() {
-            log::trace!("draw call: {:?}", call);
+        // upload the CPU vertices to the GPU vertices
+        self.batch.device.set_vertex_buffer_data(
+            self.batch.vbuf,
+            0, // vertex offset
+            &self.batch.quads[0..self.batch.n_quads],
+            fna3d::SetDataOptions::None,
+        );
+
+        for call in self.batch.draw_calls() {
+            // remove this line in real applications
+            println!("draw call: {:?}", call);
             self.draw(&call);
         }
 
@@ -234,27 +250,18 @@ impl Batcher {
     fn draw(&self, call: &DrawCall) {
         let device = &self.batch.device;
 
-        self.shader.apply_to_device();
+        device.verify_sampler(0, call.texture, &fna3d::SamplerState::default());
+        device.apply_vertex_buffer_bindings(&[self.batch.vbind], true, call.base_vtx() as u32);
 
-        {
-            let sst = fna3d::SamplerState::default();
-            let slot = 0;
-            device.verify_sampler(slot, call.texture, &sst);
-        }
-
-        {
-            device.apply_vertex_buffer_bindings(&[self.batch.vbind], true, call.base_vtx() as u32);
-
-            device.draw_indexed_primitives(
-                fna3d::PrimitiveType::TriangleList,
-                call.base_vtx() as u32,
-                0,
-                call.n_verts() as u32,
-                call.base_idx() as u32,
-                call.n_triangles() as u32,
-                self.batch.ibuf,
-                fna3d::IndexElementSize::Bits16,
-            );
-        }
+        device.draw_indexed_primitives(
+            fna3d::PrimitiveType::TriangleList,
+            call.base_vtx() as u32,
+            0,
+            call.n_verts() as u32,
+            call.base_idx() as u32,
+            call.n_triangles() as u32,
+            self.batch.ibuf,
+            fna3d::IndexElementSize::Bits16,
+        );
     }
 }

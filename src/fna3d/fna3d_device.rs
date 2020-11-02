@@ -1021,9 +1021,6 @@ impl Device {
 
     /// Sets a region of the vertex buffer with client data.
     ///
-    /// This is wrapped in `VertexBuffer:SetData` in FNA. Remember to call
-    /// `apply_vertex_buffer_bindings` before drawing.
-    ///
     /// * `opts`:
     ///   Try not to call NONE if this is a dynamic buffer!
     pub fn set_vertex_buffer_data<T>(
@@ -1042,8 +1039,8 @@ impl Device {
                 buf_offset_in_bytes as i32,
                 data as *const _ as *mut _,
                 data_len_in_bytes as i32,
-                1, // see `FNA3D.h` for details (XNA compatibility thing)
-                1, // see `FNA3D.h` for details (XNA compatibility thing)
+                1, // XNA compatibility thing. See `FNA3D.h` for details
+                1, // XNA compatibility thing. See `FNA3D.h` for details
                 opts as u32,
             );
         }
@@ -1120,9 +1117,7 @@ impl Device {
         }
     }
 
-    /// Sets a region of the index buffer with client data.
-    ///
-    /// The buffer will be copied so you can free it after calling this
+    /// Sets a region of the GPU index buffer with client data.
     ///
     /// * `buf`:
     ///   The index buffer to be updated.
