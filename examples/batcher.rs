@@ -6,6 +6,7 @@ mod common;
 
 use {
     anyhow::{Error, Result},
+    fna3d::Color,
     sdl2::{event::Event, EventPump},
     std::time::Duration,
 };
@@ -31,7 +32,8 @@ pub fn main() -> Result<()> {
 }
 
 fn run(mut pump: EventPump, init: common::Init) -> Result<()> {
-    let mut game = self::GameData::new(init)?;
+    let shader = Shader2d::new(&init.device, W, H)?;
+    let mut game = self::GameData::new(init, shader)?;
 
     'running: loop {
         // Rustified enums are the biggest benefit when using Rust-SDL2 (not Rust-SDL2-sys)!
@@ -46,6 +48,7 @@ fn run(mut pump: EventPump, init: common::Init) -> Result<()> {
         std::thread::sleep(Duration::from_nanos(1_000_000_000 / 30));
 
         // update and render our game
+        println!("---- new frame");
         game.tick()?;
     }
 
@@ -55,18 +58,18 @@ fn run(mut pump: EventPump, init: common::Init) -> Result<()> {
 pub struct GameData {
     /// Lifetime of the application
     init: common::Init,
+    /// Batcher of draw calls
     batcher: Batcher,
     deadly_strike: Texture2dDrop,
     castle: Texture2dDrop,
 }
 
 impl GameData {
-    pub fn new(init: common::Init) -> Result<Self> {
+    pub fn new(init: common::Init, shader: Shader2d) -> Result<Self> {
         // GPU texture
         let deadly_strike = Texture2dDrop::from_encoded_bytes(&init.device, embedded::ICON);
         let castle = Texture2dDrop::from_encoded_bytes(&init.device, embedded::CASTLE);
 
-        let shader = Shader2d::new(&init.device, W, H)?;
         let batcher = Batcher::new(&init.device, shader)?;
 
         Ok(Self {
@@ -80,7 +83,7 @@ impl GameData {
     pub fn tick(&mut self) -> Result<()> {
         self.init.device.clear(
             fna3d::ClearOptions::TARGET,
-            fna3d::Color::rgb(120, 180, 140).to_vec4(),
+            Color::rgb(120, 180, 140).to_vec4(),
             0.0, // depth
             0,   // stencil
         );
@@ -113,7 +116,7 @@ impl GameData {
                     100.0 + 40.0 * j as f32,
                 ];
 
-                let color = fna3d::Color::rgba(255, 255, 255, 255);
+                let color = Color::rgba(255, 255, 255, 255);
                 let quad = QuadData([
                     Vertex {
                         dst: [pos[0], pos[1], 0.0],

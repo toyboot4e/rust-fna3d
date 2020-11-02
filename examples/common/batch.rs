@@ -12,9 +12,9 @@ use super::gfx::{Shader2d, Vertex};
 #[derive(Debug, Clone, Default)]
 pub struct QuadData(pub [Vertex; 4]);
 
-/// Buffer length of quadliterals
-const N_QUADS: u32 = 2048;
-
+/// Creates an iterator of draw calls.
+///
+/// It's wrapped into [`Batcher`] so that it can be flushed running draw calls.
 #[derive(Debug)]
 struct Batch {
     device: fna3d::Device,
@@ -24,6 +24,7 @@ struct Batch {
     quads: Vec<QuadData>,
     /// The number of quads stored in this batch
     n_quads: usize,
+    /// `track.len() == quads.len()`
     track: Vec<*mut fna3d::Texture>,
 }
 
@@ -57,22 +58,27 @@ macro_rules! gen_quad_indices {
 
 impl Batch {
     pub fn new(device: &fna3d::Device) -> Result<Self> {
+        // number of quads to allocate
+        const N_QUADS: u32 = 2048;
+
         // GPU vertex buffer (marked as "dynamic")
         let n_verts = 4 * N_QUADS;
         let vbuf = device.gen_vertex_buffer(
             true, // dynamic
-            fna3d::BufferUsage::None,
+            fna3d::BufferUsage::WriteOnly,
             n_verts * mem::size_of::<Vertex>() as u32,
         );
 
         // GPU index buffer (marked as "static")
         let n_indices = 6 * N_QUADS;
         // each index element has 16 bits length
-        let ibuf = device.gen_index_buffer(false, fna3d::BufferUsage::None, n_indices * 16);
-        {
-            let data = gen_quad_indices!(N_QUADS);
-            device.set_index_buffer_data(ibuf, 0, &data, fna3d::SetDataOptions::None);
-        }
+        let ibuf = device.gen_index_buffer(false, fna3d::BufferUsage::WriteOnly, n_indices * 16);
+        device.set_index_buffer_data(
+            ibuf,
+            0, // offset (in bytes)
+            &gen_quad_indices!(N_QUADS),
+            fna3d::SetDataOptions::None,
+        );
 
         // vertex attributes
         // META: such types are just re-exported from FFI to FNA3D and don't have snake_case fields
@@ -115,10 +121,10 @@ impl Batch {
     }
 }
 
-/// Quad index [lo, hi) and texture
+/// Quad span [lo, hi) with texture
 #[derive(Debug)]
 pub struct DrawCall {
-    pub texture: *mut fna3d::Texture,
+    pub tex: *mut fna3d::Texture,
     /// low quad index (inclusive)
     pub lo: usize,
     /// high quad index (exclusive)
@@ -152,6 +158,7 @@ impl DrawCall {
 }
 
 pub struct DrawCallIterator<'a> {
+    /// Source
     batch: &'a Batch,
     /// Index of next quad
     ix: usize,
@@ -172,22 +179,23 @@ impl<'a> Iterator for DrawCallIterator<'a> {
         }
 
         let lo = self.ix;
-        let texture = self.batch.track[lo];
+        let tex = self.batch.track[lo];
 
         for hi in lo..self.batch.n_quads {
-            let new_texture = self.batch.track[hi];
-            if new_texture != texture {
+            let new_tex = self.batch.track[hi];
+            if new_tex != tex {
                 self.ix = hi;
-                return Some(DrawCall { lo, hi, texture });
+                return Some(DrawCall { lo, hi, tex });
             }
         }
 
         let hi = self.batch.n_quads;
         self.ix = hi;
-        return Some(DrawCall { lo, hi, texture });
+        return Some(DrawCall { lo, hi, tex });
     }
 }
 
+/// Batches draw calls
 pub struct Batcher {
     batch: Batch,
     shader: Shader2d,
@@ -250,7 +258,7 @@ impl Batcher {
     fn draw(&self, call: &DrawCall) {
         let device = &self.batch.device;
 
-        device.verify_sampler(0, call.texture, &fna3d::SamplerState::default());
+        device.verify_sampler(0, call.tex, &fna3d::SamplerState::default());
         device.apply_vertex_buffer_bindings(&[self.batch.vbind], true, call.base_vtx() as u32);
 
         device.draw_indexed_primitives(

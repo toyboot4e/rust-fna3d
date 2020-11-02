@@ -8,6 +8,7 @@ mod common;
 
 use {
     anyhow::{Error, Result},
+    fna3d::Color,
     sdl2::{event::Event, EventPump},
     std::{mem, time::Duration},
 };
@@ -70,7 +71,7 @@ impl GameData {
         let tex = Texture2dDrop::from_encoded_bytes(&init.device, embedded::ICON);
 
         // CPU vertex buffer
-        let color = fna3d::Color::rgb(255, 255, 255);
+        let color = Color::rgb(255, 255, 255);
         let verts = {
             // 1/2 scale
             let pos = (100.0, 100.0);
@@ -98,7 +99,7 @@ impl GameData {
     pub fn tick(&mut self) -> Result<()> {
         self.init.device.clear(
             fna3d::ClearOptions::TARGET,
-            fna3d::Color::rgb(120, 180, 140).to_vec4(),
+            Color::rgb(120, 180, 140).to_vec4(),
             0.0, // depth
             0,   // stencil
         );
@@ -148,6 +149,7 @@ impl DrawData {
         // GPU index buffer (marked as "static")
         let ibuf = device.gen_index_buffer(false, fna3d::BufferUsage::None, 16 * n_verts);
         {
+            // just for a quad
             let data = [0 as i16, 1, 2, 3, 2, 1];
             device.set_index_buffer_data(ibuf, 0, &data, fna3d::SetDataOptions::None);
         }
@@ -184,6 +186,7 @@ impl DrawData {
             );
         }
 
+        // set the texture and a (pixel) sampler state for it
         {
             let sampler = fna3d::SamplerState::default();
             let slot = 0;

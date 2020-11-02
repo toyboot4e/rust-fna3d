@@ -1,10 +1,15 @@
-= Notes
+= anf/docs
 :x: https://github.com/toyboot4e/rust-fna3d/blob/master/docs/
 
-* {x}/build.md[docs/build.md]: requirements to build Rust-FNA3D
-* {x}/quick_start.md[docs/quick_start.md]: how  to add dependency to Rust-FNA3D
-* {x}/tips.md[docs/tips.md]: using `cargo +nightly doc`
-* {x}/wrapping_c.md[docs/wrapping_c.md]: how I wrapped FNA3D in Rust
-* {x}/refs.md[docs/references.md]: other repositories using FNA3D
+== Documentations
+
+* {x}/build.md[build.md]: requirements to build Rust-FNA3D
+* {x}/quick_start.md[quick_start.md]: how  to add dependency to Rust-FNA3D
 
 Note that FNA3D doesn't print errors on macOS. OMG. Maybe use Linux for debugging.
+
+== Notes
+
+* {x}/tips.md[tips.md]: using `cargo +nightly doc`
+* {x}/wrapping_c.md[wrapping_c.md]: how I wrapped FNA3D in Rust
+* {x}/refs.md[references.md]: other repositories using FNA3D

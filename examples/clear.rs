@@ -6,6 +6,7 @@ mod common;
 
 use {
     anyhow::{Error, Result},
+    fna3d::Color,
     sdl2::{event::Event, EventPump},
     std::time::Duration,
 };
@@ -40,7 +41,7 @@ fn run(mut pump: EventPump, init: common::Init) -> Result<()> {
         // clear the screen (the back frame buffer)
         device.clear(
             fna3d::ClearOptions::TARGET,
-            fna3d::Color::cornflower_blue().to_vec4(),
+            Color::cornflower_blue().to_vec4(),
             0.0,
             0,
         );

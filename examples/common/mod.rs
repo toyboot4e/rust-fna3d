@@ -1,4 +1,18 @@
 //! Common utilities among samples
+//!
+//! # ANF framework
+//!
+//! This is a small module. For real games, you would need a bunch of things:
+//!
+//! * rendering
+//!     * 2D geometry types.. or use some existing crate
+//!     * draw API to push quadliterals to batcher
+//!     * sub texture types
+//!     * fonts
+//! * input
+//! * maybe an asset manager
+//!
+//! Check out ANF framework if you're interested!
 
 pub mod batch;
 pub mod embedded;

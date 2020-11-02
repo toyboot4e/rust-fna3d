@@ -1,6 +1,16 @@
 # Building FNA3D/MojoShader
 
+Please tell me when you find missing dependencies to install.
+
 ## macOS
+
+SDL2:
+
+```sh
+$ brew install sdl
+```
+
+Maybe we need XCode tools..?
 
 ## Linux (Ubuntu)
 
@@ -14,3 +24,7 @@ $ sudo apt install \
 ```
 
 Probablly it contains missing/redundant libraries, but it lists most of the required packages.
+
+## Windows
+
+WIP. I first have to get some Windows machine.
