@@ -1,7 +1,8 @@
 = Credits
 
-* `common/embedded/deadly-strike.png`
-+
-https://game-icons.net/1x1/lorc/deadly-strike.html
-+
-LICENSE: https://creativecommons.org/licenses/by/3.0/[CC BY 3.0]
+Icons created by http://lorcblog.blogspot.com/[Lorc]:
+
+* `common/embedded/deadly-strike.png`: https://game-icons.net/1x1/lorc/deadly-strike.html[original]
+* `common/embedded/castle.png`: https://game-icons.net/1x1/lorc/castle.html[original]
+
+They are licensed under https://creativecommons.org/licenses/by/3.0/[CC BY 3.0].

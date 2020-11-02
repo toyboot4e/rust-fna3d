@@ -203,7 +203,7 @@ impl DrawData {
     }
 
     pub fn draw_quads(&mut self, verts: &[Vertex], texture: *mut fna3d::Texture) -> Result<()> {
-        // "effect" in XNA is an abstraction over shaders --  not so good I hear though)
+        // apply "effect" in XNA, an abstraction over shaders --  not so good I hear though!
         {
             let pass = 0;
             self.device

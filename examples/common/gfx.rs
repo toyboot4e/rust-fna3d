@@ -13,11 +13,21 @@ pub struct Vertex {
     /// We don't need the z coordinate but the shader (`SpriteEffect.fxb`) requires it.
     ///
     /// TODO: really? setup 2D only vertices
-    dst: [f32; 3],
+    pub dst: [f32; 3],
     /// Color of the vertex
-    color: fna3d::Color,
+    pub color: fna3d::Color,
     /// Texture coordinates in normalized range [0, 1] (or wraps if it's out of the range)
-    uv: [f32; 2],
+    pub uv: [f32; 2],
+}
+
+impl Default for Vertex {
+    fn default() -> Self {
+        Self {
+            dst: [0.0, 0.0, 0.0],
+            color: fna3d::Color::rgba(255, 255, 255, 255),
+            uv: [0.0, 0.0],
+        }
+    }
 }
 
 mod test {
