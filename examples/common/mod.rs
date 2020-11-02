@@ -1,5 +1,6 @@
 //! Common utilities among samples
 
+pub mod batch;
 pub mod embedded;
 pub mod gfx;
 

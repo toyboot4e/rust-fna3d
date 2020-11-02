@@ -96,17 +96,18 @@ impl Texture2dDrop {
             panic!("Unable to read the encoded bytes as an image!");
         }
 
-        // setup a GPU texture
-        let raw = {
-            let tex = device.create_texture_2d(fna3d::SurfaceFormat::Color, w, h, 1, false);
-            let pixels: &[u8] = unsafe { std::slice::from_raw_parts(ptr, len as usize) };
-            device.set_texture_data_2d(tex, 0, 0, w, h, 0, pixels);
-
-            tex
-        };
+        let pixels: &[u8] = unsafe { std::slice::from_raw_parts(ptr, len as usize) };
+        let tex = Self::from_decoded_bytes(device, w, h, pixels);
 
         // free the CPU texture
         fna3d::img::free(ptr);
+
+        tex
+    }
+
+    pub fn from_decoded_bytes(device: &fna3d::Device, w: u32, h: u32, pixels: &[u8]) -> Self {
+        let raw = device.create_texture_2d(fna3d::SurfaceFormat::Color, w, h, 1, false);
+        device.set_texture_data_2d(raw, 0, 0, w, h, 0, pixels);
 
         Self {
             device: device.clone(),
