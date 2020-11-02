@@ -578,7 +578,7 @@ impl Device {
     /// * `fmt`:
     ///   The pixel format of the texture data.
     /// * `level_count`:
-    ///   The number of mipmap levels to allocate.
+    ///   The NUMBER of mipmap levels to allocate (> 0).
     /// * `is_render_target`:
     ///   Set this to 1 when using this with `set_render_targets`.
     ///
@@ -611,7 +611,7 @@ impl Device {
     /// * `depth`:
     ///   The depth of the texture image.
     /// * `level_count`:
-    ///   The number of mipmap levels to allocate.
+    ///   The NUMBER of mipmap levels to allocate (> 0).
     ///
     /// Returns an allocated FNA3D_Texture* object. Note that the contents of the
     /// texture are undefined, so you must call `SetData` at least once before drawing!
@@ -643,7 +643,7 @@ impl Device {
     /// * `size`:
     ///   The length of a single edge of the texture cube.
     /// * `level_count`:
-    ///   The number of mipmap levels to allocate.
+    ///   The NUMBER of mipmap levels to allocate (> 0).
     /// * `is_render_target`:
     ///   Set this to 1 when using this with `set_render_targets`.
     ///
@@ -682,8 +682,8 @@ impl Device {
 
     /// Uploads image data to a 2D texture object.
     ///
-    /// * `level`:
-    ///   The mipmap level being updated.
+    /// * `target_level`:
+    ///   The mipmap level being updated (>= 0).
     pub fn set_texture_data_2d(
         &self,
         texture: *mut Texture,
@@ -691,7 +691,7 @@ impl Device {
         y: u32,
         w: u32,
         h: u32,
-        level: u32,
+        target_level: u32,
         data: &[u8],
     ) {
         unsafe {
@@ -702,7 +702,7 @@ impl Device {
                 y as i32,
                 w as i32,
                 h as i32,
-                level as i32,
+                target_level as i32,
                 data.as_ptr() as *mut _,
                 data.len() as i32,
             );
@@ -711,8 +711,8 @@ impl Device {
 
     /// Uploads image data to a 3D texture object.
     ///
-    /// * `level`:
-    ///   The mipmap level being updated.
+    /// * `target_level`:
+    ///   The mipmap level being updated (>= 0).
     pub fn set_texture_data_3d(
         &self,
         texture: &mut Texture,
@@ -722,7 +722,7 @@ impl Device {
         w: u32,
         h: u32,
         depth: u32,
-        level: u32,
+        target_level: u32,
         data: &mut [u8],
     ) {
         unsafe {
@@ -735,7 +735,7 @@ impl Device {
                 w as i32,
                 h as i32,
                 depth as i32,
-                level as i32,
+                target_level as i32,
                 data.as_mut_ptr() as *mut _,
                 data.len() as i32,
             );
