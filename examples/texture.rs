@@ -23,7 +23,7 @@ const H: u32 = 720;
 pub fn main() -> Result<()> {
     env_logger::init();
 
-    let title = "Rust-FNA3D triangle example";
+    let title = "Rust-FNA3D texture example";
 
     let init = common::init(title, (W, H))?;
     let pump = init.sdl.event_pump().map_err(Error::msg)?;
@@ -222,14 +222,7 @@ impl DrawData {
         }
 
         {
-            // FIXME:
-            // let sampler = fna3d::SamplerState::default();
-            let sampler = {
-                let mut s = fna3d::SamplerState::linear_clamp();
-                s.set_address_u(fna3d::TextureAddressMode::Wrap);
-                s.set_filter(fna3d::TextureFilter::Point);
-                s
-            };
+            let sampler = fna3d::SamplerState::default();
             let slot = 0;
             self.device.verify_sampler(slot, texture, &sampler);
         }

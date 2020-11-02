@@ -6,3 +6,5 @@
 * {x}/tips.md[docs/tips.md]: using `cargo +nightly doc`
 * {x}/wrapping_c.md[docs/wrapping_c.md]: how I wrapped FNA3D in Rust
 * {x}/refs.md[docs/references.md]: other repositories using FNA3D
+
+Note that FNA3D doesn't print errors on macOS. OMG. Maybe use Linux for debugging.
