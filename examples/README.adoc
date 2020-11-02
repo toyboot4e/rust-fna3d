@@ -1,4 +1,12 @@
-= Credits
+= Exampels
+
+Try examples with: `cargo run --example <name-of-example>`
+
+* `clear`: Just clears the screen
+* `texture`: Draws a texture onto the screen
+* `batcher`: Draws 30 textures onto the screen per frame .. but visually only one texture. Try it out with `RUST_LOG=TRACE`.
+
+== Credits
 
 Icons created by http://lorcblog.blogspot.com/[Lorc]:
 

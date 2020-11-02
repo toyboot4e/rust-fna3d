@@ -85,18 +85,28 @@ impl GameData {
     }
 
     pub fn tick(&mut self) -> Result<()> {
-        {
-            let depth = 0.0;
-            let stencil = 0;
-            self.init.device.clear(
-                fna3d::ClearOptions::TARGET,
-                fna3d::Color::rgb(120, 180, 140).to_vec4(),
-                depth,
-                stencil,
-            );
-        }
+        self.init.device.clear(
+            fna3d::ClearOptions::TARGET,
+            fna3d::Color::rgb(120, 180, 140).to_vec4(),
+            0.0, // depth
+            0,   // stencil
+        );
 
+        self.render();
+
+        self.batcher.flush();
+
+        self.init
+            .device
+            .swap_buffers(None, None, self.init.raw_window() as *mut _);
+
+        Ok(())
+    }
+
+    fn render(&mut self) {
+        // push 30 quadliterals
         for i in 0..3 {
+            // switch texture by 10
             let tex = if i % 2 == 0 {
                 self.deadly_strike.raw
             } else {
@@ -132,14 +142,6 @@ impl GameData {
                 self.batcher.push_quad(&quad, tex);
             }
         }
-
-        self.batcher.flush();
-
-        self.init
-            .device
-            .swap_buffers(None, None, self.init.raw_window() as *mut _);
-
-        Ok(())
     }
 }
 
@@ -196,7 +198,6 @@ impl Batch {
         );
 
         // GPU index buffer (marked as "static")
-        let n_indices = N_QUADS * 6;
         let ibuf = device.gen_index_buffer(false, fna3d::BufferUsage::None, 16 * n_verts);
         {
             let data = gen_quad_indices!(N_QUADS);
@@ -242,7 +243,9 @@ impl Batch {
 #[derive(Debug)]
 pub struct DrawCall {
     pub texture: *mut fna3d::Texture,
+    /// low (inclusive)
     pub lo: usize,
+    /// high (exclusive)
     pub hi: usize,
 }
 
@@ -304,7 +307,7 @@ impl<'a> Iterator for DrawCallIterator<'a> {
         }
 
         let hi = self.batch.n_quads;
-        self.ix = self.batch.n_quads;
+        self.ix = hi;
         return Some(DrawCall { lo, hi, texture });
     }
 }
@@ -374,9 +377,9 @@ impl Batcher {
         self.shader.apply_to_device();
 
         {
-            let sampler = fna3d::SamplerState::default();
+            let sst = fna3d::SamplerState::default();
             let slot = 0;
-            device.verify_sampler(slot, call.texture, &sampler);
+            device.verify_sampler(slot, call.texture, &sst);
         }
 
         {

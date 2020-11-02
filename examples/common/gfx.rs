@@ -96,11 +96,11 @@ impl Texture2d {
 
         // setup a GPU texture
         let raw = {
-            let texture = device.create_texture_2d(fna3d::SurfaceFormat::Color, w, h, 1, false);
+            let tex = device.create_texture_2d(fna3d::SurfaceFormat::Color, w, h, 1, false);
             let pixels: &[u8] = unsafe { std::slice::from_raw_parts(ptr, len as usize) };
-            device.set_texture_data_2d(texture, 0, 0, w, h, 0, pixels);
+            device.set_texture_data_2d(tex, 0, 0, w, h, 0, pixels);
 
-            texture
+            tex
         };
 
         // free the CPU texture

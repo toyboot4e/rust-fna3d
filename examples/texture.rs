@@ -61,26 +61,26 @@ pub struct GameData {
     /// CPU vertices
     verts: Vec<Vertex>,
     /// GPU texture decoded from `DeadlyStrike.png`
-    texture: Texture2d,
+    tex: Texture2d,
 }
 
 impl Drop for GameData {
     fn drop(&mut self) {
-        self.init.device.add_dispose_texture(self.texture.raw);
+        self.init.device.add_dispose_texture(self.tex.raw);
     }
 }
 
 impl GameData {
     pub fn new(init: common::Init) -> Result<Self> {
         // GPU texture
-        let texture = Texture2d::from_encoded_bytes(&init.device, embedded::ICON);
+        let tex = Texture2d::from_encoded_bytes(&init.device, embedded::ICON);
 
         // CPU vertex buffer
         let color = fna3d::Color::rgb(255, 255, 255);
         let verts = {
             // 1/2 scale
             let pos = (100.0, 100.0);
-            let size = (texture.w as f32 / 2.0, texture.h as f32 / 2.0);
+            let size = (tex.w as f32 / 2.0, tex.h as f32 / 2.0);
 
             vec![
                 // Vertex::new(destination, uv, color) (z values are not used actually)
@@ -97,23 +97,19 @@ impl GameData {
             init,
             draw,
             verts,
-            texture,
+            tex,
         })
     }
 
     pub fn tick(&mut self) -> Result<()> {
-        {
-            let depth = 0.0;
-            let stencil = 0;
-            self.init.device.clear(
-                fna3d::ClearOptions::TARGET,
-                fna3d::Color::rgb(120, 180, 140).to_vec4(),
-                depth,
-                stencil,
-            );
-        }
+        self.init.device.clear(
+            fna3d::ClearOptions::TARGET,
+            fna3d::Color::rgb(120, 180, 140).to_vec4(),
+            0.0, // depth
+            0,   // stencil
+        );
 
-        self.draw.draw_quads(&self.verts, self.texture.raw)?;
+        self.draw.draw_quads(&self.verts, self.tex.raw)?;
 
         self.init
             .device
@@ -180,7 +176,7 @@ impl DrawData {
         })
     }
 
-    pub fn draw_quads(&mut self, verts: &[Vertex], texture: *mut fna3d::Texture) -> Result<()> {
+    pub fn draw_quads(&mut self, verts: &[Vertex], tex: *mut fna3d::Texture) -> Result<()> {
         self.shader.apply_to_device();
 
         // upload the CPU vertices to the GPU vertices (we don't have to do it every frame in though)
@@ -197,7 +193,7 @@ impl DrawData {
         {
             let sampler = fna3d::SamplerState::default();
             let slot = 0;
-            self.device.verify_sampler(slot, texture, &sampler);
+            self.device.verify_sampler(slot, tex, &sampler);
         }
 
         // let's make a draw call
