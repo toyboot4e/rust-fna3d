@@ -14,7 +14,7 @@ use {
 
 use self::common::{
     embedded,
-    gfx::{Texture2d, Vertex},
+    gfx::{Shader2d, Texture2d, Vertex},
 };
 
 const W: u32 = 1280;
@@ -128,10 +128,7 @@ impl GameData {
 pub struct DrawData {
     /// FNA3D device
     device: fna3d::Device,
-    /// Handle of FNA3D effect. The internals are opaque
-    effect: *mut fna3d::Effect,
-    /// Access to the internals of FNA3D effect.
-    effect_data: *mut fna3d::mojo::Effect,
+    shader: Shader2d,
     /// GPU vertex buffer
     vbuf: *mut fna3d::Buffer,
     /// Vertex attributes of the vertex buffer that can be uploaded to GPU
@@ -142,9 +139,6 @@ pub struct DrawData {
 
 impl Drop for DrawData {
     fn drop(&mut self) {
-        // frees both `effect` and `effect_data`
-        self.device.add_dispose_effect(self.effect);
-
         self.device.add_dispose_vertex_buffer(self.vbuf);
         self.device.add_dispose_index_buffer(self.ibuf);
     }
@@ -152,22 +146,7 @@ impl Drop for DrawData {
 
 impl DrawData {
     pub fn new(device: fna3d::Device, n_verts: u32) -> Result<Self> {
-        // create the `SpriteEffect` shader
-        let (effect, effect_data) =
-            fna3d::mojo::from_bytes(&device, embedded::SHADER).map_err(Error::msg)?;
-
-        // set the matrix parameter of the SpriteEffect shader to orthographic projection matrix
-        {
-            let mat = fna3d::mojo::orthographic_off_center(0.0, W as f32, H as f32, 0.0, 1.0, 0.0);
-            // the name is hardcoded to the original shader source file (`SpriteEffect.fx`)
-            let name = "MatrixTransform";
-            unsafe {
-                let name = std::ffi::CString::new(name)?;
-                if !fna3d::mojo::set_param(effect_data, &name, &mat) {
-                    eprintln!("Failed to set MatrixTransform shader paramter. Probablly we're not using `SpriteEffect.fxb`");
-                }
-            };
-        }
+        let shader = Shader2d::new(&device, W, H)?;
 
         // GPU vertex buffer (marked as "dynamic")
         let vbuf = device.gen_vertex_buffer(
@@ -194,8 +173,7 @@ impl DrawData {
 
         Ok(Self {
             device,
-            effect,
-            effect_data,
+            shader,
             vbuf,
             vbind,
             ibuf,
@@ -203,12 +181,7 @@ impl DrawData {
     }
 
     pub fn draw_quads(&mut self, verts: &[Vertex], texture: *mut fna3d::Texture) -> Result<()> {
-        // apply "effect" in XNA, an abstraction over shaders --  not so good I hear though!
-        {
-            let pass = 0;
-            self.device
-                .apply_effect(self.effect, pass, &fna3d::utils::no_change_effect());
-        }
+        self.shader.apply_to_device();
 
         // upload the CPU vertices to the GPU vertices (we don't have to do it every frame in though)
         {

@@ -1,6 +1,11 @@
 //! Grapics data types
 
-use std::mem;
+use {
+    anyhow::{Error, Result},
+    std::mem,
+};
+
+use super::embedded;
 
 /// The vertex data
 ///
@@ -27,13 +32,6 @@ impl Default for Vertex {
             color: fna3d::Color::rgba(255, 255, 255, 255),
             uv: [0.0, 0.0],
         }
-    }
-}
-
-mod test {
-    #[test]
-    fn test__() {
-        println!("{}", std::mem::align_of::<super::Vertex>());
     }
 }
 
@@ -74,6 +72,11 @@ impl Vertex {
     };
 }
 
+/// GPU texture
+///
+/// # Safety
+///
+/// It's NOT disposed automatically. Very unsafe!
 #[derive(Debug, Clone)]
 pub struct Texture2d {
     /// Consider using `Rc<TextureDrop>` in real applications
@@ -104,5 +107,56 @@ impl Texture2d {
         fna3d::img::free(ptr);
 
         Self { raw, w, h }
+    }
+}
+
+/// `SpriteEffect`, one of "Effects" in XNA
+///
+/// It's a combination of vertex/fragment shaders. I hear that it's not a good abstraction though
+#[derive(Debug)]
+pub struct Shader2d {
+    device: fna3d::Device,
+    effect: *mut fna3d::Effect,
+    effect_data: *mut fna3d::mojo::Effect,
+}
+
+impl Drop for Shader2d {
+    fn drop(&mut self) {
+        // frees both `effect` and `effect_data`
+        self.device.add_dispose_effect(self.effect);
+    }
+}
+
+impl Shader2d {
+    /// Create SpriteEffect from FNA3D device and the screen size
+    pub fn new(device: &fna3d::Device, w: u32, h: u32) -> Result<Self> {
+        // create the `SpriteEffect` shader
+        let (effect, effect_data) =
+            fna3d::mojo::from_bytes(&device, embedded::SHADER).map_err(Error::msg)?;
+
+        // set the matrix parameter of the SpriteEffect shader to orthographic projection matrix
+        {
+            let mat = fna3d::mojo::orthographic_off_center(0.0, w as f32, h as f32, 0.0, 1.0, 0.0);
+            // the name is hardcoded to the original shader source file (`SpriteEffect.fx`)
+            let name = "MatrixTransform";
+            unsafe {
+                let name = std::ffi::CString::new(name)?;
+                if !fna3d::mojo::set_param(effect_data, &name, &mat) {
+                    eprintln!("Failed to set MatrixTransform shader paramter. Probablly we're not using `SpriteEffect.fxb`");
+                }
+            };
+        }
+
+        Ok(Self {
+            device: device.clone(),
+            effect,
+            effect_data,
+        })
+    }
+
+    pub fn apply_to_device(&self) {
+        let pass = 0;
+        self.device
+            .apply_effect(self.effect, pass, &fna3d::utils::no_change_effect());
     }
 }

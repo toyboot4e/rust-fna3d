@@ -14,7 +14,7 @@ use {
 
 use self::common::{
     embedded,
-    gfx::{Texture2d, Vertex},
+    gfx::{Shader2d, Texture2d, Vertex},
 };
 
 const W: u32 = 1280;
@@ -140,47 +140,6 @@ impl GameData {
             .swap_buffers(None, None, self.init.raw_window() as *mut _);
 
         Ok(())
-    }
-}
-
-#[derive(Debug)]
-pub struct Shader {
-    device: fna3d::Device,
-    effect: *mut fna3d::Effect,
-    effect_data: *mut fna3d::mojo::Effect,
-}
-
-impl Drop for Shader {
-    fn drop(&mut self) {
-        // frees both `effect` and `effect_data`
-        self.device.add_dispose_effect(self.effect);
-    }
-}
-
-impl Shader {
-    pub fn new(device: &fna3d::Device) -> Result<Self> {
-        // create the `SpriteEffect` shader
-        let (effect, effect_data) =
-            fna3d::mojo::from_bytes(&device, embedded::SHADER).map_err(Error::msg)?;
-
-        // set the matrix parameter of the SpriteEffect shader to orthographic projection matrix
-        {
-            let mat = fna3d::mojo::orthographic_off_center(0.0, W as f32, H as f32, 0.0, 1.0, 0.0);
-            // the name is hardcoded to the original shader source file (`SpriteEffect.fx`)
-            let name = "MatrixTransform";
-            unsafe {
-                let name = std::ffi::CString::new(name)?;
-                if !fna3d::mojo::set_param(effect_data, &name, &mat) {
-                    eprintln!("Failed to set MatrixTransform shader paramter. Probablly we're not using `SpriteEffect.fxb`");
-                }
-            };
-        }
-
-        Ok(Self {
-            device: device.clone(),
-            effect,
-            effect_data,
-        })
     }
 }
 
@@ -352,14 +311,14 @@ impl<'a> Iterator for DrawCallIterator<'a> {
 
 pub struct Batcher {
     batch: Batch,
-    shader: Shader,
+    shader: Shader2d,
 }
 
 impl Batcher {
     pub fn new(device: &fna3d::Device) -> Result<Self> {
         Ok(Self {
             batch: Batch::new(device)?,
-            shader: Shader::new(device)?,
+            shader: Shader2d::new(device, W, H)?,
         })
     }
 
@@ -412,11 +371,7 @@ impl Batcher {
     fn draw(&self, call: &DrawCall) {
         let device = &self.batch.device;
 
-        // apply "effect" in XNA, an abstraction over shaders --  not so good I hear though!
-        {
-            let pass = 0;
-            device.apply_effect(self.shader.effect, pass, &fna3d::utils::no_change_effect());
-        }
+        self.shader.apply_to_device();
 
         {
             let sampler = fna3d::SamplerState::default();
