@@ -4,7 +4,7 @@ use std::mem;
 
 /// The vertex data
 ///
-/// `#[repr(C)]` is required because we're using Rust arraysin it
+/// `#[repr(C)]` is required.
 #[derive(Debug, Clone)]
 #[repr(C)]
 pub struct Vertex {

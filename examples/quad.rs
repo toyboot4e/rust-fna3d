@@ -237,8 +237,10 @@ impl DrawData {
         // let's make a draw call
         {
             let base_vtx = 0;
+            let base_vtx_idx = 0;
+            let n_verts = verts.len() as u32;
             let base_idx = 0;
-            let n_triangles = verts.len() as u32 / 2;
+            let n_triangles = n_verts / 2;
 
             self.device
                 .apply_vertex_buffer_bindings(&[self.vbind], true, base_vtx);
@@ -246,6 +248,8 @@ impl DrawData {
             self.device.draw_indexed_primitives(
                 fna3d::PrimitiveType::TriangleList,
                 base_vtx,
+                base_vtx_idx,
+                n_verts,
                 base_idx,
                 n_triangles,
                 self.ibuf,

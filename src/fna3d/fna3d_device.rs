@@ -215,11 +215,14 @@ impl Device {
 
     /// Draws data from vertex/index buffers
     ///
-    /// This is good for reducing duplicate vertices.
+    /// * `min_vert_idx`: A hint of the lowest vertex indexed relative to baseVertex.
+    /// * `n_verts`: A hint of the maximum vertex indexed.
     pub fn draw_indexed_primitives(
         &self,
         type_: enums::PrimitiveType,
         base_vtx: u32,
+        min_vert_idx: u32,
+        n_verts: u32,
         base_idx: u32,
         n_primitives: u32,
         ibuf: *mut Buffer,
@@ -230,10 +233,8 @@ impl Device {
                 self.raw(),
                 type_ as FNA3D_PrimitiveType,
                 base_vtx as i32,
-                // min_vertex_index,
-                -1, // this is ignored (it's just for XNA compatibility)
-                // num_vertices,
-                -1, // this is ignored (it's just for XNA compatibility)
+                min_vert_idx as i32,
+                n_verts as i32,
                 base_idx as i32,
                 n_primitives as i32,
                 ibuf,
@@ -815,7 +816,7 @@ impl Device {
     ///   The mipmap level being read.
     pub fn get_texture_data_2d(
         &self,
-        texture: &mut Texture,
+        texture: *mut Texture,
         x: u32,
         y: u32,
         w: u32,

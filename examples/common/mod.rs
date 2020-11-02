@@ -72,9 +72,6 @@ pub fn init(title: &str, size: (u32, u32)) -> Result<Init> {
         let rst = fna3d::RasterizerState::default();
         device.apply_rasterizer_state(&rst);
 
-        // let dst = fna3d::DepthStencilState::none();
-        // device.set_depth_stencil_state(&dst);
-
         let bst = fna3d::BlendState::alpha_blend();
         device.set_blend_state(&bst);
 
