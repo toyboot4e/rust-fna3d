@@ -1,4 +1,4 @@
-= anf/docs
+= rust-fna3d/docs
 :x: https://github.com/toyboot4e/rust-fna3d/blob/master/docs/
 
 == Documentations
