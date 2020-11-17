@@ -50,10 +50,11 @@ fn prepare() {
     }
 
     fn apply_patch(dir: &Path, patch: &Path) {
-        let dir = format!("{}", dir.display());
         let patch = format!("{}", patch.display());
+        println!("cargo:rerun-if-changed={}", patch);
+
         Command::new("git")
-            .current_dir(&dir)
+            .current_dir(dir)
             .args(&["apply", &patch])
             // suppress patch error
             .stderr(std::process::Stdio::null())
@@ -61,7 +62,9 @@ fn prepare() {
             .unwrap_or_else(|e| {
                 panic!(
                     "failed to apply patch `{}` in dir `{}`. original error {}",
-                    patch, dir, e
+                    patch,
+                    dir.display(),
+                    e
                 )
             });
     }
@@ -107,6 +110,7 @@ fn gen_bindings(wrapper: impl AsRef<Path>, dst_file_name: impl AsRef<Path>) {
     let dst = out_dir.join(&dst_file_name);
 
     println!("cargo:rerun-if-changed={}", wrapper.display());
+
     let bindings = bindgen::Builder::default()
         .header(format!("{}", wrapper.display()))
         .clang_arg("-DMOJOSHADER_EFFECT_SUPPORT")
