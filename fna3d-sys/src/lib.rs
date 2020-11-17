@@ -1,5 +1,7 @@
 /*! Rust FFI bindings to FNA3D generated with [bindgen]
 
+WARNING: Probablly it doesn't compile on Window. I need to buy one.
+
 I'm using `bindgen` with  default settings, but if you're interested, see the API documentation
 of [`Builder`] to configure enum generation.
 

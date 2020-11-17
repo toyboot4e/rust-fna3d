@@ -4,11 +4,10 @@ If the compilation fails, run `cargo clean`.
 
 # What it does
 
-1. Pulls FNA3D recursively if there's not. Also IT FORCE THE HEAD TO CHECKOUT SPECIFIC COMMIT
-2. Applies patches to FNA3D and MojoShader
-3. Compiles MojoShader and FNA3D if they're not found in `OUT_DIR`
-4. Links to the output libraries
-5. Makes bindings (FFI) to the C libraries
+1. Applies patches to FNA3D and MojoShader
+2. Compiles MojoShader and FNA3D if they're not found in `OUT_DIR`
+3. Links to the output libraries
+4. Makes bindings (FFI) to the C libraries
 
 # TODOs
 
@@ -35,12 +34,6 @@ fn main() {
 /// Pulls FNA3D and applies patches
 fn prepare() {
     let root = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
-
-    Command::new("git")
-        .current_dir(&root)
-        .args(&["submodule", "update", "--init", "--recursive"])
-        .status()
-        .expect("is git in your PATH?");
 
     {
         // MojoShader
