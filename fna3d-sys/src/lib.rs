@@ -1,10 +1,11 @@
-//! Rust FFI bindings to FNA3D generated with [bindgen]
-//!
-//! I'm using `bindgen` with  default settings, but if you're interested, see the API documentation
-//! of [`Builder`] to configure enum generation.
-//!
-//! [bindgen]:  https://github.com/rust-lang/rust-bindgen
-//! [`Builder`]: https://docs.rs/bindgen/newest/bindgen/struct.Builder.html
+/*! Rust FFI bindings to FNA3D generated with [bindgen]
+
+I'm using `bindgen` with  default settings, but if you're interested, see the API documentation
+of [`Builder`] to configure enum generation.
+
+[bindgen]:  https://github.com/rust-lang/rust-bindgen
+[`Builder`]: https://docs.rs/bindgen/newest/bindgen/struct.Builder.html
+*/
 
 // suppress all errors
 #![allow(warnings)]

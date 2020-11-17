@@ -27,8 +27,3 @@ rust-fna3d = { git = "https://github.com/toyboot4e/rust-fna3d" }
 After adding the dependency, when you build your project, FNA3D will be built as a dynamic library and linked. Now you can use the [fna3d](https://docs.rs/rust-fna3d) module!
 
 TODO: Release build and bundling the dynamic libraries. Application bundle?
-
-## More examples
-
-* [Simple texture rendering in FNA3D](https://gist.github.com/jessechounard/d4252efc12ee24494484611d92b1debe) \(C gist)
-<!-- * [ANF](https://github.com/toyboot4e/anf) framework -->

@@ -1,21 +1,20 @@
-//! Build script of `fna3d-sys`
-//!
-//! If the compilation fails, run `cargo clean`.
-//!
-//! # What it does
-//!
-//! 1. Pulls FNA3D recursively if there's not
-//! 2. Applies patches to FNA3D and MojoShader
-//! 3. Compiles MojoShader and FNA3D if they're not found in `OUT_DIR`
-//! 4. Links to the output libraries
-//! 5. Makes bindings (FFI) to the C libraries
-//!
-//! # TODOs
-//!
-//! * TODO: Windows/Linux
-//! * publishing executable with rust-FNA3D-sys
-//! ** TODO: bundling libFNA3D.dylib with executable?
-//! ** TODO: static linking?
+/*! Build script of `fna3d-sys`
+
+If the compilation fails, run `cargo clean`.
+
+# What it does
+
+1. Pulls FNA3D recursively if there's not. Also IT FORCE THE HEAD TO CHECKOUT SPECIFIC COMMIT
+2. Applies patches to FNA3D and MojoShader
+3. Compiles MojoShader and FNA3D if they're not found in `OUT_DIR`
+4. Links to the output libraries
+5. Makes bindings (FFI) to the C libraries
+
+# TODOs
+
+* TODO: support Windows
+* TODO: how to publish executable with dynamic libraries (application bundle)?
+*/
 
 use {
     cmake::Config,
@@ -29,8 +28,8 @@ use {
 fn main() {
     self::prepare();
     self::compile();
-    self::gen_bindings("fna3d_wrapper.h", "fna3d_bindings.rs");
-    self::gen_bindings("mojoshader_wrapper.h", "mojoshader_bindings.rs");
+    self::gen_bindings("wrappers/fna3d_wrapper.h", "fna3d_bindings.rs");
+    self::gen_bindings("wrappers/mojoshader_wrapper.h", "mojoshader_bindings.rs");
 }
 
 /// Pulls FNA3D and applies patches
@@ -46,14 +45,14 @@ fn prepare() {
     {
         // MojoShader
         let dir = root.join("FNA3D/MojoShader");
-        let patch = root.join("mojoshader_patch.diff");
+        let patch = root.join("wrappers/mojoshader_patch.diff");
         apply_patch(&dir, &patch);
     }
 
     {
         // FNA3D
         let dir = root.join("FNA3D");
-        let patch = root.join("fna3d_patch.diff");
+        let patch = root.join("wrappers/fna3d_patch.diff");
         apply_patch(&dir, &patch);
     }
 
@@ -110,6 +109,7 @@ fn gen_bindings(wrapper: impl AsRef<Path>, dst_file_name: impl AsRef<Path>) {
     let wrapper = wrapper.as_ref();
     let dst_file_name = dst_file_name.as_ref();
 
+    let root = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
     let dst = out_dir.join(&dst_file_name);
 
@@ -117,6 +117,8 @@ fn gen_bindings(wrapper: impl AsRef<Path>, dst_file_name: impl AsRef<Path>) {
     let bindings = bindgen::Builder::default()
         .header(format!("{}", wrapper.display()))
         .clang_arg("-DMOJOSHADER_EFFECT_SUPPORT")
+        .clang_arg(format!("-I{}", root.join("FNA3D/include").display()))
+        .clang_arg(format!("-I{}", root.join("FNA3D/MojoShader").display()))
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
         .generate()
         .unwrap_or_else(|err| {

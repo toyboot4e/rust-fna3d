@@ -11,4 +11,4 @@ Note that FNA3D doesn't print errors on macOS. OMG. Maybe use Linux for debuggin
 == Notes
 
 * {x}/wrapping_c.md[wrapping_c.md]: how I wrapped FNA3D in Rust
-* {x}/refs.md[references.md]: other repositories using FNA3D
+* {x}/refs.md[references.md]: other repositories using FNA3D and more examples
