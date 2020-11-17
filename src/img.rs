@@ -46,7 +46,7 @@
 //! }
 //! ```
 
-use ::{
+use {
     fna3d_sys as sys,
     std::{
         fs::File,

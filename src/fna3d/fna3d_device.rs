@@ -24,7 +24,7 @@ macro_rules! as_ptr {
     ($opt:expr) => {
         match $opt {
             Some(value) => value as *const _ as *mut _,
-            None => ptr::null_mut(),
+            None => std::ptr::null_mut(),
         }
     };
 }

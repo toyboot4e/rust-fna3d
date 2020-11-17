@@ -4,16 +4,15 @@ Wrapper of [FNA3D](https://github.com/FNA-XNA/FNA3D), the graphics library for [
 
 ## About
 
-Please refer to the [API documentation](https://docs.rs/rust-fna3d). It's for making a higher-level framework on it; take [ANF](https://github.com/toyboot4e/anf) as an example.
+Rust-FNA3D cares about desktop platforms and it works on macOS and Linux. To support Windows, I need to buy one.
+
+For usage, please refer to the [API documentation](https://docs.rs/rust-fna3d).
 
 ## Status
 
 Close to ready. Remaining tasks:
 
-* [ ] Multi platform support of `build.rs`
-* [ ] Or enable using `fnalibs`
-* [ ] Bundling the dynamic library to the executable automatically?
-* [ ] Publish it on crates.io and make sure it works fine
+* [ ] Windows support of `build.rs`
 * [ ] Add more wrapper types rather than re-exporting raw types
 * [ ] Add more methods to wrapper types
 * [ ] `derive` more types

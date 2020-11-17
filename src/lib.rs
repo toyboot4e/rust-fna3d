@@ -32,7 +32,7 @@ pub mod img;
 pub mod mojo;
 
 pub use crate::fna3d::{fna3d_device::*, fna3d_enums::*, fna3d_functions::*, fna3d_structs::*};
-pub use ::{bitflags, fna3d_sys as sys};
+pub use {bitflags, fna3d_sys as sys};
 
 pub mod utils {
     //! Helpers

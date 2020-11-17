@@ -17,7 +17,7 @@
 //! ** TODO: bundling libFNA3D.dylib with executable?
 //! ** TODO: static linking?
 
-use ::{
+use {
     cmake::Config,
     std::{
         env,

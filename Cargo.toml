@@ -20,7 +20,7 @@ enum-primitive-derive = "0.2.1"
 num-traits = "0.2.12"
 
 [dev-dependencies]
-# examples only dependencies
+# examples-only dependencies
 sdl2 = "0.34.3"
 env_logger = "0.7.1"
 anyhow = "1.0.33"
