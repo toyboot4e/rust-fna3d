@@ -6,6 +6,8 @@ Try examples with: `cargo run --example <name-of-example>`
 * `texture`: Draws a texture onto the screen.
 * `batcher`: Draws 20 textures onto the screen per frame batching draw calls.
 
+TODO: fix the batcher example..
+
 == Credits
 
 Icons created by http://lorcblog.blogspot.com/[Lorc]:

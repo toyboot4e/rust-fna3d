@@ -27,4 +27,4 @@ Probablly it contains missing/redundant libraries, but it lists most of the requ
 
 ## Windows
 
-WIP. I first have to get some Windows machine.
+WIP. I have to get some Windows machine.
