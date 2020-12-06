@@ -1,9 +1,0 @@
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 65c7eb8..0f80c3c 100644
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
-@@ -269,3 +269,4 @@ ENDIF(COMPILER_SUPPORT)
- 
- # End of CMakeLists.txt ...
- 
-+install (TARGETS mojoshader DESTINATION .)

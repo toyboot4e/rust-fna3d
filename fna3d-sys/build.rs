@@ -35,19 +35,9 @@ fn main() {
 fn prepare() {
     let root = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
 
-    {
-        // MojoShader
-        let dir = root.join("FNA3D/MojoShader");
-        let patch = root.join("wrappers/mojoshader_patch.diff");
-        apply_patch(&dir, &patch);
-    }
-
-    {
-        // FNA3D
-        let dir = root.join("FNA3D");
-        let patch = root.join("wrappers/fna3d_patch.diff");
-        apply_patch(&dir, &patch);
-    }
+    let dir = root.join("FNA3D");
+    let patch = root.join("wrappers/fna3d_patch.diff");
+    apply_patch(&dir, &patch);
 
     fn apply_patch(dir: &Path, patch: &Path) {
         let patch = format!("{}", patch.display());
@@ -74,18 +64,6 @@ fn prepare() {
 fn compile() {
     let root = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
-
-    // MojoShader
-    let out_lib_path = out_dir.join("libmojoshader.a");
-    if !out_lib_path.is_file() {
-        let path = root.join("FNA3D/MojoShader");
-        let _out = Config::new(path)
-            .cflag("-w") // suppress errors
-            .cflag("-DMOJOSHADER_EFFECT_SUPPORT")
-            .build();
-    }
-    println!("cargo:rustc-link-search=native={}", out_dir.display());
-    // println!("cargo:rustc-link-lib=static=mojoshader");
 
     // FNA3D
     let out_lib_path = out_dir.join("libFNA3D.dylib");
