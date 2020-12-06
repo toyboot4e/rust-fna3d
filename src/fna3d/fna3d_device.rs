@@ -6,7 +6,6 @@ use ::{
     std::{
         // this should be `std::ffi::c_void` but `bindgen` uses:
         os::raw::c_void,
-        ptr,
         rc::Rc,
     },
 };
@@ -52,12 +51,12 @@ macro_rules! as_ptr {
 /// * [Queries](#queris)
 /// * [Feature queries](#feature-queries)
 ///
-/// # Drop / dispose
+/// # Resource management
 ///
-/// `Device` is reference counted and it destories the FNA3D device when they go out of scope. This
-/// is cheating the borrow rules actually.
+/// [`Device`] is reference counted and it destories the FNA3D device when they go out of scope.
+/// NOTE: This is cheating the borrow rules.
 ///
-/// These types have to be disposed with corresponding methods in [`Device`]:
+/// Resource types have to be disposed with corresponding methods in [`Device`]:
 ///
 /// - [`Buffer`]
 /// - [`Renderbuffer`]

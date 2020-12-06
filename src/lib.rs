@@ -46,7 +46,7 @@ pub mod utils {
 
     use crate::fna3d::fna3d_enums as enums;
 
-    /// Hooks default log functions to FNA3D
+    /// Hooks default log functions to FNA3D, which outputs to `stdout`
     ///
     /// FIXME: is it really working?
     pub fn hook_log_functions_default() {
@@ -85,6 +85,7 @@ pub mod utils {
         }
     }
 
+    /// Creates [`crate::mojo::EffectStateChanges`]
     pub fn no_change_effect() -> crate::mojo::EffectStateChanges {
         crate::mojo::EffectStateChanges {
             render_state_change_count: 0,

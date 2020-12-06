@@ -28,7 +28,7 @@ pub enum DisplayOrientation {
     Portrait = sys::FNA3D_DisplayOrientation_FNA3D_DISPLAYORIENTATION_PORTRAIT,
 }
 
-/// [`PresentationParameters`] component
+/// [`PresentationParameters`] component, [`Renderbuffer`] attribute
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Primitive)]
 #[repr(u32)]
 pub enum RenderTargetUsage {
@@ -154,6 +154,7 @@ impl SurfaceFormat {
     }
 }
 
+/// [`PresentationParameters`] component, [`Renderbuffer`] attribute
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Primitive)]
 #[repr(u32)]
 pub enum DepthFormat {

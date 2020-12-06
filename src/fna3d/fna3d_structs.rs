@@ -43,7 +43,7 @@ pub type Renderbuffer = sys::FNA3D_Renderbuffer;
 /// Disposed with a corresponding function in [`Device`]
 pub type Effect = sys::FNA3D_Effect;
 
-/// Opaque struct that represents FNA3D query
+/// Opaque object to run occlusion queries
 ///
 /// Disposed with a corresponding function in [`Device`]
 pub type Query = sys::FNA3D_Query;
@@ -274,7 +274,7 @@ impl Color {
     }
 }
 
-/// Used to represent scissors rectangle
+/// Scissor rect or region of [`Renderbuffer`]
 pub type Rect = sys::FNA3D_Rect;
 /// Used to represent color
 pub type Vec4 = sys::FNA3D_Vec4;

@@ -9,7 +9,7 @@
 //! [`stb_image`]: https://github.com/nothings/stb/blob/master/stb_image.h
 //! [`SDL_RWops`]: https://wiki.libsdl.org/SDL_RWops
 //!
-//! # Example (presudo code)
+//! # Example
 //!
 //! ```no_run
 //! pub struct MyTexture2d {
@@ -34,7 +34,7 @@
 //!             fna3d::SurfaceFormat::Color,
 //!             w,
 //!             h,
-//!             0,
+//!             1, // mipmap level (do not set it to zero)
 //!             false,
 //!         );
 //!         let texture = MyTexture2d { raw, w, h };
