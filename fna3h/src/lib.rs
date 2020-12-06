@@ -38,12 +38,14 @@ pub mod draw {
     * [`Device::clear`]
     * for each draw call:
         * (set shader matrix)
-        * [`Device::apply_effect`] ([`mojo::Effect`], [`crate::tex::Texture`])
-        * [`Device::set_vertex_buffer_data`] ([`crate::buf`])
-        * [`Device::verify_sampler`] ([`pip::SamplerState`])
+        * apply pipeline
+            * [`Device::apply_effect`] ([`mojo::Effect`])
+            * [`Device::set_vertex_buffer_data`] ([`crate::buf`])
+            * [`Device::verify_sampler`] ([`pip::SamplerState`])
         * [`Device::apply_vertex_buffer_bindings`] ([`VertexBufferBinding`])
         * [`Device::draw_indexed_primitives`]: (range of vertex buffer and index buffer)
-    * [`Device::swap_buffers`]
+
+    And call [`Device::swap_buffers`] at the end of a frame.
 
                 */
 

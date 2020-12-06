@@ -1,6 +1,6 @@
 [package]
 name = "fna3h"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["toyboot4e <toyboot4e@gmail.com>"]
 description = "FNA3D types in a hierarchy"
 repository = "https://github.com/toyboot4e/rust-fna3d"
@@ -11,7 +11,7 @@ license = "MIT"
 categories = ["game-engines"]
 
 [dependencies]
-fna3d = { path = "../fna3d", version = "0.1.4" }
+fna3d = { path = "../fna3d", version = "0.1.5" }
 
 [dev-dependencies]
 # examples-only dependencies

@@ -1,19 +1,7 @@
-/*! Build script of `fna3d-sys`
+//! Build script of `fna3d-sys`
 
-If the compilation fails, run `cargo clean`.
-
-# What it does
-
-1. Applies patches to FNA3D and MojoShader
-2. Compiles MojoShader and FNA3D if they're not found in `OUT_DIR`
-3. Links to the output libraries
-4. Makes bindings (FFI) to the C libraries
-
-# TODOs
-
-* TODO: support Windows
-* TODO: how to publish executable with dynamic libraries (application bundle)?
-*/
+// * TODO: support Windows
+// * TODO: how to publish executable with dynamic libraries (application bundle)?
 
 use {
     cmake::Config,
@@ -26,8 +14,8 @@ use {
 
 fn main() {
     // FIXME: somehow rerun too much
-    let root = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
-    println!("cargo:rerun-if-changed={}", root.join("wrappers").display());
+    // let root = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
+    // println!("cargo:rerun-if-changed={}", root.join("wrappers").display());
     // when we update `FNA3D`, we have to manually rebuild!
 
     self::prepare();
@@ -49,7 +37,21 @@ fn prepare() {
     let src = fs::read("wrappers/mojoshader_version.h").unwrap();
 
     // consider crates.io (read-only)
-    if let Ok(mut dst) = fs::File::create(root.join("FNA3D/MojoShader/mojoshader_version.h")) {
+    let p = root.join("FNA3D/MojoShader/mojoshader_version.h");
+
+    if p.is_file() {
+        let content = match fs::read(&p) {
+            Ok(s) => s,
+            Err(_) => return,
+        };
+        if src == content {
+            return;
+        }
+    }
+
+    // NOTE: on crates.io, we can't write to the file (since it's read-only)
+    if let Ok(mut dst) = fs::File::create(&p) {
+        // NOTE: this forces rebuilding `fna3d-sys`
         dst.write_all(&src).unwrap();
     }
 
@@ -93,6 +95,8 @@ fn compile() {
 
 /// Generates bindings using a wrapper header file
 fn gen_bindings(wrapper: impl AsRef<Path>, dst_file_name: impl AsRef<Path>) {
+    return;
+
     let wrapper = wrapper.as_ref();
     let dst_file_name = dst_file_name.as_ref();
 
