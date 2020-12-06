@@ -13,13 +13,13 @@ of [`Builder`] to configure enum generation.
 #![allow(warnings)]
 
 // Include generated bindings
-include!(concat!(env!("OUT_DIR"), "/fna3d_bindings.rs"));
+include!("ffi/fna3d_bindings.rs");
 
 pub mod mojo {
     //! MojoShader types
     //!
     //! These types are concrete while mojoshader types under `crate::` don't tell the field types.
-    include!(concat!(env!("OUT_DIR"), "/mojoshader_bindings.rs"));
+    include!("ffi/mojoshader_bindings.rs");
 }
 
 #[cfg(test)]

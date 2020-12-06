@@ -84,7 +84,7 @@ fn gen_bindings(wrapper: impl AsRef<Path>, dst_file_name: impl AsRef<Path>) {
     let dst_file_name = dst_file_name.as_ref();
 
     let root = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
-    let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
+    let out_dir = root.join("src/ffi");
     let dst = out_dir.join(&dst_file_name);
 
     println!("cargo:rerun-if-changed={}", wrapper.display());
