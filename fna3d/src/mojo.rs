@@ -128,6 +128,8 @@ pub fn from_bytes(
 
 /// Column-major orthographic matrix
 ///
+/// TODO: fix the docstring
+///
 /// `fna3d::mojo::orthographic_off_center(0.0, width, height, 0.0, 1.0, 0.0);`
 ///
 /// * bottom is down and top is up, so `bottom` > `top`

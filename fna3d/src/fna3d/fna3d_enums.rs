@@ -81,7 +81,7 @@ pub enum IndexElementSize {
     Bits32 = sys::FNA3D_IndexElementSize_FNA3D_INDEXELEMENTSIZE_32BIT,
 }
 
-/// Surface pixel data format; memory layout of each pixel in a 2D image
+/// [`Texture`] or [`Renderbuffer`] pixel data format (memory layout of each pixel)
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Primitive)]
 #[repr(u32)]
 pub enum SurfaceFormat {
