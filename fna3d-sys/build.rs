@@ -39,6 +39,12 @@ fn prepare() {
     let patch = root.join("wrappers/fna3d_patch.diff");
     apply_patch(&dir, &patch);
 
+    // copy `mojoshader_version.h`
+    use std::{fs, io::prelude::*};
+    let src = fs::read("wrappers/mojoshader_version.h").unwrap();
+    let mut dst = fs::File::create(root.join("FNA3D/MojoShader/mojoshader_version.h")).unwrap();
+    dst.write_all(&src).unwrap();
+
     fn apply_patch(dir: &Path, patch: &Path) {
         let patch = format!("{}", patch.display());
         println!("cargo:rerun-if-changed={}", patch);
