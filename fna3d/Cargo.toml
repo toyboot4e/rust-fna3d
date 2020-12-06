@@ -11,7 +11,7 @@ license = "MIT"
 categories = ["game-engines"]
 
 [dependencies]
-fna3d-sys = { path = "../fna3d-sys", version = "0.1.5" }
+fna3d-sys = { path = "../fna3d-sys", version = "0.1.6" }
 
 log = "0.4.11"
 
