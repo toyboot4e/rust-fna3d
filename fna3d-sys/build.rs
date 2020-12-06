@@ -91,6 +91,12 @@ fn compile() {
     println!("cargo:rustc-link-lib=dylib=FNA3D");
 }
 
+fn is_readonly(p: &Path) -> bool {
+    std::fs::metadata(p)
+        .map(|m| m.permissions().readonly())
+        .unwrap_or(true)
+}
+
 /// Generates bindings using a wrapper header file
 fn gen_bindings(wrapper: impl AsRef<Path>, dst_file_name: impl AsRef<Path>) {
     let wrapper = wrapper.as_ref();
@@ -101,11 +107,10 @@ fn gen_bindings(wrapper: impl AsRef<Path>, dst_file_name: impl AsRef<Path>) {
     let dst = out_dir.join(&dst_file_name);
 
     // consider crates.io (read-only)
-    let meta = match std::fs::metadata(&out_dir) {
-        Ok(m) => m,
-        Err(_) => return,
-    };
-    if meta.permissions().readonly() {
+    if is_readonly(&out_dir) {
+        return;
+    }
+    if is_readonly(&dst) {
         return;
     }
 
