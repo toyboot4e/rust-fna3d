@@ -47,7 +47,8 @@ fn prepare() {
     // copy `mojoshader_version.h`
     use std::{fs, io::prelude::*};
     let src = fs::read("wrappers/mojoshader_version.h").unwrap();
-    // consider `crates.io` (read-only)
+
+    // consider crates.io (read-only)
     if let Ok(mut dst) = fs::File::create(root.join("FNA3D/MojoShader/mojoshader_version.h")) {
         dst.write_all(&src).unwrap();
     }
@@ -98,6 +99,15 @@ fn gen_bindings(wrapper: impl AsRef<Path>, dst_file_name: impl AsRef<Path>) {
     let root = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
     let out_dir = root.join("src/ffi");
     let dst = out_dir.join(&dst_file_name);
+
+    // consider crates.io (read-only)
+    let meta = match std::fs::metadata(&out_dir) {
+        Ok(m) => m,
+        Err(_) => return,
+    };
+    if meta.permissions().readonly() {
+        return;
+    }
 
     let bindings = bindgen::Builder::default()
         .header(format!("{}", wrapper.display()))
