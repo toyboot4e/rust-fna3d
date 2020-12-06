@@ -2,7 +2,7 @@
 //!
 //! [fna3d]: https://docs.rs/fna3d/latest/fna3d/index.html
 //!
-//! Just a collection of re-exported types.
+//! Just a collection of re-exports.
 //!
 //! Unexported items: [`fna3d::linked_version`]
 
