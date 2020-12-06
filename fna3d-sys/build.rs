@@ -95,8 +95,6 @@ fn compile() {
 
 /// Generates bindings using a wrapper header file
 fn gen_bindings(wrapper: impl AsRef<Path>, dst_file_name: impl AsRef<Path>) {
-    return;
-
     let wrapper = wrapper.as_ref();
     let dst_file_name = dst_file_name.as_ref();
 

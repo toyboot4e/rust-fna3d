@@ -159,7 +159,7 @@ dependencies = [
 
 [[package]]
 name = "fna3d"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "anyhow",
  "bitflags",
@@ -173,7 +173,7 @@ dependencies = [
 
 [[package]]
 name = "fna3d-sys"
-version = "0.1.6"
+version = "0.1.8"
 dependencies = [
  "bindgen",
  "cmake",
