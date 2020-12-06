@@ -1,6 +1,6 @@
 [package]
 name = "fna3d-sys"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["toyboot4e <toyboot4e@gmail.com>"]
 description = "Rust FFI bindings to FNA3D"
 repository = "https://github.com/toyboot4e/rust-fna3d/fna3d-sys"
