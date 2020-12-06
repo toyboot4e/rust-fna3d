@@ -2,6 +2,14 @@
 
 Wrapper of [FNA3D](https://github.com/FNA-XNA/FNA3D), the graphics library for [FNA](https://fna-xna.github.io/)
 
+## Crates
+
+Choose `fna3d` or `fna3h`:
+
+* `fna3d-sys`: Rust FFI to FNA3D generated with `bindgen`
+* `fna3d`: Thin wrapper of `fna3d-sys`
+* `fna3h`: `fna3d` types in a hierarchy (sub modules).
+
 ## About
 
 Rust-FNA3D cares about desktop platforms and it works on macOS and Linux. To support Windows, I need to buy one.

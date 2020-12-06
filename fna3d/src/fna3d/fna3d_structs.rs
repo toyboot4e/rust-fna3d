@@ -59,6 +59,7 @@ pub type Texture = sys::FNA3D_Texture;
 /// attributes
 pub type VertexBufferBinding = sys::FNA3D_VertexBufferBinding;
 
+/// Offscreen rendering
 pub struct RenderTargetBinding {
     raw: sys::FNA3D_RenderTargetBinding,
 }
