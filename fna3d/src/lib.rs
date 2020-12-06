@@ -1,6 +1,8 @@
 //! Wrapper of [FNA3D], the graphics library for [FNA]
 //!
-//! See [examples](https://github.com/toyboot4e/rust-fna3d/tree/master/examples) to get started.
+//! See [fna3h](https://docs.rs/fna3h/latest/fna3h/) as an alternative.
+//!
+//! See [examples](https://github.com/toyboot4e/rust-fna3d/tree/master/fna3d/examples) to get started.
 //!
 //! ## What is `fna3d`?
 //!

@@ -25,6 +25,11 @@ use {
 };
 
 fn main() {
+    // FIXME: somehow rerun too much
+    let root = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
+    println!("cargo:rerun-if-changed={}", root.join("wrappers").display());
+    // when we update `FNA3D`, we have to manually rebuild!
+
     self::prepare();
     self::compile();
     self::gen_bindings("wrappers/fna3d_wrapper.h", "fna3d_bindings.rs");
@@ -42,12 +47,13 @@ fn prepare() {
     // copy `mojoshader_version.h`
     use std::{fs, io::prelude::*};
     let src = fs::read("wrappers/mojoshader_version.h").unwrap();
-    let mut dst = fs::File::create(root.join("FNA3D/MojoShader/mojoshader_version.h")).unwrap();
-    dst.write_all(&src).unwrap();
+    // consider `crates.io` (read-only)
+    if let Ok(mut dst) = fs::File::create(root.join("FNA3D/MojoShader/mojoshader_version.h")) {
+        dst.write_all(&src).unwrap();
+    }
 
     fn apply_patch(dir: &Path, patch: &Path) {
         let patch = format!("{}", patch.display());
-        println!("cargo:rerun-if-changed={}", patch);
 
         Command::new("git")
             .current_dir(dir)
@@ -92,8 +98,6 @@ fn gen_bindings(wrapper: impl AsRef<Path>, dst_file_name: impl AsRef<Path>) {
     let root = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
     let out_dir = root.join("src/ffi");
     let dst = out_dir.join(&dst_file_name);
-
-    println!("cargo:rerun-if-changed={}", wrapper.display());
 
     let bindings = bindgen::Builder::default()
         .header(format!("{}", wrapper.display()))
