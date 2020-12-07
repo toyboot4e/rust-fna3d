@@ -1,3 +1,6 @@
 [submodule "fna3d-sys/FNA3D"]
 	path = fna3d-sys/FNA3D
 	url = https://github.com/FNA-XNA/FNA3D
+[submodule "fna3d-fontstash/fontstash-rs"]
+	path = fna3d-fontstash/fontstash-rs
+	url = https://github.com/toyboot4e/fontstash-rs

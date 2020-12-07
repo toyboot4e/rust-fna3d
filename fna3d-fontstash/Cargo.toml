@@ -1,0 +1,10 @@
+[package]
+name = "fna3d-fontstash"
+version = "0.1.0"
+authors = ["toyboot4e <toyboot4e@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+fna3d = { path = "../fna3d", version = "0.1.5" }
+fontstash = { path = "fontstash-rs", version = "0.1.0" }
+log = "0.4.11"
