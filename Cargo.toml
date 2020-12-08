@@ -1,0 +1,8 @@
+[workspace]
+members = [
+    "fna3d-sys",
+    "fna3d",
+    "fna3h",
+    "fna3d-imgui",
+    "fna3d-fontstash",
+]
