@@ -137,6 +137,11 @@ fn bindgen_test_layout_MOJOSHADER_uniform() {
         )
     );
 }
+impl Default for MOJOSHADER_uniform {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct MOJOSHADER_constant {
@@ -204,6 +209,11 @@ fn bindgen_test_layout_MOJOSHADER_constant__bindgen_ty_1() {
         )
     );
 }
+impl Default for MOJOSHADER_constant__bindgen_ty_1 {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[test]
 fn bindgen_test_layout_MOJOSHADER_constant() {
     assert_eq!(
@@ -246,6 +256,11 @@ fn bindgen_test_layout_MOJOSHADER_constant() {
             stringify!(value)
         )
     );
+}
+impl Default for MOJOSHADER_constant {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 pub const MOJOSHADER_samplerType_MOJOSHADER_SAMPLER_UNKNOWN: MOJOSHADER_samplerType = -1;
 pub const MOJOSHADER_samplerType_MOJOSHADER_SAMPLER_2D: MOJOSHADER_samplerType = 0;
@@ -313,6 +328,11 @@ fn bindgen_test_layout_MOJOSHADER_sampler() {
         )
     );
 }
+impl Default for MOJOSHADER_sampler {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_samplerMap {
@@ -351,6 +371,11 @@ fn bindgen_test_layout_MOJOSHADER_samplerMap() {
             stringify!(type_)
         )
     );
+}
+impl Default for MOJOSHADER_samplerMap {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 pub const MOJOSHADER_usage_MOJOSHADER_USAGE_UNKNOWN: MOJOSHADER_usage = -1;
 pub const MOJOSHADER_usage_MOJOSHADER_USAGE_POSITION: MOJOSHADER_usage = 0;
@@ -419,6 +444,11 @@ fn bindgen_test_layout_MOJOSHADER_attribute() {
         )
     );
 }
+impl Default for MOJOSHADER_attribute {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_swizzle {
@@ -468,6 +498,11 @@ fn bindgen_test_layout_MOJOSHADER_swizzle() {
             stringify!(swizzles)
         )
     );
+}
+impl Default for MOJOSHADER_swizzle {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 pub const MOJOSHADER_symbolRegisterSet_MOJOSHADER_SYMREGSET_BOOL: MOJOSHADER_symbolRegisterSet = 0;
 pub const MOJOSHADER_symbolRegisterSet_MOJOSHADER_SYMREGSET_INT4: MOJOSHADER_symbolRegisterSet = 1;
@@ -615,6 +650,11 @@ fn bindgen_test_layout_MOJOSHADER_symbolTypeInfo() {
         )
     );
 }
+impl Default for MOJOSHADER_symbolTypeInfo {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_symbolStructMember {
@@ -657,6 +697,11 @@ fn bindgen_test_layout_MOJOSHADER_symbolStructMember() {
             stringify!(info)
         )
     );
+}
+impl Default for MOJOSHADER_symbolStructMember {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -734,6 +779,11 @@ fn bindgen_test_layout_MOJOSHADER_symbol() {
         )
     );
 }
+impl Default for MOJOSHADER_symbol {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_error {
@@ -783,6 +833,11 @@ fn bindgen_test_layout_MOJOSHADER_error() {
             stringify!(error_position)
         )
     );
+}
+impl Default for MOJOSHADER_error {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 pub const MOJOSHADER_preshaderOpcode_MOJOSHADER_PRESHADEROP_NOP: MOJOSHADER_preshaderOpcode = 0;
 pub const MOJOSHADER_preshaderOpcode_MOJOSHADER_PRESHADEROP_MOV: MOJOSHADER_preshaderOpcode = 1;
@@ -912,6 +967,11 @@ fn bindgen_test_layout_MOJOSHADER_preshaderOperand() {
         )
     );
 }
+impl Default for MOJOSHADER_preshaderOperand {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_preshaderInstruction {
@@ -983,6 +1043,11 @@ fn bindgen_test_layout_MOJOSHADER_preshaderInstruction() {
             stringify!(operands)
         )
     );
+}
+impl Default for MOJOSHADER_preshaderInstruction {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -1144,6 +1209,11 @@ fn bindgen_test_layout_MOJOSHADER_preshader() {
             stringify!(malloc_data)
         )
     );
+}
+impl Default for MOJOSHADER_preshader {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -1492,6 +1562,11 @@ fn bindgen_test_layout_MOJOSHADER_parseData() {
         )
     );
 }
+impl Default for MOJOSHADER_parseData {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 extern "C" {
     pub fn MOJOSHADER_maxShaderModel(
         profile: *const ::std::os::raw::c_char,
@@ -1571,6 +1646,11 @@ fn bindgen_test_layout_MOJOSHADER_preprocessorDefine() {
             stringify!(definition)
         )
     );
+}
+impl Default for MOJOSHADER_preprocessorDefine {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 pub const MOJOSHADER_includeType_MOJOSHADER_INCLUDETYPE_LOCAL: MOJOSHADER_includeType = 0;
 pub const MOJOSHADER_includeType_MOJOSHADER_INCLUDETYPE_SYSTEM: MOJOSHADER_includeType = 1;
@@ -1680,6 +1760,11 @@ fn bindgen_test_layout_MOJOSHADER_preprocessData() {
             stringify!(malloc_data)
         )
     );
+}
+impl Default for MOJOSHADER_preprocessData {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 pub type MOJOSHADER_includeOpen = ::std::option::Option<
     unsafe extern "C" fn(
@@ -1821,6 +1906,11 @@ fn bindgen_test_layout_MOJOSHADER_astDataTypeStructMember() {
         )
     );
 }
+impl Default for MOJOSHADER_astDataTypeStructMember {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_astDataTypeStruct {
@@ -1878,6 +1968,11 @@ fn bindgen_test_layout_MOJOSHADER_astDataTypeStruct() {
         )
     );
 }
+impl Default for MOJOSHADER_astDataTypeStruct {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_astDataTypeArray {
@@ -1933,6 +2028,11 @@ fn bindgen_test_layout_MOJOSHADER_astDataTypeArray() {
             stringify!(elements)
         )
     );
+}
+impl Default for MOJOSHADER_astDataTypeArray {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 pub type MOJOSHADER_astDataTypeVector = MOJOSHADER_astDataTypeArray;
 #[repr(C)]
@@ -2004,6 +2104,11 @@ fn bindgen_test_layout_MOJOSHADER_astDataTypeMatrix() {
         )
     );
 }
+impl Default for MOJOSHADER_astDataTypeMatrix {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_astDataTypeBuffer {
@@ -2046,6 +2151,11 @@ fn bindgen_test_layout_MOJOSHADER_astDataTypeBuffer() {
             stringify!(base)
         )
     );
+}
+impl Default for MOJOSHADER_astDataTypeBuffer {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -2131,6 +2241,11 @@ fn bindgen_test_layout_MOJOSHADER_astDataTypeFunction() {
         )
     );
 }
+impl Default for MOJOSHADER_astDataTypeFunction {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_astDataTypeUser {
@@ -2184,6 +2299,11 @@ fn bindgen_test_layout_MOJOSHADER_astDataTypeUser() {
             stringify!(name)
         )
     );
+}
+impl Default for MOJOSHADER_astDataTypeUser {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -2292,6 +2412,11 @@ fn bindgen_test_layout_MOJOSHADER_astDataType() {
             stringify!(function)
         )
     );
+}
+impl Default for MOJOSHADER_astDataType {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 pub const MOJOSHADER_astNodeType_MOJOSHADER_AST_OP_START_RANGE: MOJOSHADER_astNodeType = 0;
 pub const MOJOSHADER_astNodeType_MOJOSHADER_AST_OP_START_RANGE_UNARY: MOJOSHADER_astNodeType = 1;
@@ -2442,6 +2567,11 @@ fn bindgen_test_layout_MOJOSHADER_astNodeInfo() {
         )
     );
 }
+impl Default for MOJOSHADER_astNodeInfo {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 pub const MOJOSHADER_astVariableAttributes_MOJOSHADER_AST_VARATTR_EXTERN:
     MOJOSHADER_astVariableAttributes = 1;
 pub const MOJOSHADER_astVariableAttributes_MOJOSHADER_AST_VARATTR_NOINTERPOLATION:
@@ -2510,6 +2640,11 @@ fn bindgen_test_layout_MOJOSHADER_astGeneric() {
         )
     );
 }
+impl Default for MOJOSHADER_astGeneric {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_astExpression {
@@ -2550,6 +2685,11 @@ fn bindgen_test_layout_MOJOSHADER_astExpression() {
             stringify!(datatype)
         )
     );
+}
+impl Default for MOJOSHADER_astExpression {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -2602,6 +2742,11 @@ fn bindgen_test_layout_MOJOSHADER_astArguments() {
             stringify!(next)
         )
     );
+}
+impl Default for MOJOSHADER_astArguments {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -2658,6 +2803,11 @@ fn bindgen_test_layout_MOJOSHADER_astExpressionUnary() {
             stringify!(operand)
         )
     );
+}
+impl Default for MOJOSHADER_astExpressionUnary {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -2727,6 +2877,11 @@ fn bindgen_test_layout_MOJOSHADER_astExpressionBinary() {
             stringify!(right)
         )
     );
+}
+impl Default for MOJOSHADER_astExpressionBinary {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -2811,6 +2966,11 @@ fn bindgen_test_layout_MOJOSHADER_astExpressionTernary() {
         )
     );
 }
+impl Default for MOJOSHADER_astExpressionTernary {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_astExpressionIdentifier {
@@ -2886,6 +3046,11 @@ fn bindgen_test_layout_MOJOSHADER_astExpressionIdentifier() {
         )
     );
 }
+impl Default for MOJOSHADER_astExpressionIdentifier {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_astExpressionIntLiteral {
@@ -2946,6 +3111,11 @@ fn bindgen_test_layout_MOJOSHADER_astExpressionIntLiteral() {
             stringify!(value)
         )
     );
+}
+impl Default for MOJOSHADER_astExpressionIntLiteral {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -3012,6 +3182,11 @@ fn bindgen_test_layout_MOJOSHADER_astExpressionFloatLiteral() {
         )
     );
 }
+impl Default for MOJOSHADER_astExpressionFloatLiteral {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_astExpressionStringLiteral {
@@ -3076,6 +3251,11 @@ fn bindgen_test_layout_MOJOSHADER_astExpressionStringLiteral() {
             stringify!(string)
         )
     );
+}
+impl Default for MOJOSHADER_astExpressionStringLiteral {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -3142,6 +3322,11 @@ fn bindgen_test_layout_MOJOSHADER_astExpressionBooleanLiteral() {
         )
     );
 }
+impl Default for MOJOSHADER_astExpressionBooleanLiteral {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_astExpressionConstructor {
@@ -3202,6 +3387,11 @@ fn bindgen_test_layout_MOJOSHADER_astExpressionConstructor() {
             stringify!(args)
         )
     );
+}
+impl Default for MOJOSHADER_astExpressionConstructor {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -3306,6 +3496,11 @@ fn bindgen_test_layout_MOJOSHADER_astExpressionDerefStruct() {
         )
     );
 }
+impl Default for MOJOSHADER_astExpressionDerefStruct {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_astExpressionCallFunction {
@@ -3385,6 +3580,11 @@ fn bindgen_test_layout_MOJOSHADER_astExpressionCallFunction() {
         )
     );
 }
+impl Default for MOJOSHADER_astExpressionCallFunction {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_astExpressionCast {
@@ -3441,6 +3641,11 @@ fn bindgen_test_layout_MOJOSHADER_astExpressionCast() {
         )
     );
 }
+impl Default for MOJOSHADER_astExpressionCast {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_astCompilationUnit {
@@ -3483,6 +3688,11 @@ fn bindgen_test_layout_MOJOSHADER_astCompilationUnit() {
             stringify!(next)
         )
     );
+}
+impl Default for MOJOSHADER_astCompilationUnit {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 pub const MOJOSHADER_astFunctionStorageClass_MOJOSHADER_AST_FNSTORECLS_NONE:
     MOJOSHADER_astFunctionStorageClass = 0;
@@ -3640,6 +3850,11 @@ fn bindgen_test_layout_MOJOSHADER_astFunctionParameters() {
         )
     );
 }
+impl Default for MOJOSHADER_astFunctionParameters {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_astFunctionSignature {
@@ -3739,6 +3954,11 @@ fn bindgen_test_layout_MOJOSHADER_astFunctionSignature() {
         )
     );
 }
+impl Default for MOJOSHADER_astFunctionSignature {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_astScalarOrArray {
@@ -3806,6 +4026,11 @@ fn bindgen_test_layout_MOJOSHADER_astScalarOrArray() {
         )
     );
 }
+impl Default for MOJOSHADER_astScalarOrArray {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_astAnnotations {
@@ -3871,6 +4096,11 @@ fn bindgen_test_layout_MOJOSHADER_astAnnotations() {
         )
     );
 }
+impl Default for MOJOSHADER_astAnnotations {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_astPackOffset {
@@ -3920,6 +4150,11 @@ fn bindgen_test_layout_MOJOSHADER_astPackOffset() {
             stringify!(ident2)
         )
     );
+}
+impl Default for MOJOSHADER_astPackOffset {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -3978,6 +4213,11 @@ fn bindgen_test_layout_MOJOSHADER_astVariableLowLevel() {
             stringify!(register_name)
         )
     );
+}
+impl Default for MOJOSHADER_astVariableLowLevel {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -4073,6 +4313,11 @@ fn bindgen_test_layout_MOJOSHADER_astStructMembers() {
         )
     );
 }
+impl Default for MOJOSHADER_astStructMembers {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_astStructDeclaration {
@@ -4142,6 +4387,11 @@ fn bindgen_test_layout_MOJOSHADER_astStructDeclaration() {
             stringify!(members)
         )
     );
+}
+impl Default for MOJOSHADER_astStructDeclaration {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -4301,6 +4551,11 @@ fn bindgen_test_layout_MOJOSHADER_astVariableDeclaration() {
         )
     );
 }
+impl Default for MOJOSHADER_astVariableDeclaration {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_astStatement {
@@ -4339,6 +4594,11 @@ fn bindgen_test_layout_MOJOSHADER_astStatement() {
             stringify!(next)
         )
     );
+}
+impl Default for MOJOSHADER_astStatement {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 pub type MOJOSHADER_astEmptyStatement = MOJOSHADER_astStatement;
 pub type MOJOSHADER_astBreakStatement = MOJOSHADER_astStatement;
@@ -4400,6 +4660,11 @@ fn bindgen_test_layout_MOJOSHADER_astBlockStatement() {
         )
     );
 }
+impl Default for MOJOSHADER_astBlockStatement {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_astReturnStatement {
@@ -4455,6 +4720,11 @@ fn bindgen_test_layout_MOJOSHADER_astReturnStatement() {
             stringify!(expr)
         )
     );
+}
+impl Default for MOJOSHADER_astReturnStatement {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -4514,6 +4784,11 @@ fn bindgen_test_layout_MOJOSHADER_astExpressionStatement() {
             stringify!(expr)
         )
     );
+}
+impl Default for MOJOSHADER_astExpressionStatement {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -4605,6 +4880,11 @@ fn bindgen_test_layout_MOJOSHADER_astIfStatement() {
         )
     );
 }
+impl Default for MOJOSHADER_astIfStatement {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_astSwitchCases {
@@ -4667,6 +4947,11 @@ fn bindgen_test_layout_MOJOSHADER_astSwitchCases() {
             stringify!(next)
         )
     );
+}
+impl Default for MOJOSHADER_astSwitchCases {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -4751,6 +5036,11 @@ fn bindgen_test_layout_MOJOSHADER_astSwitchStatement() {
         )
     );
 }
+impl Default for MOJOSHADER_astSwitchStatement {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_astWhileStatement {
@@ -4832,6 +5122,11 @@ fn bindgen_test_layout_MOJOSHADER_astWhileStatement() {
             stringify!(statement)
         )
     );
+}
+impl Default for MOJOSHADER_astWhileStatement {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 pub type MOJOSHADER_astDoStatement = MOJOSHADER_astWhileStatement;
 #[repr(C)]
@@ -4951,6 +5246,11 @@ fn bindgen_test_layout_MOJOSHADER_astForStatement() {
         )
     );
 }
+impl Default for MOJOSHADER_astForStatement {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_astTypedef {
@@ -5012,6 +5312,11 @@ fn bindgen_test_layout_MOJOSHADER_astTypedef() {
         )
     );
 }
+impl Default for MOJOSHADER_astTypedef {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_astTypedefStatement {
@@ -5068,6 +5373,11 @@ fn bindgen_test_layout_MOJOSHADER_astTypedefStatement() {
             stringify!(type_info)
         )
     );
+}
+impl Default for MOJOSHADER_astTypedefStatement {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -5126,6 +5436,11 @@ fn bindgen_test_layout_MOJOSHADER_astVarDeclStatement() {
         )
     );
 }
+impl Default for MOJOSHADER_astVarDeclStatement {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_astStructStatement {
@@ -5182,6 +5497,11 @@ fn bindgen_test_layout_MOJOSHADER_astStructStatement() {
             stringify!(struct_info)
         )
     );
+}
+impl Default for MOJOSHADER_astStructStatement {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -5276,6 +5596,11 @@ fn bindgen_test_layout_MOJOSHADER_astCompilationUnitFunction() {
         )
     );
 }
+impl Default for MOJOSHADER_astCompilationUnitFunction {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_astCompilationUnitTypedef {
@@ -5341,6 +5666,11 @@ fn bindgen_test_layout_MOJOSHADER_astCompilationUnitTypedef() {
         )
     );
 }
+impl Default for MOJOSHADER_astCompilationUnitTypedef {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_astCompilationUnitStruct {
@@ -5401,6 +5731,11 @@ fn bindgen_test_layout_MOJOSHADER_astCompilationUnitStruct() {
             stringify!(struct_info)
         )
     );
+}
+impl Default for MOJOSHADER_astCompilationUnitStruct {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -5466,6 +5801,11 @@ fn bindgen_test_layout_MOJOSHADER_astCompilationUnitVariable() {
             stringify!(declaration)
         )
     );
+}
+impl Default for MOJOSHADER_astCompilationUnitVariable {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -6017,6 +6357,11 @@ fn bindgen_test_layout_MOJOSHADER_astNode() {
         )
     );
 }
+impl Default for MOJOSHADER_astNode {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_astData {
@@ -6124,6 +6469,11 @@ fn bindgen_test_layout_MOJOSHADER_astData() {
         )
     );
 }
+impl Default for MOJOSHADER_astData {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 extern "C" {
     pub fn MOJOSHADER_parseAst(
         srcprofile: *const ::std::os::raw::c_char,
@@ -6218,6 +6568,11 @@ fn bindgen_test_layout_MOJOSHADER_irNodeInfo() {
         )
     );
 }
+impl Default for MOJOSHADER_irNodeInfo {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_irGeneric {
@@ -6245,6 +6600,11 @@ fn bindgen_test_layout_MOJOSHADER_irGeneric() {
             stringify!(ir)
         )
     );
+}
+impl Default for MOJOSHADER_irGeneric {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 pub const MOJOSHADER_irBinOpType_MOJOSHADER_IR_BINOP_ADD: MOJOSHADER_irBinOpType = 0;
 pub const MOJOSHADER_irBinOpType_MOJOSHADER_IR_BINOP_SUBTRACT: MOJOSHADER_irBinOpType = 1;
@@ -6316,6 +6676,11 @@ fn bindgen_test_layout_MOJOSHADER_irExprInfo() {
         )
     );
 }
+impl Default for MOJOSHADER_irExprInfo {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct MOJOSHADER_irConstant {
@@ -6371,6 +6736,11 @@ fn bindgen_test_layout_MOJOSHADER_irConstant__bindgen_ty_1() {
         )
     );
 }
+impl Default for MOJOSHADER_irConstant__bindgen_ty_1 {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[test]
 fn bindgen_test_layout_MOJOSHADER_irConstant() {
     assert_eq!(
@@ -6403,6 +6773,11 @@ fn bindgen_test_layout_MOJOSHADER_irConstant() {
             stringify!(value)
         )
     );
+}
+impl Default for MOJOSHADER_irConstant {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -6442,6 +6817,11 @@ fn bindgen_test_layout_MOJOSHADER_irTemp() {
             stringify!(index)
         )
     );
+}
+impl Default for MOJOSHADER_irTemp {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -6504,6 +6884,11 @@ fn bindgen_test_layout_MOJOSHADER_irBinOp() {
         )
     );
 }
+impl Default for MOJOSHADER_irBinOp {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_irMemory {
@@ -6542,6 +6927,11 @@ fn bindgen_test_layout_MOJOSHADER_irMemory() {
             stringify!(index)
         )
     );
+}
+impl Default for MOJOSHADER_irMemory {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -6593,6 +6983,11 @@ fn bindgen_test_layout_MOJOSHADER_irCall() {
         )
     );
 }
+impl Default for MOJOSHADER_irCall {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_irESeq {
@@ -6642,6 +7037,11 @@ fn bindgen_test_layout_MOJOSHADER_irESeq() {
             stringify!(expr)
         )
     );
+}
+impl Default for MOJOSHADER_irESeq {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -6693,6 +7093,11 @@ fn bindgen_test_layout_MOJOSHADER_irArray() {
         )
     );
 }
+impl Default for MOJOSHADER_irArray {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_irConvert {
@@ -6731,6 +7136,11 @@ fn bindgen_test_layout_MOJOSHADER_irConvert() {
             stringify!(expr)
         )
     );
+}
+impl Default for MOJOSHADER_irConvert {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -6782,6 +7192,11 @@ fn bindgen_test_layout_MOJOSHADER_irSwizzle() {
         )
     );
 }
+impl Default for MOJOSHADER_irSwizzle {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_irConstruct {
@@ -6820,6 +7235,11 @@ fn bindgen_test_layout_MOJOSHADER_irConstruct() {
             stringify!(args)
         )
     );
+}
+impl Default for MOJOSHADER_irConstruct {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -6975,6 +7395,11 @@ fn bindgen_test_layout_MOJOSHADER_irExpression() {
         )
     );
 }
+impl Default for MOJOSHADER_irExpression {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_irMove {
@@ -7036,6 +7461,11 @@ fn bindgen_test_layout_MOJOSHADER_irMove() {
         )
     );
 }
+impl Default for MOJOSHADER_irMove {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_irExprStmt {
@@ -7075,6 +7505,11 @@ fn bindgen_test_layout_MOJOSHADER_irExprStmt() {
         )
     );
 }
+impl Default for MOJOSHADER_irExprStmt {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_irJump {
@@ -7113,6 +7548,11 @@ fn bindgen_test_layout_MOJOSHADER_irJump() {
             stringify!(label)
         )
     );
+}
+impl Default for MOJOSHADER_irJump {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -7197,6 +7637,11 @@ fn bindgen_test_layout_MOJOSHADER_irCJump() {
         )
     );
 }
+impl Default for MOJOSHADER_irCJump {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_irSeq {
@@ -7247,6 +7692,11 @@ fn bindgen_test_layout_MOJOSHADER_irSeq() {
         )
     );
 }
+impl Default for MOJOSHADER_irSeq {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_irLabel {
@@ -7285,6 +7735,11 @@ fn bindgen_test_layout_MOJOSHADER_irLabel() {
             stringify!(index)
         )
     );
+}
+impl Default for MOJOSHADER_irLabel {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 pub type MOJOSHADER_irDiscard = MOJOSHADER_irGeneric;
 #[repr(C)]
@@ -7404,6 +7859,11 @@ fn bindgen_test_layout_MOJOSHADER_irStatement() {
         )
     );
 }
+impl Default for MOJOSHADER_irStatement {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_irExprList {
@@ -7453,6 +7913,11 @@ fn bindgen_test_layout_MOJOSHADER_irExprList() {
             stringify!(next)
         )
     );
+}
+impl Default for MOJOSHADER_irExprList {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -7504,6 +7969,11 @@ fn bindgen_test_layout_MOJOSHADER_irMisc() {
             stringify!(exprlist)
         )
     );
+}
+impl Default for MOJOSHADER_irMisc {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -7577,6 +8047,11 @@ fn bindgen_test_layout_MOJOSHADER_irNode() {
             stringify!(misc)
         )
     );
+}
+impl Default for MOJOSHADER_irNode {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -7738,6 +8213,11 @@ fn bindgen_test_layout_MOJOSHADER_compileData() {
             stringify!(malloc_data)
         )
     );
+}
+impl Default for MOJOSHADER_compileData {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 extern "C" {
     pub fn MOJOSHADER_compile(
@@ -8936,6 +9416,11 @@ fn bindgen_test_layout_MOJOSHADER_effectValue__bindgen_ty_1() {
         )
     );
 }
+impl Default for MOJOSHADER_effectValue__bindgen_ty_1 {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[test]
 fn bindgen_test_layout_MOJOSHADER_effectValue() {
     assert_eq!(
@@ -8991,6 +9476,11 @@ fn bindgen_test_layout_MOJOSHADER_effectValue() {
         )
     );
 }
+impl Default for MOJOSHADER_effectValue {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct MOJOSHADER_effectState {
@@ -9029,6 +9519,11 @@ fn bindgen_test_layout_MOJOSHADER_effectState() {
             stringify!(value)
         )
     );
+}
+impl Default for MOJOSHADER_effectState {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -9072,6 +9567,11 @@ fn bindgen_test_layout_MOJOSHADER_effectSamplerState() {
             stringify!(value)
         )
     );
+}
+impl Default for MOJOSHADER_effectSamplerState {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 pub type MOJOSHADER_effectAnnotation = MOJOSHADER_effectValue;
 #[repr(C)]
@@ -9127,6 +9627,11 @@ fn bindgen_test_layout_MOJOSHADER_effectParam() {
             stringify!(annotations)
         )
     );
+}
+impl Default for MOJOSHADER_effectParam {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -9205,6 +9710,11 @@ fn bindgen_test_layout_MOJOSHADER_effectPass() {
             stringify!(annotations)
         )
     );
+}
+impl Default for MOJOSHADER_effectPass {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -9287,6 +9797,11 @@ fn bindgen_test_layout_MOJOSHADER_effectTechnique() {
         )
     );
 }
+impl Default for MOJOSHADER_effectTechnique {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct MOJOSHADER_effectShader {
@@ -9353,6 +9868,11 @@ fn bindgen_test_layout_MOJOSHADER_effectShader__bindgen_ty_1() {
             stringify!(preshader)
         )
     );
+}
+impl Default for MOJOSHADER_effectShader__bindgen_ty_1 {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[test]
 fn bindgen_test_layout_MOJOSHADER_effectShader() {
@@ -9483,6 +10003,11 @@ fn bindgen_test_layout_MOJOSHADER_effectShader() {
         )
     );
 }
+impl Default for MOJOSHADER_effectShader {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_effectSamplerMap {
@@ -9526,6 +10051,11 @@ fn bindgen_test_layout_MOJOSHADER_effectSamplerMap() {
         )
     );
 }
+impl Default for MOJOSHADER_effectSamplerMap {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_effectString {
@@ -9565,6 +10095,11 @@ fn bindgen_test_layout_MOJOSHADER_effectString() {
         )
     );
 }
+impl Default for MOJOSHADER_effectString {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MOJOSHADER_effectTexture {
@@ -9592,6 +10127,11 @@ fn bindgen_test_layout_MOJOSHADER_effectTexture() {
             stringify!(type_)
         )
     );
+}
+impl Default for MOJOSHADER_effectTexture {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -9680,6 +10220,11 @@ fn bindgen_test_layout_MOJOSHADER_effectObject__bindgen_ty_1() {
         )
     );
 }
+impl Default for MOJOSHADER_effectObject__bindgen_ty_1 {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[test]
 fn bindgen_test_layout_MOJOSHADER_effectObject() {
     assert_eq!(
@@ -9702,6 +10247,11 @@ fn bindgen_test_layout_MOJOSHADER_effectObject() {
             stringify!(type_)
         )
     );
+}
+impl Default for MOJOSHADER_effectObject {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -9775,6 +10325,11 @@ fn bindgen_test_layout_MOJOSHADER_samplerStateRegister() {
             stringify!(sampler_states)
         )
     );
+}
+impl Default for MOJOSHADER_samplerStateRegister {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -9876,6 +10431,11 @@ fn bindgen_test_layout_MOJOSHADER_effectStateChanges() {
             stringify!(vertex_sampler_state_changes)
         )
     );
+}
+impl Default for MOJOSHADER_effectStateChanges {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 pub type MOJOSHADER_compileShaderFunc = ::std::option::Option<
     unsafe extern "C" fn(
@@ -10101,6 +10661,11 @@ fn bindgen_test_layout_MOJOSHADER_effectShaderContext() {
             stringify!(malloc_data)
         )
     );
+}
+impl Default for MOJOSHADER_effectShaderContext {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -10341,6 +10906,11 @@ fn bindgen_test_layout_MOJOSHADER_effect() {
             stringify!(ctx)
         )
     );
+}
+impl Default for MOJOSHADER_effect {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 extern "C" {
     pub fn MOJOSHADER_compileEffect(

@@ -1,81 +1,50 @@
 //! Build script of `fna3d-sys`
 
 // * TODO: support Windows
-// * TODO: how to publish executable with dynamic libraries (application bundle)?
+// * TODO: application bundle?
 
 use {
     cmake::Config,
     std::{
         env,
         path::{Path, PathBuf},
-        process::Command,
     },
 };
 
 fn main() {
-    // FIXME: somehow rerun too much
-    // let root = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
-    // println!("cargo:rerun-if-changed={}", root.join("wrappers").display());
-    // when we update `FNA3D`, we have to manually rebuild!
-
-    self::prepare();
+    // FIXME: somehow reruns too often?
     self::compile();
     self::gen_bindings("wrappers/fna3d_wrapper.h", "fna3d_bindings.rs");
     self::gen_bindings("wrappers/mojoshader_wrapper.h", "mojoshader_bindings.rs");
 }
 
-/// Pulls FNA3D and applies patches
+/// Add `mojoshader_version.h` to `FNA3D/MojoShader`
+///
+/// I'm not sure why we need it.
 fn prepare() {
     let root = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
-
-    let dir = root.join("FNA3D");
-    let patch = root.join("wrappers/fna3d_patch.diff");
-    apply_patch(&dir, &patch);
 
     // copy `mojoshader_version.h`
     use std::{fs, io::prelude::*};
     let src = fs::read("wrappers/mojoshader_version.h").unwrap();
 
-    // consider crates.io (read-only)
     let p = root.join("FNA3D/MojoShader/mojoshader_version.h");
-
     if p.is_file() {
-        let content = match fs::read(&p) {
-            Ok(s) => s,
-            Err(_) => return,
-        };
-        if src == content {
-            return;
+        // FIXME: should we unwrap
+        match fs::read(&p) {
+            Ok(content) if content == src => {}
+            _ => return,
         }
     }
 
-    // NOTE: on crates.io, we can't write to the file (since it's read-only)
+    // NOTE: we can't write on crates.io (since it's read-only)
     if let Ok(mut dst) = fs::File::create(&p) {
         // NOTE: this forces rebuilding `fna3d-sys`
         dst.write_all(&src).unwrap();
     }
-
-    fn apply_patch(dir: &Path, patch: &Path) {
-        let patch = format!("{}", patch.display());
-
-        Command::new("git")
-            .current_dir(dir)
-            .args(&["apply", &patch])
-            // suppress patch error
-            .stderr(std::process::Stdio::null())
-            .status()
-            .unwrap_or_else(|e| {
-                panic!(
-                    "failed to apply patch `{}` in dir `{}`. original error {}",
-                    patch,
-                    dir.display(),
-                    e
-                )
-            });
-    }
 }
 
-/// Runs `cmake` (only when it's necessary) and links the output libraries
+/// Run `cmake` (only when it's necessary) and link the output library
 fn compile() {
     let root = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
@@ -85,6 +54,7 @@ fn compile() {
     if !out_lib_path.is_file() {
         let path = root.join("FNA3D");
         let _out = Config::new(path)
+            .no_build_target(true)
             .cflag("-w") // suppress errors
             .cflag("-DMOJOSHADER_EFFECT_SUPPORT")
             .build();
@@ -104,6 +74,7 @@ fn gen_bindings(wrapper: impl AsRef<Path>, dst_file_name: impl AsRef<Path>) {
 
     let bindings = bindgen::Builder::default()
         .header(format!("{}", wrapper.display()))
+        .derive_default(true)
         .clang_arg("-DMOJOSHADER_EFFECT_SUPPORT")
         .clang_arg(format!("-I{}", root.join("FNA3D/include").display()))
         .clang_arg(format!("-I{}", root.join("FNA3D/MojoShader").display()))
@@ -117,6 +88,6 @@ fn gen_bindings(wrapper: impl AsRef<Path>, dst_file_name: impl AsRef<Path>) {
             )
         });
 
-    // conidering crates.io..
+    // it's `ok` to fail conidering crates.io
     bindings.write_to_file(&dst).ok();
 }

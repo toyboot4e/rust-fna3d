@@ -146,6 +146,11 @@ fn bindgen_test_layout___mbstate_t() {
         )
     );
 }
+impl Default for __mbstate_t {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 pub type __darwin_mbstate_t = __mbstate_t;
 pub type __darwin_ptrdiff_t = ::std::os::raw::c_long;
 pub type __darwin_size_t = ::std::os::raw::c_ulong;
@@ -233,6 +238,11 @@ fn bindgen_test_layout___darwin_pthread_handler_rec() {
         )
     );
 }
+impl Default for __darwin_pthread_handler_rec {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct _opaque_pthread_attr_t {
@@ -271,6 +281,11 @@ fn bindgen_test_layout__opaque_pthread_attr_t() {
             stringify!(__opaque)
         )
     );
+}
+impl Default for _opaque_pthread_attr_t {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -311,8 +326,13 @@ fn bindgen_test_layout__opaque_pthread_cond_t() {
         )
     );
 }
+impl Default for _opaque_pthread_cond_t {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Default, Copy, Clone)]
 pub struct _opaque_pthread_condattr_t {
     pub __sig: ::std::os::raw::c_long,
     pub __opaque: [::std::os::raw::c_char; 8usize],
@@ -395,8 +415,13 @@ fn bindgen_test_layout__opaque_pthread_mutex_t() {
         )
     );
 }
+impl Default for _opaque_pthread_mutex_t {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Default, Copy, Clone)]
 pub struct _opaque_pthread_mutexattr_t {
     pub __sig: ::std::os::raw::c_long,
     pub __opaque: [::std::os::raw::c_char; 8usize],
@@ -439,7 +464,7 @@ fn bindgen_test_layout__opaque_pthread_mutexattr_t() {
     );
 }
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Default, Copy, Clone)]
 pub struct _opaque_pthread_once_t {
     pub __sig: ::std::os::raw::c_long,
     pub __opaque: [::std::os::raw::c_char; 8usize],
@@ -518,8 +543,13 @@ fn bindgen_test_layout__opaque_pthread_rwlock_t() {
         )
     );
 }
+impl Default for _opaque_pthread_rwlock_t {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Default, Copy, Clone)]
 pub struct _opaque_pthread_rwlockattr_t {
     pub __sig: ::std::os::raw::c_long,
     pub __opaque: [::std::os::raw::c_char; 16usize],
@@ -612,6 +642,11 @@ fn bindgen_test_layout__opaque_pthread_t() {
             stringify!(__opaque)
         )
     );
+}
+impl Default for _opaque_pthread_t {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 pub type __darwin_pthread_attr_t = _opaque_pthread_attr_t;
 pub type __darwin_pthread_cond_t = _opaque_pthread_cond_t;
@@ -853,7 +888,7 @@ pub const FNA3D_VertexElementUsage_FNA3D_VERTEXELEMENTUSAGE_TESSELATEFACTOR:
     FNA3D_VertexElementUsage = 12;
 pub type FNA3D_VertexElementUsage = ::std::os::raw::c_uint;
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Default, Copy, Clone)]
 pub struct FNA3D_Color {
     pub r: u8,
     pub g: u8,
@@ -914,7 +949,7 @@ fn bindgen_test_layout_FNA3D_Color() {
     );
 }
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Default, Copy, Clone)]
 pub struct FNA3D_Rect {
     pub x: i32,
     pub y: i32,
@@ -975,7 +1010,7 @@ fn bindgen_test_layout_FNA3D_Rect() {
     );
 }
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Default, Copy, Clone)]
 pub struct FNA3D_Vec4 {
     pub x: f32,
     pub y: f32,
@@ -1036,7 +1071,7 @@ fn bindgen_test_layout_FNA3D_Vec4() {
     );
 }
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Default, Copy, Clone)]
 pub struct FNA3D_Viewport {
     pub x: i32,
     pub y: i32,
@@ -1275,6 +1310,11 @@ fn bindgen_test_layout_FNA3D_PresentationParameters() {
         )
     );
 }
+impl Default for FNA3D_PresentationParameters {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct FNA3D_BlendState {
@@ -1445,6 +1485,11 @@ fn bindgen_test_layout_FNA3D_BlendState() {
             stringify!(multiSampleMask)
         )
     );
+}
+impl Default for FNA3D_BlendState {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -1680,6 +1725,11 @@ fn bindgen_test_layout_FNA3D_DepthStencilState() {
         )
     );
 }
+impl Default for FNA3D_DepthStencilState {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct FNA3D_RasterizerState {
@@ -1770,6 +1820,11 @@ fn bindgen_test_layout_FNA3D_RasterizerState() {
             stringify!(multiSampleAntiAlias)
         )
     );
+}
+impl Default for FNA3D_RasterizerState {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -1870,6 +1925,11 @@ fn bindgen_test_layout_FNA3D_SamplerState() {
         )
     );
 }
+impl Default for FNA3D_SamplerState {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct FNA3D_VertexElement {
@@ -1935,6 +1995,11 @@ fn bindgen_test_layout_FNA3D_VertexElement() {
         )
     );
 }
+impl Default for FNA3D_VertexElement {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct FNA3D_VertexDeclaration {
@@ -1990,6 +2055,11 @@ fn bindgen_test_layout_FNA3D_VertexDeclaration() {
             stringify!(elements)
         )
     );
+}
+impl Default for FNA3D_VertexDeclaration {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -2062,6 +2132,11 @@ fn bindgen_test_layout_FNA3D_VertexBufferBinding() {
         )
     );
 }
+impl Default for FNA3D_VertexBufferBinding {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct FNA3D_RenderTargetBinding {
@@ -2080,7 +2155,7 @@ pub union FNA3D_RenderTargetBinding__bindgen_ty_1 {
     _bindgen_union_align: [u32; 2usize],
 }
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Default, Copy, Clone)]
 pub struct FNA3D_RenderTargetBinding__bindgen_ty_1__bindgen_ty_1 {
     pub width: i32,
     pub height: i32,
@@ -2181,6 +2256,11 @@ fn bindgen_test_layout_FNA3D_RenderTargetBinding__bindgen_ty_1__bindgen_ty_2() {
         )
     );
 }
+impl Default for FNA3D_RenderTargetBinding__bindgen_ty_1__bindgen_ty_2 {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
 #[test]
 fn bindgen_test_layout_FNA3D_RenderTargetBinding__bindgen_ty_1() {
     assert_eq!(
@@ -2225,6 +2305,11 @@ fn bindgen_test_layout_FNA3D_RenderTargetBinding__bindgen_ty_1() {
             stringify!(cube)
         )
     );
+}
+impl Default for FNA3D_RenderTargetBinding__bindgen_ty_1 {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 #[test]
 fn bindgen_test_layout_FNA3D_RenderTargetBinding() {
@@ -2297,6 +2382,11 @@ fn bindgen_test_layout_FNA3D_RenderTargetBinding() {
             stringify!(colorBuffer)
         )
     );
+}
+impl Default for FNA3D_RenderTargetBinding {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 extern "C" {
     pub fn FNA3D_LinkedVersion() -> u32;
@@ -2924,4 +3014,9 @@ fn bindgen_test_layout___va_list_tag() {
             stringify!(reg_save_area)
         )
     );
+}
+impl Default for __va_list_tag {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
