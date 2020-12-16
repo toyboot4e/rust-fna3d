@@ -14,7 +14,7 @@ Choose `fna3d` or `fna3h`:
 
 Rust-FNA3D cares about desktop platforms and it works on macOS and Linux. To support Windows, I need to buy one.
 
-For usage, please refer to the [API documentation](https://docs.rs/rust-fna3d).
+For usage, please refer to the [API documentation](https://docs.rs/fna3d).
 
 ## Status
 
